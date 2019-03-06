@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Drawing;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -92,11 +93,11 @@ namespace Fusee.Engine.Player.Desktop
             fap.RegisterTypeHandler(
                 new AssetHandler
                 {
-                    ReturnedType = typeof(Font),
+                    ReturnedType = typeof(Base.Core.Font),
                     Decoder = delegate (string id, object storage)
                     {
                         if (!Path.GetExtension(id).ToLower().Contains("ttf")) return null;
-                        return new Font { _fontImp = new FontImp((Stream)storage) };
+                        return new Base.Core.Font { _fontImp = new FontImp((Stream)storage) };
                     },
                     Checker = id => Path.GetExtension(id).ToLower().Contains("ttf")
                 });
@@ -107,8 +108,7 @@ namespace Fusee.Engine.Player.Desktop
                     Decoder = delegate (string id, object storage)
                     {
                         if (!Path.GetExtension(id).ToLower().Contains("fus")) return null;
-                        var ser = new Serializer();
-                        return new ConvertSceneGraph().Convert(ser.Deserialize((Stream)storage, null, typeof(SceneContainer)) as SceneContainer);
+                        return new ConvertSceneGraph().Convert(ProtoBuf.Serializer.Deserialize<SceneContainer>((Stream)storage));
                     },
                     Checker = id => Path.GetExtension(id).ToLower().Contains("fus")
                 });
@@ -130,8 +130,8 @@ namespace Fusee.Engine.Player.Desktop
                     ((Fusee.Engine.Player.Core.Player)app).ModelFile = modelFile;
 
                 // Inject Fusee.Engine InjectMe dependencies (hard coded)
-                System.Drawing.Icon appIcon = System.Drawing.Icon.ExtractAssociatedIcon(Assembly.GetExecutingAssembly().Location);
-                app.CanvasImplementor = new Fusee.Engine.Imp.Graphics.Desktop.RenderCanvasImp(appIcon);
+                //System.Drawing.Icon appIcon = System.Drawing.Icon.ExtractAssociatedIcon(Assembly.GetExecutingAssembly().Location);
+                app.CanvasImplementor = new Fusee.Engine.Imp.Graphics.Desktop.RenderCanvasImp();
                 app.ContextImplementor = new Fusee.Engine.Imp.Graphics.Desktop.RenderContextImp(app.CanvasImplementor);
                 Input.AddDriverImp(
                     new Fusee.Engine.Imp.Graphics.Desktop.RenderCanvasInputDriverImp(app.CanvasImplementor));

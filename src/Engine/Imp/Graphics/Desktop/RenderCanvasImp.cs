@@ -47,7 +47,7 @@ namespace Fusee.Engine.Imp.Graphics.Desktop
         /// <value>
         /// The height.
         /// </value>
-        public virtual int Height        
+        public virtual int Height
         {
             get { return BaseHeight; }
             set { BaseHeight = value; }
@@ -170,7 +170,7 @@ namespace Fusee.Engine.Imp.Graphics.Desktop
 
             _flags = GraphicsContextFlags.Default;
             _wi = Utilities.CreateWindowsWindowInfo(windowHandle);
-            
+
             try
             {
                 _mode = new GraphicsMode(32, 24, 0, 8);
@@ -181,11 +181,11 @@ namespace Fusee.Engine.Imp.Graphics.Desktop
                 _mode = new GraphicsMode(32, 24, 0, 0);
                 _context = new GraphicsContext(_mode, _wi, _major, _minor, _flags);
             }
-            
+
             _context.MakeCurrent(_wi);
             ((IGraphicsContextInternal)_context).LoadAll();
 
-            GL.ClearColor(Color.MidnightBlue);
+            GL.ClearColor(OpenTK.Color.MidnightBlue);
 
             GL.Enable(EnableCap.DepthTest);
             GL.Enable(EnableCap.CullFace);
@@ -212,10 +212,10 @@ namespace Fusee.Engine.Imp.Graphics.Desktop
             _deltaFrameTime = newTick - _lastTimeTick;
             _lastTimeTick = newTick;
 
-         
+
             // _context.MakeCurrent(_wi);
             _context.SwapBuffers();
-       
+
         }
 
         /// <summary>
@@ -488,7 +488,7 @@ namespace Fusee.Engine.Imp.Graphics.Desktop
         /// Initializes a new instance of the <see cref="RenderCanvasImp"/> class.
         /// </summary>
         /// <param name="appIcon">The icon for the render window.</param>
-        public RenderCanvasImp(Icon appIcon)
+        public RenderCanvasImp(OpenTK.Icon appIcon)
         {
             const int width = 1280;
             var height = System.Math.Min(DisplayDevice.Default.Bounds.Height - 100, 720);
@@ -526,18 +526,18 @@ namespace Fusee.Engine.Imp.Graphics.Desktop
             if (!_videoWallMode)
             {
                 _gameWindow.WindowBorder = _windowBorderHidden ? WindowBorder.Hidden : WindowBorder.Resizable;
-                _gameWindow.Bounds = new System.Drawing.Rectangle(BaseLeft, BaseTop, BaseWidth, BaseHeight);
+                _gameWindow.Bounds = new OpenTK.Rectangle(BaseLeft, BaseTop, BaseWidth, BaseHeight);
             }
             else
             {
                 var oneScreenWidth = DisplayDevice.Default.Bounds.Width + 16; // TODO: Fix this. This +16 is strance behavior. Border should not make an impact to the width.
                 var oneScreenHeight = DisplayDevice.Default.Bounds.Height;
 
-                var width = oneScreenWidth*_videoWallMonitorsHor;
-                var height = oneScreenHeight*_videoWallMonitorsVert;
+                var width = oneScreenWidth * _videoWallMonitorsHor;
+                var height = oneScreenHeight * _videoWallMonitorsVert;
 
-                _gameWindow.Bounds = new System.Drawing.Rectangle(0, 0, width, height);
-                
+                _gameWindow.Bounds = new OpenTK.Rectangle(0, 0, width, height);
+
                 if (_windowBorderHidden)
                     _gameWindow.WindowBorder = WindowBorder.Hidden;
             }
@@ -573,8 +573,8 @@ namespace Fusee.Engine.Imp.Graphics.Desktop
             BaseWidth = width;
             BaseHeight = height;
 
-            BaseLeft = (posx == -1) ? DisplayDevice.Default.Bounds.Width/2 - width/2 : posx;
-            BaseTop = (posy == -1) ? DisplayDevice.Default.Bounds.Height /2 - height/2 : posy;
+            BaseLeft = (posx == -1) ? DisplayDevice.Default.Bounds.Width / 2 - width / 2 : posx;
+            BaseTop = (posy == -1) ? DisplayDevice.Default.Bounds.Height / 2 - height / 2 : posy;
 
             _windowBorderHidden = borderHidden;
 
@@ -589,7 +589,7 @@ namespace Fusee.Engine.Imp.Graphics.Desktop
         /// </summary>
         public void CloseGameWindow()
         {
-            if(_gameWindow != null)
+            if (_gameWindow != null)
                 _gameWindow.Exit();
         }
 
@@ -782,7 +782,7 @@ namespace Fusee.Engine.Imp.Graphics.Desktop
             : base(width, height, new GraphicsMode(32, 24, 0, (antiAliasing) ? 8 : 0) /*GraphicsMode.Default*/, "Fusee Engine")
         {
             _renderCanvasImp = renderCanvasImp;
-            
+
             _renderCanvasImp.BaseWidth = Width;
             _renderCanvasImp.BaseHeight = Height;
         }
@@ -804,7 +804,7 @@ namespace Fusee.Engine.Imp.Graphics.Desktop
                 throw new InvalidOperationException("You need at least OpenGL 2.0 to run this example. GLSL not supported.");
             }
 
-            GL.ClearColor(Color.MidnightBlue);
+            GL.ClearColor(OpenTK.Color.MidnightBlue);
 
             GL.Enable(EnableCap.DepthTest);
             GL.Enable(EnableCap.CullFace);
@@ -843,7 +843,7 @@ namespace Fusee.Engine.Imp.Graphics.Desktop
         protected override void OnUpdateFrame(FrameEventArgs e)
         {
             //if (Keyboard[OpenTK.Input.Key.Escape])
-                //this.Exit();
+            //this.Exit();
 
             if (Keyboard[OpenTK.Input.Key.F11])
                 WindowState = (WindowState != WindowState.Fullscreen) ? WindowState.Fullscreen : WindowState.Normal;

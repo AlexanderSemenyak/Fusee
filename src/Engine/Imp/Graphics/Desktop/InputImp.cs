@@ -73,7 +73,7 @@ namespace Fusee.Engine.Imp.Graphics.Desktop
             get { return GetType().FullName; }
         }
 
-        #pragma warning disable 0067
+#pragma warning disable 0067
         /// <summary>
         /// Not supported on this driver. Mouse and keyboard are considered to be connected all the time.
         /// You can register handlers but they will never get called.
@@ -85,7 +85,7 @@ namespace Fusee.Engine.Imp.Graphics.Desktop
         /// You can register handlers but they will never get called.
         /// </summary>
         public event EventHandler<NewDeviceImpConnectedArgs> NewDeviceConnected;
-        #pragma warning restore 0067
+#pragma warning restore 0067
 
         #region IDisposable Support
         private bool disposedValue = false; // To detect redundant calls
@@ -192,7 +192,7 @@ namespace Fusee.Engine.Imp.Graphics.Desktop
         {
             get
             {
-                return from k in _keymapper orderby k.Value.Id select new ButtonImpDescription {ButtonDesc = k.Value, PollButton = false};
+                return from k in _keymapper orderby k.Value.Id select new ButtonImpDescription { ButtonDesc = k.Value, PollButton = false };
             }
         }
 
@@ -231,7 +231,7 @@ namespace Fusee.Engine.Imp.Graphics.Desktop
         }
 
 
-        #pragma warning disable 0067
+#pragma warning disable 0067
         /// <summary>
         /// No axes exist on this device, so listeners registered to this event will never get called.
         /// </summary>
@@ -242,7 +242,7 @@ namespace Fusee.Engine.Imp.Graphics.Desktop
         /// to get information from this device.
         /// </summary>
         public event EventHandler<ButtonValueChangedArgs> ButtonValueChanged;
-        #pragma warning restore 0067
+#pragma warning restore 0067
 
         /// <summary>
         /// Called when keyboard button is pressed down.
@@ -325,7 +325,7 @@ namespace Fusee.Engine.Imp.Graphics.Desktop
                 ButtonDesc = new ButtonDescription
                 {
                     Name = "Left",
-                    Id = (int) MouseButtons.Left
+                    Id = (int)MouseButtons.Left
                 },
                 PollButton = false
             };
@@ -334,7 +334,7 @@ namespace Fusee.Engine.Imp.Graphics.Desktop
                 ButtonDesc = new ButtonDescription
                 {
                     Name = "Middle",
-                    Id = (int) MouseButtons.Middle
+                    Id = (int)MouseButtons.Middle
                 },
                 PollButton = false
             };
@@ -343,7 +343,7 @@ namespace Fusee.Engine.Imp.Graphics.Desktop
                 ButtonDesc = new ButtonDescription
                 {
                     Name = "Right",
-                    Id = (int) MouseButtons.Right
+                    Id = (int)MouseButtons.Right
                 },
                 PollButton = false
             };
@@ -366,12 +366,12 @@ namespace Fusee.Engine.Imp.Graphics.Desktop
                     AxisDesc = new AxisDescription
                     {
                         Name = "X",
-                        Id = (int) MouseAxes.X,
+                        Id = (int)MouseAxes.X,
                         Direction = AxisDirection.X,
                         Nature = AxisNature.Position,
                         Bounded = AxisBoundedType.OtherAxis,
-                        MinValueOrAxis = (int) MouseAxes.MinX,
-                        MaxValueOrAxis = (int) MouseAxes.MaxX
+                        MinValueOrAxis = (int)MouseAxes.MinX,
+                        MaxValueOrAxis = (int)MouseAxes.MaxX
                     },
                     PollAxis = true
                 };
@@ -380,7 +380,7 @@ namespace Fusee.Engine.Imp.Graphics.Desktop
                     AxisDesc = new AxisDescription
                     {
                         Name = "Y",
-                        Id = (int) MouseAxes.Y,
+                        Id = (int)MouseAxes.Y,
                         Direction = AxisDirection.Y,
                         Nature = AxisNature.Position,
                         Bounded = AxisBoundedType.OtherAxis,
@@ -394,7 +394,7 @@ namespace Fusee.Engine.Imp.Graphics.Desktop
                     AxisDesc = new AxisDescription
                     {
                         Name = "Wheel",
-                        Id = (int) MouseAxes.Wheel,
+                        Id = (int)MouseAxes.Wheel,
                         Direction = AxisDirection.Z,
                         Nature = AxisNature.Position,
                         Bounded = AxisBoundedType.Unbound,
@@ -499,14 +499,14 @@ namespace Fusee.Engine.Imp.Graphics.Desktop
         /// <summary>
         /// No event-based axes are exposed by this device. Use <see cref="GetAxis"/> to akquire mouse axis information.
         /// </summary>
-        #pragma warning disable 0067
+#pragma warning disable 0067
         public event EventHandler<AxisValueChangedArgs> AxisValueChanged;
 
         /// <summary>
         /// All three mouse buttons are event-based. Listen to this event to get information about mouse button state changes.
         /// </summary>
         public event EventHandler<ButtonValueChangedArgs> ButtonValueChanged;
-        #pragma warning restore 0067
+#pragma warning restore 0067
 
         /// <summary>
         /// Retrieves values for the X, Y and Wheel axes. No other axes are supported by this device.
@@ -517,11 +517,11 @@ namespace Fusee.Engine.Imp.Graphics.Desktop
         {
             switch (iAxisId)
             {
-                case (int) MouseAxes.X:
+                case (int)MouseAxes.X:
                     return _gameWindow.Mouse.X;
-                case (int) MouseAxes.Y:
+                case (int)MouseAxes.Y:
                     return _gameWindow.Mouse.Y;
-                case (int) MouseAxes.Wheel:
+                case (int)MouseAxes.Wheel:
                     return _gameWindow.Mouse.WheelPrecise;
                 case (int)MouseAxes.MinX:
                     return 0;

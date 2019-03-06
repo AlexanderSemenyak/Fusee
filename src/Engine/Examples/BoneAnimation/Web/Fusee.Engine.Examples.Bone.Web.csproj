@@ -2,7 +2,7 @@
   <PropertyGroup>
     <RootNamespace>Fusee.Engine.Examples.Bone.Web</RootNamespace>
     <PackageId>Fusee.Engine.Examples.Bone.Web</PackageId>
-    <TargetFramework>net462</TargetFramework>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <OutputType>WinExe</OutputType>
     <DefineConstants>PLATFORM_WEB</DefineConstants>
   </PropertyGroup>

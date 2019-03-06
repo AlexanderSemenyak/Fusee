@@ -2,7 +2,7 @@
   <PropertyGroup>
     <RootNamespace>Fusee.Engine.Examples.Simple.Web</RootNamespace>
     <PackageId>Fusee.Engine.Examples.Simple.Web</PackageId>
-    <TargetFramework>net462</TargetFramework>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <OutputType>WinExe</OutputType>
     <DefineConstants>PLATFORM_WEB</DefineConstants>
   </PropertyGroup>
@@ -22,6 +22,7 @@
   </ItemGroup>
   
   <ItemGroup>
+   <Reference Include="System.Drawing"></Reference>
     <Reference Include="Fusee.Base.Common">
       <HintPath>$(FuseeBuildRoot)\bin\$(Configuration)\Libraries\Fusee.Base.Common.dll</HintPath>
     </Reference>

@@ -11,6 +11,7 @@ using static Fusee.Engine.Core.Input;
 using static Fusee.Engine.Core.Time;
 using Fusee.Engine.GUI;
 using Fusee.Xene;
+using System.Drawing;
 
 namespace Fusee.Engine.Player.Core
 {
@@ -268,11 +269,11 @@ namespace Fusee.Engine.Player.Core
                 });
             fuseeLogo.AddComponent(btnFuseeLogo);
 
-            var fontLato = AssetStorage.Get<Font>("Lato-Black.ttf");
-            _guiLatoBlack = new FontMap(fontLato, 36);
+            //var fontLato = AssetStorage.Get<Font>("/media/data-ext4/roetner/_DEV/Fusee/src/Engine/Player/Core/Assets/Lato-Black.ttf");
+            //_guiLatoBlack = new FontMap(fontLato, 36);
 
             // Initialize the information text line.
-            var textToDisplay = "FUSEE 3D Scene";
+            /*var textToDisplay = "FUSEE 3D Scene";
             if (_scene.Header.CreatedBy != null || _scene.Header.CreationDate != null)
             {
                 textToDisplay += " created";
@@ -299,7 +300,7 @@ namespace Fusee.Engine.Player.Core
                     Max = new float2(-4, 0.5f)
                 },
                 _guiLatoBlack,
-                ColorUint.Tofloat4(ColorUint.Greenery), 0.25f);
+                ColorUint.Tofloat4(ColorUint.Greenery), 0.25f); */
 
             var canvas = new CanvasNodeContainer(
                 "Canvas",
@@ -315,7 +316,7 @@ namespace Fusee.Engine.Player.Core
                 {
                     //Simple Texture Node, contains the fusee logo.
                     fuseeLogo,
-                    text
+                    //text
                 }
             };
 

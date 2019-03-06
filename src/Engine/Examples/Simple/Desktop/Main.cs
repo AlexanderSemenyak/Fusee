@@ -26,7 +26,7 @@ namespace Fusee.Engine.Examples.Simple.Desktop
                     Decoder = delegate (string id, object storage)
                     {
                         if (!Path.GetExtension(id).ToLower().Contains("ttf")) return null;
-                        return new Font{ _fontImp = new FontImp((Stream)storage) };
+                        return new Font { _fontImp = new FontImp((Stream)storage) };
                     },
                     Checker = id => Path.GetExtension(id).ToLower().Contains("ttf")
                 });
@@ -48,8 +48,8 @@ namespace Fusee.Engine.Examples.Simple.Desktop
             var app = new Core.Simple();
 
             // Inject Fusee.Engine InjectMe dependencies (hard coded)
-            System.Drawing.Icon appIcon = System.Drawing.Icon.ExtractAssociatedIcon(Assembly.GetExecutingAssembly().Location);
-			app.CanvasImplementor = new Fusee.Engine.Imp.Graphics.Desktop.RenderCanvasImp(appIcon);
+            //System.Drawing.Icon appIcon = System.Drawing.Icon.ExtractAssociatedIcon(Assembly.GetExecutingAssembly().Location);
+            app.CanvasImplementor = new Fusee.Engine.Imp.Graphics.Desktop.RenderCanvasImp();
             app.ContextImplementor = new Fusee.Engine.Imp.Graphics.Desktop.RenderContextImp(app.CanvasImplementor);
             Input.AddDriverImp(new Fusee.Engine.Imp.Graphics.Desktop.RenderCanvasInputDriverImp(app.CanvasImplementor));
             Input.AddDriverImp(new Fusee.Engine.Imp.Graphics.Desktop.WindowsTouchInputDriverImp(app.CanvasImplementor));

@@ -33,8 +33,8 @@
 
   <!-- This target calls the protobuf precompiler. Note that the filename is hardwired and no item list is taken -->
   <Target Name="SerializationCompileSerializer" Inputs="$(OutputPath)$(AssemblyName).dll" Outputs="$(OutputPath)Fusee.SerializationSerializer.dll">
-    <Message Importance="High" Text="$(FuseeBuildRoot)\ext\protobuf\PrecompileTool\precompile &quot;$(OutputPath)$(AssemblyName).dll&quot; -o:&quot;$(OutputPath)Fusee.SerializationSerializer.dll&quot; -t:Fusee.Serialization.Serializer -f:&quot;C:\Program Files\dotnet\sdk\NuGetFallbackFolder\netstandard.library\2.0.3\build\netstandard2.0\ref&quot;" />
-    <Exec Command="$(FuseeBuildRoot)\ext\protobuf\PrecompileTool\precompile &quot;$(OutputPath)$(AssemblyName).dll&quot; -o:&quot;$(OutputPath)Fusee.SerializationSerializer.dll&quot; -t:Fusee.Serialization.Serializer -f:&quot;C:\Program Files\dotnet\sdk\NuGetFallbackFolder\netstandard.library\2.0.3\build\netstandard2.0\ref&quot;" WorkingDirectory="$(MSBuildProjectDirectory)" />
+    <Message Importance="High" Text="mono $(FuseeBuildRoot)ext/protobuf/PrecompileTool/precompile.exe &quot;$(OutputPath.Replace('/', '\\'))$(AssemblyName).dll&quot; -o:&quot;$(OutputPath.Replace('/', '\\'))Fusee.SerializationSerializer.dll&quot; -t:Fusee.Serialization.Serializer -f:&quot;/usr/share/dotnet/shared/Microsoft.NETCore.App/2.2.2/&quot;" />
+    <Exec Command="mono --debug --profile=iomap $(FuseeBuildRoot)ext/protobuf/PrecompileTool/precompile.exe &quot;$(OutputPath.Replace('/', '\\'))$(AssemblyName).dll&quot; -o:&quot;$(OutputPath.Replace('/', '\\'))Fusee.SerializationSerializer.dll&quot; -t:Fusee.Serialization.Serializer -f:&quot;/usr/share/dotnet/shared/Microsoft.NETCore.App/2.2.2/&quot;" WorkingDirectory="$(MSBuildProjectDirectory)" />
     <Message Importance="High" Text="$(AssemblyName).dll -&gt; $(OutputPath)SerializationSerializer.dll" />
   </Target>
   <PropertyGroup>

@@ -2,7 +2,7 @@
   <PropertyGroup>
     <RootNamespace>Fusee.Engine.Examples.Picking.Desktop</RootNamespace>
     <PackageId>Fusee.Engine.Examples.Picking.Desktop</PackageId>
-    <TargetFramework>net462</TargetFramework>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <OutputType>WinExe</OutputType>
     <DefineConstants>PLATFORM_DESKTOP</DefineConstants>
     <ApplicationIcon>FuseeLogo.ico</ApplicationIcon>

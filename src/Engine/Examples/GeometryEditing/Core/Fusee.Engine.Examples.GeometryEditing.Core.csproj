@@ -37,7 +37,7 @@
       <HintPath>$(FuseeBuildRoot)\bin\$(Configuration)\Libraries\Fusee.Xene.dll</HintPath>
     </Reference>
     <Reference Include="Fusee.Jometri">
-      <HintPath>$(FuseeBuildRoot)\bin\$(Configuration)\Libraries\Fusee.jometri.dll</HintPath>
+      <HintPath>$(FuseeBuildRoot)\bin\$(Configuration)\Libraries\Fusee.Jometri.dll</HintPath>
     </Reference>
   </ItemGroup>
 

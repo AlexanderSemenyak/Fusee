@@ -2,7 +2,7 @@
   <PropertyGroup>
     <RootNamespace>Fusee.Engine.Examples.ThreeDFont.Web</RootNamespace>
     <PackageId>Fusee.Engine.Examples.ThreeDFont.Web</PackageId>
-    <TargetFramework>net462</TargetFramework>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <OutputType>WinExe</OutputType>
     <DefineConstants>PLATFORM_WEB</DefineConstants>
   </PropertyGroup>
