@@ -49,7 +49,7 @@ namespace Fusee.Serialization
         /// <summary>
         /// The list of child nodes. Each can contain children itself.
         /// </summary>
-        [ProtoMember(2, AsReference = true)]
+        [ProtoMember(2, true, false)]
         public List<SceneNodeContainer> Children;
 
     }

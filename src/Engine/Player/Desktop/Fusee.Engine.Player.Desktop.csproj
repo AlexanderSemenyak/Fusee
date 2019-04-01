@@ -25,12 +25,10 @@
     <ProjectReference Include="$(FuseeBuildRoot)\src\Engine\Imp\Graphics\Desktop\Fusee.Engine.Imp.Graphics.Desktop.csproj" />
     <ProjectReference Include="$(FuseeBuildRoot)\src\Engine\Player\Core\Fusee.Engine.Player.Core.csproj" />
   </ItemGroup>
+
   <ItemGroup>
-    <Reference Include="Fusee.SerializationSerializer">
-      <HintPath>$(FuseeBuildRoot)\bin\$(Configuration)\Libraries\Fusee.SerializationSerializer.dll</HintPath>
-    </Reference>
     <Reference Include="protobuf-net">
-      <HintPath>$(FuseeBuildRoot)\ext\protobuf\protobuf-net.dll</HintPath>
+      <HintPath>..\..\..\..\ext\protobuf\protobuf-net.dll</HintPath>
     </Reference>
   </ItemGroup>
 

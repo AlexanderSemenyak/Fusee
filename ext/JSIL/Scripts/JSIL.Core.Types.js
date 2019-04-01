@@ -900,6 +900,23 @@ JSIL.MakeClass($jsilcore.TypeRef("System.Object"), "System.Attribute", true, [],
     );
 });
 
+JSIL.MakeClass($jsilcore.TypeRef("System.Attribute"), "System.Reflection.DefaultMemberAttribute", true, [], function ($) {
+	$.Property({ Public: true, Static: false, Virtual: true }, "MemberName");
+	$.Method({Static: false, Public: true}, ".ctor",
+    new JSIL.MethodSignature(null, [$jsilcore.TypeRef("System.String")], []),
+    function(memberName) {
+        this.memberName = memberName;
+    }
+  );
+
+  $.Method({Static: false, Public: true, Virtual:true}, "get_MemberName",
+    new JSIL.MethodSignature($.String, [], []),
+    function() {
+        return this.memberName;
+    }
+  );
+});
+
 JSIL.MakeEnum(
   "System.TypeCode", true, {
       Empty: 0,

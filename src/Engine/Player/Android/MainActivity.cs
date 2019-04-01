@@ -14,6 +14,7 @@ using Fusee.Engine.Imp.Graphics.Android;
 using Fusee.Serialization;
 using Font = Fusee.Base.Core.Font;
 using Path = Fusee.Base.Common.Path;
+using ProtoBuf;
 
 namespace Fusee.Engine.Player.Android
 {
@@ -35,7 +36,7 @@ namespace Fusee.Engine.Player.Android
 		        // Inject Fusee.Engine.Base InjectMe dependencies
 		        IO.IOImp = new IOImp(ApplicationContext);
 
-                var fap = new Fusee.Base.Imp.Android.ApkAssetProvider(ApplicationContext);
+                var fap = new ApkAssetProvider(ApplicationContext);
                 fap.RegisterTypeHandler(
                     new AssetHandler
                     {
@@ -60,10 +61,8 @@ namespace Fusee.Engine.Player.Android
                         Decoder = delegate (string id, object storage)
                         {
                             if (Path.GetExtension(id).ToLower().Contains("fus"))
-                            {
-                                var ser = new Serializer();
-                                
-                                return new ConvertSceneGraph().Convert((ser.Deserialize((Stream)storage, null, typeof(SceneContainer)) as SceneContainer));
+                            {                                
+                                return new ConvertSceneGraph().Convert(Serializer.Deserialize<SceneContainer>((Stream)storage));
                             }
                             return null;
                         },

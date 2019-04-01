@@ -2,6 +2,7 @@
 using Fusee.Base.Core;
 using Fusee.Engine.Core;
 using Fusee.Serialization;
+using ProtoBuf;
 
 namespace Fusee.Engine.Player.Web
 {
@@ -39,8 +40,7 @@ namespace Fusee.Engine.Player.Web
                     {
                         if (Path.GetExtension(id).ToLower().Contains("fus"))
                         {
-                            var ser = new Serializer();
-                            return new ConvertSceneGraph().Convert(ser.Deserialize(IO.StreamFromFile("Assets/" + id, FileMode.Open), null, typeof(SceneContainer)) as SceneContainer);
+                            return new ConvertSceneGraph().Convert(Serializer.Deserialize<SceneContainer>(IO.StreamFromFile("Assets/" + id, FileMode.Open)) as SceneContainer);
                         }
                         return null;
                     },

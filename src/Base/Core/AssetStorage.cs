@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using Fusee.Base.Common;
 using Fusee.Serialization;
+using ProtoBuf;
 
 namespace Fusee.Base.Core
 {
@@ -105,12 +106,7 @@ namespace Fusee.Base.Core
             {
                 throw new InvalidOperationException($"DeepCopy: ProtoBuf.ProtoContractAttribute is not defined on '{source.GetType().Name}'!");
             }
-            var ser = new Serializer();
-            var stream = new MemoryStream();
-
-            ser.Serialize(stream, source);
-            stream.Position = 0;
-            return ser.Deserialize(stream, null, typeof(T)) as T;
+            return Serializer.DeepClone<T>(source);
         }
     }
 }

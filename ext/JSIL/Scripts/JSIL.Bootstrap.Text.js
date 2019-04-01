@@ -512,11 +512,23 @@ JSIL.ImplementExternals(
     );
 
     $.Method({ Static: true, Public: true }, "Compare",
-      new JSIL.MethodSignature($jsilcore.TypeRef("System.Int32"), [
+      new JSIL.MethodSignature($jsilcore.TypeRef("System.Boolean"), [
           $jsilcore.TypeRef("System.String"), $jsilcore.TypeRef("System.String"),
           $jsilcore.TypeRef("System.StringComparison")
       ], []),
-      compareInternal
+	  function(lhs, rhs, comparison){
+		  if (lhs === null && rhs === null)
+			return true;
+		if (lhs !== null && rhs === null)
+			return false;
+		if (lhs === null && rhs !== null)
+			return false;
+		  if(comparison == System.StringComparison.OrdinalIgnoreCase)
+		  {
+			  return lhs.toLowerCase() === rhs.toLowerCase();
+		  }
+		  return lhs === rhs;
+	  }
     );
 
     var concatInternal = function (firstValue) {
@@ -1408,6 +1420,17 @@ JSIL.ImplementExternals("System.Text.UTF8Encoding", function ($) {
 
     return result;
   });
+  
+  $.Method({ Static: false, Public: true }, "GetString",
+    (new JSIL.MethodSignature($.String, [
+          $jsilcore.TypeRef("System.Array", [$.Byte]), $.Int32,
+          $.Int32
+    ], [])),
+    function GetString(bytes, index, count) {
+      return this.$decode(bytes, index, count);
+    }
+  );
+  
 });
 
 JSIL.MakeClass("System.Text.Encoding", "System.Text.UTF8Encoding", true, [], function ($) {

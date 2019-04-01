@@ -44,7 +44,7 @@
   },
   "AnalyzerSettings": {
 		  "DeadCodeAnalyzer": {
-			"DeadCodeElimination": true,
+			"DeadCodeElimination": false,
 			"NonAggressiveVirtualMethodElimination": true,
         "WhiteList": [
           "Fusee",

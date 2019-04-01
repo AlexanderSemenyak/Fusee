@@ -14,6 +14,7 @@ using System.Globalization;
 using System.Text;
 using System.Security;
 using System.Windows.Forms;
+using ProtoBuf;
 
 namespace Fusee.Tools.fuseeCmdLine
 {
@@ -275,8 +276,7 @@ namespace Fusee.Tools.fuseeCmdLine
 
                     SceneContainer fuseeScene = Assimp2Fusee.FuseefyScene(assimpScene);
 
-                    var ser = new Serializer();
-                    ser.Serialize(output, fuseeScene);
+                    Serializer.Serialize(output, fuseeScene);
                     output.Flush();
                     output.Close();
                 })

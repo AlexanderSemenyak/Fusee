@@ -1827,6 +1827,135 @@ JSIL.MakeEnum(
 );
 
 JSIL.ImplementExternals("System.Attribute", function ($) {
+	$.Method({ Static: false, Public: true }, ".ctor",
+    JSIL.MethodSignature.Void,
+    function () {
+    }
+  );
+});
+
+JSIL.ImplementExternals("System.Runtime.CompilerServices.CompilerGeneratedAttribute", function ($) {
+	$.Method({ Static: false, Public: true }, ".ctor",
+    JSIL.MethodSignature.Void,
+    function () {
+    }
+  );
+});
+
+JSIL.ImplementExternals("__DynamicallyInvokableAttribute", function ($) {
+	$.Method({ Static: false, Public: true }, ".ctor",
+    JSIL.MethodSignature.Void,
+    function () {
+    }
+  );
+});
+
+JSIL.ImplementExternals("System.Reflection.DefaultMemberAttribute", function ($) {
+	$.Method({ Static: false, Public: true }, ".ctor",
+    JSIL.MethodSignature.Action($.String),
+    function _ctor(memberName) {
+      this.set_MemberName(memberName);
+    }
+  );
+  
+  $.Method({ Static: false, Public: true }, "set_MemberName",
+    JSIL.MethodSignature.Action($.String),
+    function set_MemberName(value) {
+      this._MemberName = value;
+    }
+  );
+
+  $.Method({Static: false, Public: true, Virtual:true}, "get_MemberName",
+    new JSIL.MethodSignature($.String, [], []),
+    function() {
+        return this._MemberName;
+    }
+  );
+});
+
+JSIL.ImplementExternals("System.Diagnostics.DebuggerBrowsableAttribute", function ($) {
+	$.Method({ Static: false, Public: true }, ".ctor",
+    JSIL.MethodSignature.Action($jsilcore.TypeRef("System.Diagnostics.DebuggerBrowsableState")),
+    function _ctor(memberName) {
+      this.set_MemberName(memberName);
+    }
+  );
+  
+  $.Method({ Static: false, Public: true }, "set_MemberName",
+    JSIL.MethodSignature.Action($.String),
+    function set_MemberName(value) {
+      this._MemberName = value;
+    }
+  );
+
+  $.Method({Static: false, Public: true, Virtual:true}, "get_MemberName",
+    new JSIL.MethodSignature($.String, [], []),
+    function() {
+        return this._MemberName;
+    }
+  );
+});
+
+JSIL.ImplementExternals("System.Diagnostics.DebuggerDisplayAttribute", function ($) {
+	$.Method({ Static: false, Public: true }, ".ctor",
+    JSIL.MethodSignature.Action($.String),
+    function _ctor(memberName) {
+      this.set_MemberName(memberName);
+    }
+  );
+  
+  $.Method({ Static: false, Public: true }, ".ctor",
+    JSIL.MethodSignature.Action($jsilcore.TypeRef("System.Type")),
+    function _ctorType(type) {
+      this._TypeName = type.get_AssemblyQualifiedName();
+    }
+  );
+  
+  
+  $.Method({ Static: false, Public: true }, "set_MemberName",
+    JSIL.MethodSignature.Action($.String),
+    function set_MemberName(value) {
+      this._MemberName = value;
+    }
+  );
+
+  $.Method({Static: false, Public: true, Virtual:true}, "get_MemberName",
+    new JSIL.MethodSignature($.String, [], []),
+    function() {
+        return this._MemberName;
+    }
+  );
+});
+
+JSIL.ImplementExternals("System.Diagnostics.DebuggerTypeProxyAttribute", function ($) {
+	$.Method({ Static: false, Public: true }, ".ctor",
+    JSIL.MethodSignature.Action($.String),
+    function _ctor(memberName) {
+      this.set_MemberName(memberName);
+    }
+  );
+  
+  $.Method({ Static: false, Public: true }, ".ctor",
+    JSIL.MethodSignature.Action($jsilcore.TypeRef("System.Type")),
+    function _ctorType(type) {
+      this._TypeName = type.get_AssemblyQualifiedName();
+    }
+  );
+  
+  
+  $.Method({ Static: false, Public: true }, "set_MemberName",
+    JSIL.MethodSignature.Action($.String),
+    function set_MemberName(value) {
+      this._MemberName = value;
+    }
+  );
+
+  $.Method({Static: false, Public: true, Virtual:true}, "get_MemberName",
+    new JSIL.MethodSignature($.String, [], []),
+    function() {
+        return this._MemberName;
+    }
+  );
 });
 
 (function AssemblyName$Members() {
@@ -1918,6 +2047,24 @@ JSIL.ImplementExternals("System.Attribute", function ($) {
   });
 
 })();
+
+/*
+JSIL.ImplementExternals("System.Reflection.DefaultMemberAttribute", function ($) {
+	$.Property({ Public: true, Static: false, Virtual: true }, "MemberName");
+  $.Method({Static: false, Public: true}, ".ctor",
+    new JSIL.MethodSignature(null, [$jsilcore.TypeRef("System.String")], []),
+    function(memberName) {
+        this.memberName = memberName;
+    }
+  );
+
+  $.Method({Static: false, Public: true, Virtual:true}, "get_MemberName",
+    new JSIL.MethodSignature($.String, [], []),
+    function() {
+        return this.memberName;
+    }
+  );
+});*/
 
 JSIL.ImplementExternals("System.Reflection.AssemblyName", function ($interfaceBuilder) {
   var $ = $interfaceBuilder;

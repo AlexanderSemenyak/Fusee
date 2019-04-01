@@ -20,7 +20,7 @@ namespace Fusee.Serialization
         /// <summary>
         /// The EffectParameters
         /// </summary>
-        [ProtoMember(2, AsReference = true)]
+        [ProtoMember(2, true, false)]
         public List<TypeContainer> EffectParameter;
     }
 

@@ -20,13 +20,13 @@ namespace Fusee.Serialization
         /// <summary>
         /// The components this node is made of.
         /// </summary>
-        [ProtoMember(2, AsReference = true)]
+        [ProtoMember(2, true, false)]
         public List<SceneComponentContainer> Components;
 
         /// <summary>
         /// Possible children. 
         /// </summary>
-        [ProtoMember(3, AsReference = true)]
+        [ProtoMember(3, true, false)]
         public List<SceneNodeContainer> Children;
      }
 }
