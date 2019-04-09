@@ -6,7 +6,7 @@ using ProtoBuf;
 
 namespace Fusee.Engine.Player.Web
 {
-    public class Simple
+    public class Player
     {
         public static void Main()
         {

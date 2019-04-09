@@ -15,7 +15,7 @@ namespace Fusee.Serialization
         /// List of EffectPasses
         /// </summary>
         [ProtoMember(1)]
-        public List<RenderPass> EffectPasses;
+        public List<RenderPass> EffectPasses = new List<RenderPass>();
 
         /// <summary>
         /// The EffectParameters
@@ -46,7 +46,7 @@ namespace Fusee.Serialization
         /// The RenderStates
         /// </summary>
         [ProtoMember(3)]
-        public Dictionary<uint, uint> RenderStateContainer;
+        public Dictionary<uint, uint> RenderStateContainer = new Dictionary<uint, uint>();
     }
 
 }
