@@ -1801,7 +1801,7 @@ JSIL.ImplementExternals("Fusee.Engine.Imp.Graphics.Web.RenderContextImp", functi
             switch (renderStateVal) {
                 case $fuseeCommon.Fusee.Engine.Common.RenderState.FillMode.value:
                     // Only solid polygon fill is supported by WebGL
-                    return $fuseeCommon.Fusee.Engine.Common.PolygonMode.Fill;
+                    return $fuseeCommon.Fusee.Engine.Common.FillMode.Solid;
                 case $fuseeCommon.Fusee.Engine.Common.RenderState.CullMode.value:
                     {
                         var cullFace = this.gl.getParameter(this.gl.CULL_FACE);

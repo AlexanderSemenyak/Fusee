@@ -1847,7 +1847,7 @@ namespace Fusee.Engine.Imp.Graphics.Desktop
                 case RenderState.DestinationBlend:
                     {
                         int rgbDst;
-                        GL.GetInteger(GetPName.BlendSrcRgb, out rgbDst);
+                        GL.GetInteger(GetPName.BlendDstRgb, out rgbDst);
                         return (uint)BlendFromOgl(rgbDst);
                     }
                 case RenderState.SourceBlendAlpha:

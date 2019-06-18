@@ -1,0 +1,134 @@
+﻿<!-- Project Sdk="Microsoft.NET.Sdk"-->
+<Project Sdk="Mono.WebAssembly.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+	  <NoWarn>NU1701;NU1604</NoWarn>
+    <MonoWasmLinkMode>None</MonoWasmLinkMode>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <Reference Include="Fusee.SerializationSerializer">
+      <HintPath>..\..\..\..\..\bin\Debug\Libraries\Fusee.SerializationSerializer.dll</HintPath>
+    </Reference>
+    <Reference Include="SkiaSharp.Wasm">
+      <HintPath>..\libs\Uno.SkiaSharp\SkiaSharp.Wasm.dll</HintPath>
+    </Reference>
+    <ProjectReference Include="..\..\..\..\..\src\Base\Common\Fusee.Base.Common.csproj" />
+    <ProjectReference Include="..\..\..\..\..\src\Base\Core\Fusee.Base.Core.csproj" />
+    <ProjectReference Include="..\..\..\..\..\src\Engine\Common\Fusee.Engine.Common.csproj" />
+    <ProjectReference Include="..\..\..\..\..\src\Engine\Core\Fusee.Engine.Core.csproj" />
+    <ProjectReference Include="..\..\..\..\..\src\Math\Core\Fusee.Math.Core.csproj" />
+    <ProjectReference Include="..\..\Core\Fusee.Examples.RocketOnly.Core.csproj" />
+    <ProjectReference Include="..\LinkerWorkaround\LinkerWorkaround.csproj" />
+    <ProjectReference Include="..\WebGLDotNET\WebGLDotNET.csproj" />
+  </ItemGroup>
+ 
+  <ItemGroup>
+    <PackageReference Include="glTF2Loader" Version="1.1.3-alpha" />
+    <PackageReference Include="Humanizer.Core" Version="2.6.2" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
+    <PackageReference Include="WaveEngine.Common" Version="2.5.0.39" />
+    <PackageReference Include="WebAssembly.Bindings" Version="0.1.0" />
+    <PackageReference Include="WebAssembly.Net.Http" Version="0.1.0" />
+    <PackageReference Include="WebAssembly.Net.WebSockets" Version="0.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Assets\FUSEERocket.fus" />
+    <None Remove="Assets\Lato-Black.ttf" />
+    <None Remove="Assets\Model.fus" />
+    <None Remove="Assets\nineSlice.vert" />
+    <None Remove="Assets\nineSliceTile.frag" />
+    <None Remove="canvaskit.js" />
+    <None Remove="index.html" />
+    <None Remove="Scripts\mono_support.js" />
+    <None Remove="Scripts\SkiaSharp.js" />
+    
+    <None Remove="canvaskit.wasm" />
+    
+    <Content Include="Assets\FUSEERocket.fus">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    
+    <Content Include="Assets\Lato-Black.ttf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    
+    <Content Include="Assets\Model.fus">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    
+    <Content Include="Assets\nineSlice.vert">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    
+    <Content Include="Assets\nineSliceTile.frag">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="canvaskit.wasm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+
+    <None Remove="Assets\PlainConcepts.bmp" />
+    <Content Include="Assets\PlainConcepts.bmp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <None Remove="Assets\PlainConcepts.png" />
+    <Content Include="Assets\PlainConcepts.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <None Remove="Assets\PlainConcepts.jpg" />
+    <Content Include="Assets\PlainConcepts.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <None Remove="Assets\DamagedHelmet_img0.bmp" />
+    <Content Include="Assets\DamagedHelmet_img0.bmp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <None Remove="Assets\DamagedHelmet_img1.bmp" />
+    <Content Include="Assets\DamagedHelmet_img1.bmp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <None Remove="Assets\DamagedHelmet_img2.bmp" />
+    <Content Include="Assets\DamagedHelmet_img2.bmp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <None Remove="Assets\DamagedHelmet_img3.bmp" />
+    <Content Include="Assets\DamagedHelmet_img3.bmp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <None Remove="Assets\DamagedHelmet_img4.bmp" />
+    <Content Include="Assets\DamagedHelmet_img4.bmp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    
+    <!-- TODO move into Content for best practice -->
+    <None Remove="Resources\DamagedHelmet.glb" />
+    <EmbeddedResource Include="Resources\DamagedHelmet.glb">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <None Remove="Resources\GLTFFragmentShader.essl" />
+    <EmbeddedResource Include="Resources\GLTFFragmentShader.essl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <None Remove="Resources\GLTFVertexShader.essl" />
+    <EmbeddedResource Include="Resources\GLTFVertexShader.essl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+  </ItemGroup>
+  
+  <ItemGroup>
+    <None Remove="server.py" />
+    <Content Include="server.py">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Content Update="Assets\FuseeText.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  
+</Project>

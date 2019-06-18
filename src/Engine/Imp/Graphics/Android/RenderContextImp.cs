@@ -1851,7 +1851,7 @@ namespace Fusee.Engine.Imp.Graphics.Android
                 case RenderState.DestinationBlend:
                     {
                         int rgbDst;
-                        GL.GetInteger(All.BlendSrcRgb, out rgbDst);
+                        GL.GetInteger(All.BlendDstRgb, out rgbDst);
                         return (uint)BlendFromOgl(rgbDst);
                     }
                 case RenderState.SourceBlendAlpha:
