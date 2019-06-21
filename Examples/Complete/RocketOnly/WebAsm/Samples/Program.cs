@@ -96,18 +96,24 @@ namespace Samples
                         var divCanvasObject = (JSObject)d.Invoke("getElementById", fullscreenDivCanvasName);
                         var canvasObject = (JSObject)d.Invoke("getElementById", fullscreenCanvasName);
 
+                        Console.WriteLine("Fullscreen Toggle " + fullscreenElement?.GetObjectProperty("name"));
+
                         if (fullscreenElement != null)
                         {
+
+
                             var width = (int)divCanvasObject.GetObjectProperty("clientWidth");
                             var height = (int)divCanvasObject.GetObjectProperty("clientHeight");
 
                             SetNewCanvasSize(canvasObject, width, height);
                             fullscreenSample.Resize(width, height);
+                            Console.WriteLine($"fullscreenSample.Resize({width}, {height});");
                         }
                         else
                         {
                             SetNewCanvasSize(canvasObject, CanvasWidth, CanvasHeight);
                             fullscreenSample.Resize(CanvasWidth, CanvasHeight);
+                            Console.WriteLine($"fullscreenSample.Resize({CanvasWidth}, {CanvasWidth});");
                         }
                     }
 

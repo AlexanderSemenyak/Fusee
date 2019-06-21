@@ -81,6 +81,8 @@ namespace Fusee.Engine.Imp.Graphics.WebAsm
 
         public void DoResize(int w, int h)
         {
+            _width = w;
+            _height = h;
             Resize?.Invoke(this, new ResizeEventArgs(w, h));
         }
     }

@@ -138,5 +138,11 @@ namespace Samples
                 0);
             */
         }
+
+        public override void Resize(int width, int height)
+        {
+            base.Resize(width, height);
+            _canvasImp.DoResize(width, height);
+        }
     }
 }

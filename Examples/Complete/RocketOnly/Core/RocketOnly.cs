@@ -37,7 +37,7 @@ namespace Fusee.Examples.RocketOnly.Core
         // Init is called on startup. 
         public override void Init()
         {
-            Resize(new ResizeEventArgs(Width, Height));
+            //Resize(new ResizeEventArgs(Width, Height));
 
             // Set the clear color for the backbuffer to white (100% intensity in all color channels R, G, B, A).
             RC.ClearColor = new float4(0.5f, 1, 0.25f, 1);
@@ -59,15 +59,14 @@ namespace Fusee.Examples.RocketOnly.Core
             {
                 Effect = SimpleMeshes.MakeShaderEffect(new float3(1, 0, 0), new float3(1, 1, 1), 4)
             };
-            var cubeMesh = SimpleMeshes.CreateCuboid(new float3(20, 10, 10));
+            var cubeMesh = SimpleMeshes.CreateCuboid(new float3(10, 10, 10));
 
             cubeNode.Components = new List<SceneComponentContainer>();
             cubeNode.Components.Add(_cubeTransform);
             cubeNode.Components.Add(cubeShader);
             cubeNode.Components.Add(cubeMesh);
 
-
-            RC.View = float4x4.Invert(float4x4.CreateTranslation(0, 0, -50));
+            RC.View = float4x4.Invert(float4x4.CreateRotationY(0.4f) *  float4x4.CreateRotationX(0.3f) * float4x4.CreateTranslation(0, 0, -25));
 
             _sceneRenderer = new SceneRenderer(_scene);
 
@@ -97,8 +96,7 @@ namespace Fusee.Examples.RocketOnly.Core
             // _cubeTransform.Translation = _cubeTransform.Translation + new float3(2 * Time.DeltaTime, 0, 0);
             _sceneRenderer.Render(RC);
             // Diagnostics.Log(Time.DeltaTime);
-
-            Diagnostics.Log($"Windowsize: {Width} x {Height}");
+            // Diagnostics.Log($"Windowsize: {Width} x {Height}");
 
 
             Present();
@@ -155,6 +153,22 @@ namespace Fusee.Examples.RocketOnly.Core
             // Swap buffers: Show the contents of the backbuffer (containing the currently rendered frame) on the front buffer.
             Present();
             */
+        }
+
+        // Is called when the window was resized
+        public override void Resize(ResizeEventArgs rea)
+        {
+            // Set the new rendering area to the entire new windows size
+            RC.Viewport(0, 0, Width, Height);
+
+            // Create a new projection matrix generating undistorted images on the new aspect ratio.
+            var aspectRatio = Width / (float)Height;
+
+            // 0.25*PI Rad -> 45° Opening angle along the vertical direction. Horizontal opening angle is calculated based on the aspect ratio
+            // Front clipping happens at 0.01 (Objects nearer than 1 world unit get clipped)
+            // Back clipping happens at 200 (Anything further away from the camera than 200 world units gets clipped, polygons will be cut)
+            var projection = float4x4.CreatePerspectiveFieldOfView(M.PiOver4, aspectRatio, 0.01f, 200.0f);
+            RC.Projection = projection;
         }
     }
 }

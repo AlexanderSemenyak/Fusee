@@ -699,8 +699,7 @@ namespace Fusee.Engine.Imp.Graphics.WebAsm
         /// <param name="val">The value.</param>
         public void SetShaderParam(IShaderParam param, float4x4 val)
         {
-            // Column order notation: set transpose to false.
-            gl.UniformMatrix4fv(((ShaderParam)param).handle, false, val.ToArray());
+            gl.UniformMatrix4fv(((ShaderParam)param).handle, true, val.ToArray());
         }
 
 
@@ -734,7 +733,7 @@ namespace Fusee.Engine.Imp.Graphics.WebAsm
             }
 
             fixed (float4* pMtx = &tmpArray[0])
-                gl.UniformMatrix4fv(((ShaderParam)param).handle, false, new Span<float>((float*)pMtx, val.Length * 16) );
+                gl.UniformMatrix4fv(((ShaderParam)param).handle, true, new Span<float>((float*)pMtx, val.Length * 16) );
         }
 
         /// <summary>

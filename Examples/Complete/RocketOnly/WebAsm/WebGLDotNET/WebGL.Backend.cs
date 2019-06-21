@@ -124,7 +124,7 @@ namespace WebGLDotNET
 
         protected object Invoke(string method, params object[] args)
         {
-            Console.WriteLine($"[WebGLDotNet] {method}({string.Join(", ", args.Select(x => (x == null) ? "null" : x.ToString()))})");
+            // Console.WriteLine($"[WebGLDotNet] {method}({string.Join(", ", args.Select(x => (x == null) ? "null" : x.ToString()))})");
             var actualArgs = Translate(args);
             var result = gl.Invoke(method, actualArgs);
             DisposeArrayTypes(actualArgs);

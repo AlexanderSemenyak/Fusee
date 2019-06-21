@@ -25,7 +25,9 @@ namespace Samples
             canvasWidth = (int)canvas.GetObjectProperty("width");
             canvasHeight = (int)canvas.GetObjectProperty("height");
 
-            gl = new WebGL2RenderingContext(canvas);
+            var webglContextAttrib = new JSObject();
+            webglContextAttrib.SetObjectProperty("alpha", false);
+            gl = new WebGL2RenderingContext(canvas, webglContextAttrib);
         }
 
         public virtual void Run()
