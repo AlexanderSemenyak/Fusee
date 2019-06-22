@@ -91,13 +91,12 @@ namespace Fusee.Examples.RocketOnly.Core
         // RenderAFrame is called once a frame
         public override void RenderAFrame()
         {
-            RC.Clear(ClearFlags.Color | ClearFlags.Depth);
-
-            // _cubeTransform.Translation = _cubeTransform.Translation + new float3(2 * Time.DeltaTime, 0, 0);
-            _sceneRenderer.Render(RC);
             // Diagnostics.Log(Time.DeltaTime);
             // Diagnostics.Log($"Windowsize: {Width} x {Height}");
+            Diagnostics.Log($"Active: {Touch.ActiveTouchpoints}. Pos[0]: {Touch.GetPosition(TouchPoints.Touchpoint_0)}");
+            RC.Clear(ClearFlags.Color | ClearFlags.Depth);
 
+            _sceneRenderer.Render(RC);
 
             Present();
 

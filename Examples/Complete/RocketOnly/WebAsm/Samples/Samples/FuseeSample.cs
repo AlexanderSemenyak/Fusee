@@ -13,7 +13,7 @@ namespace Samples
     public class FuseeSample : BaseSample
     {
         public override string Description =>
-            "Complete FUSEE Example with experimental RenderCanvas/RenderContext implementation.";
+            "Complete <a href=\"https://fusee3d.org\">FUSEE</a> Example with experimental RenderCanvas/RenderContext implementation.";
 
         Fusee.Engine.Imp.Graphics.WebAsm.RenderCanvasImp _canvasImp;
 
@@ -68,7 +68,6 @@ namespace Samples
 
             Console.WriteLine("[TEST]");
 
-
             /*var task = WasmResourceLoader.LoadAsync("Assets/FUSEERocket.fus", WasmResourceLoader.GetLocalAddress());
             Console.WriteLine("[1] " + task);
             task.Wait();
@@ -79,7 +78,7 @@ namespace Samples
             */
 
             // Inject Fusee.Engine InjectMe dependencies (hard coded)
-            _canvasImp = new Fusee.Engine.Imp.Graphics.WebAsm.RenderCanvasImp(gl, canvasWidth, canvasHeight);
+            _canvasImp = new Fusee.Engine.Imp.Graphics.WebAsm.RenderCanvasImp(canvas, gl, canvasWidth, canvasHeight);
             app.CanvasImplementor = _canvasImp;
             app.ContextImplementor = new Fusee.Engine.Imp.Graphics.WebAsm.RenderContextImp(app.CanvasImplementor);
             Input.AddDriverImp(new Fusee.Engine.Imp.Graphics.WebAsm.RenderCanvasInputDriverImp(app.CanvasImplementor));
@@ -95,48 +94,14 @@ namespace Samples
 
         public override void Update(double elapsedMilliseconds)
         {
-            /*
-            base.Update(elapsedMilliseconds);
-
-            var aspectRatio = (float)canvasWidth / (float)canvasHeight;
-
-
-            projectionMatrix = Matrix.CreatePerspectiveFieldOfView(
-                (float)Math.PI / 4, aspectRatio, 0.1f, 1000f);
-
-            viewMatrix = Matrix.CreateLookAt(Vector3.UnitZ * 10, Vector3.Zero, Vector3.Up);
-
-            var elapsedMillisecondsFloat = (float)elapsedMilliseconds;
-            var rotation = WaveEngine.Common.Math.Quaternion.CreateFromYawPitchRoll(
-                elapsedMillisecondsFloat * 2 * 0.001f,
-                elapsedMillisecondsFloat * 4 * 0.001f,
-                elapsedMillisecondsFloat * 3 * 0.001f);
-            worldMatrix *= Matrix.CreateFromQuaternion(rotation);
-            worldMatrixFu *= float4x4.CreateRotationY(elapsedMillisecondsFloat * 4 * 0.001f)
-                              * float4x4.CreateRotationX(elapsedMillisecondsFloat * 2 * 0.001f)
-                              * float4x4.CreateRotationX(elapsedMillisecondsFloat * 3 * 0.001f);
-            */
+            if (_canvasImp != null)
+                _canvasImp.DeltaTime = (float)(elapsedMilliseconds / 1000.0);
         }
 
         public override void Draw()
         {
-            // base.Draw();
-
             if (_canvasImp != null)
                 _canvasImp.DoRender();
-
-            /*
-            gl.UniformMatrix4fv(pMatrixUniform, false, projectionMatrix.ToArray());
-            gl.UniformMatrix4fv(vMatrixUniform, false, viewMatrix.ToArray());
-            // gl.UniformMatrix4fv(wMatrixUniform, false, worldMatrix.ToArray());
-            gl.UniformMatrix4fv(wMatrixUniform, false, worldMatrixFu.ToArray());
-
-            gl.DrawElements(
-                WebGLRenderingContextBase.TRIANGLES,
-                indices.Length,
-                WebGLRenderingContextBase.UNSIGNED_SHORT,
-                0);
-            */
         }
 
         public override void Resize(int width, int height)

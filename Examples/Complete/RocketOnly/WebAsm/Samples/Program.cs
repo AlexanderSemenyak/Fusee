@@ -30,15 +30,13 @@ namespace Samples
             if (!isBrowserSupportsWebGL2())
             {
                 HtmlHelper.AddParagraph("We are sorry, but your browser does not seem to support WebGL2.");
-                HtmlHelper.AddParagraph("See the <a href=\"https://github.com/WaveEngine/WebGL.NET\">GitHub repo</a>.");
                 return;
             }
 
             HtmlHelper.AddHeader1("WebGL.NET Samples Gallery with FUSEE try.");
 
             HtmlHelper.AddParagraph(
-                "A collection of WebGL samples translated from .NET/C# into WebAssembly. " +
-                "See the <a href=\"https://github.com/WaveEngine/WebGL.NET\">GitHub repo</a>.");
+                "A collection of WebGL samples translated from .NET/C# into WebAssembly.");
 
             samples = new ISample[]
             {

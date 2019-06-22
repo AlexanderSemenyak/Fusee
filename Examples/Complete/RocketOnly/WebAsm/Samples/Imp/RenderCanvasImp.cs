@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Drawing;
 using Fusee.Engine.Common;
+using WebAssembly;
 using WebGLDotNET;
 
 
@@ -10,25 +11,26 @@ namespace Fusee.Engine.Imp.Graphics.WebAsm
     class RenderCanvasImp : IRenderCanvasImp
     {
         internal WebGLRenderingContextBase _gl;
+        internal JSObject _canvas;
         private int _width;
         private int _height;
 
 
-        public RenderCanvasImp(WebGLRenderingContextBase gl, int width, int height)
+        public RenderCanvasImp(JSObject canvas, /* TODO: remove rest of parameters */ WebGLRenderingContextBase gl, int width, int height)
         {
+            _canvas = canvas;
+
+            // TODO: Extract a convenient Gl Context (version 2) ourselves from the given canvas. Then retrieve width and height
             _gl = gl;
             _width = width;
             _height = height;
-            
-
-
         }
 
         public int Width { get => _width; set => throw new NotImplementedException(); }
         public int Height { get => _height; set => throw new NotImplementedException(); }
         public string Caption { get => ""; set { } }
 
-        public float DeltaTime => Fusee.Engine.Core.Time.DeltaTime;
+        public float DeltaTime { get; set; }
 
         public bool VerticalSync { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public bool Fullscreen { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
