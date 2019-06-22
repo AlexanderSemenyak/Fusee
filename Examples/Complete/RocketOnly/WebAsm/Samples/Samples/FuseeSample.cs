@@ -16,6 +16,7 @@ namespace Samples
             "Complete <a href=\"https://fusee3d.org\">FUSEE</a> Example with experimental RenderCanvas/RenderContext implementation.";
 
         Fusee.Engine.Imp.Graphics.WebAsm.RenderCanvasImp _canvasImp;
+        Fusee.Examples.RocketOnly.Core.RocketOnly _app;
 
 
         public override void Run()
@@ -64,7 +65,7 @@ namespace Samples
                 });
             AssetStorage.RegisterProvider(fap);
 
-            var app = new Fusee.Examples.RocketOnly.Core.RocketOnly();
+            _app = new Fusee.Examples.RocketOnly.Core.RocketOnly();
 
             Console.WriteLine("[TEST]");
 
@@ -76,20 +77,29 @@ namespace Samples
             app._rocketScene = new ConvertSceneGraph().Convert(seri.Deserialize(task.Result, null, typeof(SceneContainer)) as SceneContainer);
             Console.WriteLine("[3] " + app._rocketScene);
             */
-
             // Inject Fusee.Engine InjectMe dependencies (hard coded)
             _canvasImp = new Fusee.Engine.Imp.Graphics.WebAsm.RenderCanvasImp(canvas, gl, canvasWidth, canvasHeight);
-            app.CanvasImplementor = _canvasImp;
-            app.ContextImplementor = new Fusee.Engine.Imp.Graphics.WebAsm.RenderContextImp(app.CanvasImplementor);
-            Input.AddDriverImp(new Fusee.Engine.Imp.Graphics.WebAsm.RenderCanvasInputDriverImp(app.CanvasImplementor));
+            _app.CanvasImplementor = _canvasImp;
+            _app.ContextImplementor = new Fusee.Engine.Imp.Graphics.WebAsm.RenderContextImp(_app.CanvasImplementor);
+            Input.AddDriverImp(new Fusee.Engine.Imp.Graphics.WebAsm.RenderCanvasInputDriverImp(_app.CanvasImplementor));
             // app.AudioImplementor = new Fusee.Engine.Imp.Sound.Web.AudioImp();
             // app.NetworkImplementor = new Fusee.Engine.Imp.Network.Web.NetworkImp();
             // app.InputDriverImplementor = new Fusee.Engine.Imp.Input.Web.InputDriverImp();
             // app.VideoManagerImplementor = ImpFactory.CreateIVideoManagerImp();
 
             // Start the app
-            app.Run();
+            _app.Run();
 
+            LoadRocket();
+
+        }
+
+        private async void LoadRocket()
+        {
+            var stream = await WasmResourceLoader.LoadAsync("Assets/FUSEERocket.fus", WasmResourceLoader.GetLocalAddress());
+            var seri = new Serializer();
+            var scene = new ConvertSceneGraph().Convert(seri.Deserialize(stream, null, typeof(SceneContainer)) as SceneContainer);
+            _app.RocketScene = scene;
         }
 
         public override void Update(double elapsedMilliseconds)

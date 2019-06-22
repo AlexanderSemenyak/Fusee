@@ -21,7 +21,7 @@ namespace Fusee.Examples.RocketOnly.Core
         private const float RotationSpeed = 7;
         private const float Damping = 0.8f;
 
-        public SceneContainer _rocketScene;
+        private SceneContainer _rocketScene;
         private SceneContainer _scene;
         private SceneRenderer _sceneRenderer;
 
@@ -37,9 +37,8 @@ namespace Fusee.Examples.RocketOnly.Core
         // Init is called on startup. 
         public override void Init()
         {
-            //Resize(new ResizeEventArgs(Width, Height));
-
             // Set the clear color for the backbuffer to white (100% intensity in all color channels R, G, B, A).
+            /*
             RC.ClearColor = new float4(0.5f, 1, 0.25f, 1);
 
             _scene = new SceneContainer();
@@ -69,28 +68,37 @@ namespace Fusee.Examples.RocketOnly.Core
             RC.View = float4x4.Invert(float4x4.CreateRotationY(0.4f) *  float4x4.CreateRotationX(0.3f) * float4x4.CreateTranslation(0, 0, -25));
 
             _sceneRenderer = new SceneRenderer(_scene);
+            */
 
-            /*
             // Set the clear color for the backbuffer to white (100% intensity in all color channels R, G, B, A).
             RC.ClearColor = new float4(1, 1, 1, 1);
 
             // Load the rocket model
-            if (_rocketScene == null)
-                _rocketScene = AssetStorage.Get<SceneContainer>("FUSEERocket.fus");
+            // if (_rocketScene == null)
+            //   _rocketScene = AssetStorage.Get<SceneContainer>("FUSEERocket.fus");
+        }
 
-            //Add resize delegate
-            var projComp = _rocketScene.Children[0].GetComponent<ProjectionComponent>();
-            AddResizeDelegate(delegate { projComp.Resize(Width, Height); });
+        public SceneContainer RocketScene
+        {
+            get => _rocketScene;
+            set
+            {
+                _rocketScene = value;
 
-            // Wrap a SceneRenderer around the model.
-            _sceneRenderer = new SceneRenderer(_rocketScene);
-            */
+                //Add resize delegate
+                var projComp = _rocketScene.Children[0].GetComponent<ProjectionComponent>();
+                AddResizeDelegate(delegate { projComp.Resize(Width, Height); });
+                _sceneRenderer = new SceneRenderer(_rocketScene);
+                Diagnostics.Log("Rocket Set");
+                projComp.Resize(Width, Height);
+            }
         }
 
 
         // RenderAFrame is called once a frame
         public override void RenderAFrame()
         {
+            /*
             // Diagnostics.Log(Time.DeltaTime);
             // Diagnostics.Log($"Windowsize: {Width} x {Height}");
             Diagnostics.Log($"Active: {Touch.ActiveTouchpoints}. Pos[0]: {Touch.GetPosition(TouchPoints.Touchpoint_0)}");
@@ -99,8 +107,8 @@ namespace Fusee.Examples.RocketOnly.Core
             _sceneRenderer.Render(RC);
 
             Present();
+            */
 
-            /*
             // Clear the backbuffer
             RC.Clear(ClearFlags.Color | ClearFlags.Depth);
 
@@ -146,17 +154,22 @@ namespace Fusee.Examples.RocketOnly.Core
             var mtxCam = float4x4.LookAt(0, +2, -10, 0, +2, 0, 0, 1, 0);
             RC.View = mtxCam * mtxRot;
 
-            // Render the scene loaded in Init()
-            _sceneRenderer.Render(RC);
+            // Render the scene 
+            if (_sceneRenderer != null)
+            {
+                Diagnostics.Log("Rendering Rocket");
+                _sceneRenderer.Render(RC);
+            }
 
             // Swap buffers: Show the contents of the backbuffer (containing the currently rendered frame) on the front buffer.
             Present();
-            */
         }
 
         // Is called when the window was resized
         public override void Resize(ResizeEventArgs rea)
         {
+            Diagnostics.Log($"Resize({Width}, {Height})");
+
             // Set the new rendering area to the entire new windows size
             RC.Viewport(0, 0, Width, Height);
 
