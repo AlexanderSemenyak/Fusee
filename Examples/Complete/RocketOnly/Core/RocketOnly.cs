@@ -157,7 +157,6 @@ namespace Fusee.Examples.RocketOnly.Core
             // Render the scene 
             if (_sceneRenderer != null)
             {
-                Diagnostics.Log("Rendering Rocket");
                 _sceneRenderer.Render(RC);
             }
 
@@ -168,8 +167,6 @@ namespace Fusee.Examples.RocketOnly.Core
         // Is called when the window was resized
         public override void Resize(ResizeEventArgs rea)
         {
-            Diagnostics.Log($"Resize({Width}, {Height})");
-
             // Set the new rendering area to the entire new windows size
             RC.Viewport(0, 0, Width, Height);
 

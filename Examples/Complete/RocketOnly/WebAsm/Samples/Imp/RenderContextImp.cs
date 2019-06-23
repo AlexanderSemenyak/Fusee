@@ -1810,9 +1810,9 @@ namespace Fusee.Engine.Imp.Graphics.WebAsm
         }
 
         /// <summary>
-        /// Gets the current RenderState that is applied to the current OpenGL based RenderContext.
+        /// Retrieves the current value for the given RenderState that is applied to the current WebGL based RenderContext.
         /// </summary>
-        /// <param name="renderState">State of the render. See <see cref="RenderState"/> for further information.</param>
+        /// <param name="renderState">The RenderState setting to be retrieved. See <see cref="RenderState"/> for further information.</param>
         /// <returns></returns>
         /// <exception cref="ArgumentOutOfRangeException">
         /// pm;Value  + ((PolygonMode)pm) +  not handled
