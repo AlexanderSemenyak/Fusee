@@ -122,137 +122,28 @@ namespace Fusee.Engine.Imp.Graphics.WebAsm
         #endregion
     }
 
+    /// <summary>
+    /// Gamepad input device implementation for the WebAsm platform.
+    /// </summary>
     public class GamePadDeviceImp : IInputDeviceImp
     {
         private ButtonImpDescription _btnADesc, _btnXDesc, _btnYDesc, _btnBDesc, _btnStartDesc, _btnSelectDesc, _dpadUpDesc, _dpadDownDesc, _dpadLeftDesc, _dpadRightDesc, _btnLeftDesc, _btnRightDesc, _btnL3Desc, _btnR3Desc;
         private JSObject _window;
+        private JSObject navigtor;
+        private int DeviceID;
         #region JSExternals
-        private void ConnectWindowEvents()
-        {
-            _window. ("gamepadconnected", new Action<JSObject>(evt => GamePadEvent) connecthandler);
-            _window.addEventListener("gamepaddisconnected", disconnecthandler);
-            _window.addEventListener("webkitgamepadconnected", connecthandler);
-            _window.addEventListener("webkitgamepaddisconnected", disconnecthandler);
-        }
+        
+       
         #endregion
 
         #region Javascript callback code
-        internal void GamepadButtonDown(int button)
-        {
-            switch (button)
-            {
-                case 0:
-                    ButtonValueChanged?.Invoke(this, new ButtonValueChangedArgs
-                    {
-                        Button = _btnADesc.ButtonDesc,
-                        Pressed = true
-                    });
-                    break;
-                case 1:
-                    ButtonValueChanged?.Invoke(this, new ButtonValueChangedArgs
-                    {
-                        Button = _btnBDesc.ButtonDesc,
-                        Pressed = true
-                    });
-                    break;
-                case 2:
-                    ButtonValueChanged?.Invoke(this, new ButtonValueChangedArgs
-                    {
-                        Button = _btnXDesc.ButtonDesc,
-                        Pressed = true
-                    });
-                    break;
-                case 3:
-                    ButtonValueChanged?.Invoke(this, new ButtonValueChangedArgs
-                    {
-                        Button = _btnYDesc.ButtonDesc,
-                        Pressed = true
-                    });
-                    break;
-                case 4:
-                    ButtonValueChanged?.Invoke(this, new ButtonValueChangedArgs
-                    {
-                        Button = _btnLeftDesc.ButtonDesc ,
-                        Pressed = true
-                    });
-                    break;
-                case 5:
-                    ButtonValueChanged?.Invoke(this, new ButtonValueChangedArgs
-                    {
-                        Button = _btnRightDesc.ButtonDesc,
-                        Pressed = true
-                    });
-                    break;
-                case 6:
-                    
-                    break;
-                case 7:
-                    
-                    break;
-                case 8:
-                    ButtonValueChanged?.Invoke(this, new ButtonValueChangedArgs
-                    {
-                        Button = _btnSelectDesc.ButtonDesc,
-                        Pressed = true
-                    });
-                    break;
-                case 9:
-                    ButtonValueChanged?.Invoke(this, new ButtonValueChangedArgs
-                    {
-                        Button = _btnStartDesc.ButtonDesc,
-                        Pressed = true
-                    });
-                    break;
-                case 10:
-                    ButtonValueChanged?.Invoke(this, new ButtonValueChangedArgs
-                    {
-                        Button = _btnL3Desc.ButtonDesc,
-                        Pressed = true
-                    });
-                    break;
-                case 11:
-                    ButtonValueChanged?.Invoke(this, new ButtonValueChangedArgs
-                    {
-                        Button = _btnR3Desc.ButtonDesc,
-                        Pressed = true
-                    });
-                    break;
-                case 12:
-                    ButtonValueChanged?.Invoke(this, new ButtonValueChangedArgs
-                    {
-                        Button = _dpadUpDesc.ButtonDesc,
-                        Pressed = true
-                    });
-                    break;
-                case 13:
-                    ButtonValueChanged?.Invoke(this, new ButtonValueChangedArgs
-                    {
-                        Button = _dpadDownDesc.ButtonDesc,
-                        Pressed = true
-                    });
-                    break;
-                case 14:
-                    ButtonValueChanged?.Invoke(this, new ButtonValueChangedArgs
-                    {
-                        Button = _dpadLeftDesc.ButtonDesc,
-                        Pressed = true
-                    });
-                    break;
-                case 15:
-                    ButtonValueChanged?.Invoke(this, new ButtonValueChangedArgs
-                    {
-                        Button = _dpadRightDesc.ButtonDesc,
-                        Pressed = true
-                    });
-                    break;
-            }
-        }
+      
         #endregion
 
         internal GamePadDeviceImp(JSObject Window, int deviceID = 0)
         {
             JSObject _window = Window;
-            float DeviceID = deviceID;
+            DeviceID = deviceID;
 
             _btnADesc = new ButtonImpDescription
             {
@@ -382,7 +273,43 @@ namespace Fusee.Engine.Imp.Graphics.WebAsm
             };
         }
 
-        public string Id => Controller[DeviceID].Index;
+        public string Id
+        {
+            get
+            {
+                string Index = "0";
+          
+                using (JSObject navigator = (JSObject)Runtime.GetGlobalObject("navigator"))
+                {
+                    using (JSObject Gamepads = (JSObject)navigator.Invoke("getGamepads"))
+                    {
+                        Diagnostics.Log($"{Gamepads.Length} Gamepads connected:");
+                        for (int i = 0; i < Gamepads.Length; i++)
+                        {
+                            using (JSObject Gamepad = (JSObject)Gamepads.GetObjectProperty(i.ToString()))
+                            {
+                                if (Gamepad != null)
+                                {
+                                    string id = (string)Gamepad.GetObjectProperty("id");
+                                    Diagnostics.Log($"Gamepad {i}: ID={id}");
+                                }
+                            }
+                        }
+                        using (JSObject Gamepad = (JSObject)Gamepads.GetObjectProperty(DeviceID.ToString()))
+                        {
+                            if (Gamepad != null)
+                            { 
+                                string _index = (string)Gamepad.GetObjectProperty("id");
+                                {
+                                    Index = _index.ToString();
+                                }
+                            }
+                        }
+                    }
+                }
+                return Index;
+            }
+        }
 
         /// <summary>
         /// Description.
@@ -394,7 +321,6 @@ namespace Fusee.Engine.Imp.Graphics.WebAsm
                 return "WebAsm XBox-Gamepad input implementation.";
             }
         }
-
 
         /// <summary>
         /// Returns Type of input device.
@@ -474,21 +400,74 @@ namespace Fusee.Engine.Imp.Graphics.WebAsm
 
         public int ButtonCount => 14;
 
-        public IEnumerable<ButtonImpDescription> ButtonImpDesc => throw new NotImplementedException();
+        public IEnumerable<ButtonImpDescription> ButtonImpDesc
+        {
+            get
+            {
+                yield return _btnADesc;
+                yield return _btnXDesc;
+                yield return _btnYDesc;
+                yield return _btnBDesc;
+                yield return _btnStartDesc;
+                yield return _btnSelectDesc;
+                yield return _btnRightDesc;
+                yield return _btnLeftDesc;
+                yield return _btnR3Desc;
+                yield return _btnL3Desc;
+                yield return _dpadUpDesc;
+                yield return _dpadDownDesc;
+                yield return _dpadLeftDesc;
+                yield return _dpadRightDesc;
+            }
+        }
 
         public event EventHandler<AxisValueChangedArgs> AxisValueChanged;
         public event EventHandler<ButtonValueChangedArgs> ButtonValueChanged;
 
         /// <summary>
-        /// This device does not support to-be-polled-axes. All gamepad axes are event-driven. Listen to the <see cref="AxisValueChanged"/>
-        /// event to reveive gamepad notifications from this device.
+        /// All Axes on this Device are polled.
         /// </summary>
-        /// <param name="iAxisId">No matter what you specify here, you'll evoke an exception.</param>
+        /// <param name="iAxisId">The Axis to be polled.</param>
         /// <returns>No return, always throws.</returns>
         public float GetAxis(int iAxisId)
         {
-            throw new InvalidOperationException($"Axis {iAxisId} does not exist or is no pollable. Listen to the AxisValueChanged event to receive gamepad notifications from this device.");
+            float Axis;
+            JSObject _GamePad;
+            JSObject Axes;
+            using (JSObject navigator = (JSObject)Runtime.GetGlobalObject("navigator"))
+            {
+                using (JSObject Gamepads = (JSObject)navigator.Invoke("getGamepads"))
+                {
+                    using (_GamePad = (JSObject)Gamepads.GetObjectProperty(DeviceID.ToString()))
+                    {
+                        //using (Axes = (JSObject)_GamePad.GetObjectProperty("axes"))
+                        //{
+                            switch (iAxisId) 
+                            {
+                                case 0:
+                                    Axis = (float)_GamePad.GetObjectProperty("axes(0)");
+                                    return Axis;
+                                case 1:
+                                    Axis = (float)_GamePad.GetObjectProperty("1");
+                                    return Axis;
+                                case 2:
+                                    Axis = (float)_GamePad.GetObjectProperty("2");
+                                    return Axis;
+                                case 3:
+                                    Axis = (float)_GamePad.GetObjectProperty("3");
+                                    return Axis;
+                            }
+                        //}
+                    }
+                }
+            }
+
+            throw new InvalidOperationException($"Unsupported axis {iAxisId}.");
         }
+
+        
+                
+    
 
         /// <summary>
         /// This device does not support to-be-polled-buttons. All gamepad buttons are event-driven. Listen to the <see cref="ButtonValueChanged"/>
@@ -498,10 +477,70 @@ namespace Fusee.Engine.Imp.Graphics.WebAsm
         /// <returns>No return, always throws.</returns>
         public bool GetButton(int iButtonId)
         {
-            throw new InvalidOperationException($"Button {iButtonId} does not exist or is no pollable. Listen to the ButtonValueChanged event to receive gamepad notifications from this device.");
+            bool retval;
+            JSObject _GamePad;
+            JSObject Buttons;
+            using (var navigator = (JSObject)Runtime.GetGlobalObject("navigator"))
+            { 
+                using (JSObject Gamepads = (JSObject)navigator.Invoke("getGamepads"))
+                {
+                    using (_GamePad = (JSObject)Gamepads.GetObjectProperty(DeviceID.ToString()))
+                    {
+                        using (Buttons = (JSObject)_GamePad.Invoke("buttons"))
+                        {
+                            Diagnostics.Log($"buttons: {Buttons.GetObjectProperty("length")}");
+                        }
+                    }
+                }
+            }
+            switch (iButtonId)
+            {
+                case 0:
+                    retval = ((int)Buttons.GetObjectProperty("0")) == 0 ? false : true;
+                    return retval;
+                case 1:
+                    retval = ((int)Buttons.GetObjectProperty("1")) == 0 ? false : true;
+                    return retval;
+                case 2:
+                    retval = ((int)Buttons.GetObjectProperty("2")) == 0 ? false : true;
+                    return retval;
+                case 3:
+                    retval = ((int)Buttons.GetObjectProperty("3")) == 0 ? false : true;
+                    return retval;
+                case 4:
+                    retval = ((int)Buttons.GetObjectProperty("4")) == 0 ? false : true;
+                    return retval;
+                case 5:
+                    retval = ((int)Buttons.GetObjectProperty("5")) == 0 ? false : true;
+                    return retval;
+                case 6:
+                    retval = ((int)Buttons.GetObjectProperty("6")) == 0 ? false : true;
+                    return retval;
+                case 7:
+                    retval = ((int)Buttons.GetObjectProperty("7")) == 0 ? false : true;
+                    return retval;
+                case 8:
+                    retval = ((int)Buttons.GetObjectProperty("8")) == 0 ? false : true;
+                    return retval;
+                case 9:
+                    retval = ((int)Buttons.GetObjectProperty("9")) == 0 ? false : true;
+                    return retval;
+                case 10:
+                    retval = ((int)Buttons.GetObjectProperty("10")) == 0 ? false : true;
+                    return retval;
+                case 11:
+                    retval = ((int)Buttons.GetObjectProperty("11")) == 0 ? false : true;
+                    return retval;
+                case 12:
+                    retval = ((int)Buttons.GetObjectProperty("12")) == 0 ? false : true;
+                    return retval;
+                case 13:
+                    retval = ((int)Buttons.GetObjectProperty("13")) == 0 ? false : true;
+                    return retval;
+            }
+        throw new InvalidOperationException($"Unsupported button {iButtonId}.");
         }
     }
-
 
     /// <summary>
     /// Keyboard input device implementation for the WebAsm platform.
