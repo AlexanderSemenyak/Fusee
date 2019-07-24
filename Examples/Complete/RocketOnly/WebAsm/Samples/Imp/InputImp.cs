@@ -140,7 +140,7 @@ namespace Fusee.Engine.Imp.Graphics.WebAsm
       
         #endregion
 
-        internal GamePadDeviceImp(JSObject Window, int deviceID = 0)
+        internal GamePadDeviceImp(JSObject Window, int deviceID = 1)
         {
             JSObject _window = Window;
             DeviceID = deviceID;
@@ -440,12 +440,12 @@ namespace Fusee.Engine.Imp.Graphics.WebAsm
                 {
                     using (_GamePad = (JSObject)Gamepads.GetObjectProperty(DeviceID.ToString()))
                     {
-                        //using (Axes = (JSObject)_GamePad.GetObjectProperty("axes"))
-                        //{
+                        if(_GamePad != null)
+                        {
                             switch (iAxisId) 
                             {
                                 case 0:
-                                    Axis = (float)_GamePad.GetObjectProperty("axes(0)");
+                                    Axis = (float)_GamePad.GetObjectProperty("axes[0]");
                                     return Axis;
                                 case 1:
                                     Axis = (float)_GamePad.GetObjectProperty("1");
@@ -457,17 +457,17 @@ namespace Fusee.Engine.Imp.Graphics.WebAsm
                                     Axis = (float)_GamePad.GetObjectProperty("3");
                                     return Axis;
                             }
-                        //}
+                            throw new InvalidOperationException($"Unsupported axis {iAxisId}.");
+                        }
                     }
                 }
             }
-
-            throw new InvalidOperationException($"Unsupported axis {iAxisId}.");
+            return 0;
         }
 
-        
-                
-    
+
+
+
 
         /// <summary>
         /// This device does not support to-be-polled-buttons. All gamepad buttons are event-driven. Listen to the <see cref="ButtonValueChanged"/>
@@ -481,64 +481,65 @@ namespace Fusee.Engine.Imp.Graphics.WebAsm
             JSObject _GamePad;
             JSObject Buttons;
             using (var navigator = (JSObject)Runtime.GetGlobalObject("navigator"))
-            { 
+            {
                 using (JSObject Gamepads = (JSObject)navigator.Invoke("getGamepads"))
                 {
                     using (_GamePad = (JSObject)Gamepads.GetObjectProperty(DeviceID.ToString()))
                     {
-                        using (Buttons = (JSObject)_GamePad.Invoke("buttons"))
-                        {
-                            Diagnostics.Log($"buttons: {Buttons.GetObjectProperty("length")}");
-                        }
+                        var Gamepad = _GamePad;
                     }
                 }
             }
-            switch (iButtonId)
+            if (_GamePad != null)
             {
-                case 0:
-                    retval = ((int)Buttons.GetObjectProperty("0")) == 0 ? false : true;
-                    return retval;
-                case 1:
-                    retval = ((int)Buttons.GetObjectProperty("1")) == 0 ? false : true;
-                    return retval;
-                case 2:
-                    retval = ((int)Buttons.GetObjectProperty("2")) == 0 ? false : true;
-                    return retval;
-                case 3:
-                    retval = ((int)Buttons.GetObjectProperty("3")) == 0 ? false : true;
-                    return retval;
-                case 4:
-                    retval = ((int)Buttons.GetObjectProperty("4")) == 0 ? false : true;
-                    return retval;
-                case 5:
-                    retval = ((int)Buttons.GetObjectProperty("5")) == 0 ? false : true;
-                    return retval;
-                case 6:
-                    retval = ((int)Buttons.GetObjectProperty("6")) == 0 ? false : true;
-                    return retval;
-                case 7:
-                    retval = ((int)Buttons.GetObjectProperty("7")) == 0 ? false : true;
-                    return retval;
-                case 8:
-                    retval = ((int)Buttons.GetObjectProperty("8")) == 0 ? false : true;
-                    return retval;
-                case 9:
-                    retval = ((int)Buttons.GetObjectProperty("9")) == 0 ? false : true;
-                    return retval;
-                case 10:
-                    retval = ((int)Buttons.GetObjectProperty("10")) == 0 ? false : true;
-                    return retval;
-                case 11:
-                    retval = ((int)Buttons.GetObjectProperty("11")) == 0 ? false : true;
-                    return retval;
-                case 12:
-                    retval = ((int)Buttons.GetObjectProperty("12")) == 0 ? false : true;
-                    return retval;
-                case 13:
-                    retval = ((int)Buttons.GetObjectProperty("13")) == 0 ? false : true;
-                    return retval;
+                switch (iButtonId)
+                {
+                    case 0:
+                        retval = ((int)_GamePad.GetObjectProperty("buttons[0]")) == 0 ? false : true;
+                        return retval;
+                    case 1:
+                        retval = ((int)_GamePad.GetObjectProperty("buttons[1]")) == 0 ? false : true;
+                        return retval;
+                    case 2:
+                        retval = ((int)_GamePad.GetObjectProperty("buttons[2]")) == 0 ? false : true;
+                        return retval;
+                    case 3:
+                        retval = ((int)_GamePad.GetObjectProperty("buttons[3]")) == 0 ? false : true;
+                        return retval;
+                    case 4:
+                        retval = ((int)_GamePad.GetObjectProperty("buttons[4]")) == 0 ? false : true;
+                        return retval;
+                    case 5:
+                        retval = ((int)_GamePad.GetObjectProperty("buttons[5]")) == 0 ? false : true;
+                        return retval;
+                    case 6:
+                        retval = ((int)_GamePad.GetObjectProperty("buttons[6]")) == 0 ? false : true;
+                        return retval;
+                    case 7:
+                        retval = ((int)_GamePad.GetObjectProperty("buttons[7]")) == 0 ? false : true;
+                        return retval;
+                    case 8:
+                        retval = ((int)_GamePad.GetObjectProperty("buttons[8]")) == 0 ? false : true;
+                        return retval;
+                    case 9:
+                        retval = ((int)_GamePad.GetObjectProperty("buttons[9]")) == 0 ? false : true;
+                        return retval;
+                    case 10:
+                        retval = ((int)_GamePad.GetObjectProperty("buttons[10]")) == 0 ? false : true;
+                        return retval;
+                    case 11:
+                        retval = ((int)_GamePad.GetObjectProperty("buttons[11]")) == 0 ? false : true;
+                        return retval;
+                    case 12:
+                        retval = ((int)_GamePad.GetObjectProperty("buttons[12]")) == 0 ? false : true;
+                        return retval;
+                    case 13:
+                        retval = ((int)_GamePad.GetObjectProperty("buttons[13]")) == 0 ? false : true;
+                        return retval;
+                }
+                throw new InvalidOperationException($"Unsupported button {iButtonId}.");
             }
-        throw new InvalidOperationException($"Unsupported button {iButtonId}.");
+            return false;
         }
     }
 
