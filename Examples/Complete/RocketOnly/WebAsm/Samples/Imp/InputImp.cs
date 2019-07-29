@@ -493,7 +493,10 @@ namespace Fusee.Engine.Imp.Graphics.WebAsm
                 {
                     using (_GamePad = (JSObject)Gamepads.GetObjectProperty(DeviceID.ToString()))
                     {
-                        var Gamepad = _GamePad;
+                        using (Buttons = (JSObject)_GamePad.GetObjectProperty("buttons"))
+                        {
+
+                        }
                     }
                 }
             }
@@ -502,46 +505,46 @@ namespace Fusee.Engine.Imp.Graphics.WebAsm
                 switch (iButtonId)
                 {
                     case 0:
-                        retval = ((int)_GamePad.GetObjectProperty("buttons[0]")) == 0 ? false : true;
+                        retval = ((int)Buttons.GetObjectProperty("[0]")) == 0 ? false : true;
                         return retval;
                     case 1:
-                        retval = ((int)_GamePad.GetObjectProperty("buttons[1]")) == 0 ? false : true;
+                        retval = ((int)Buttons.GetObjectProperty("[1]")) == 0 ? false : true;
                         return retval;
                     case 2:
-                        retval = ((int)_GamePad.GetObjectProperty("buttons[2]")) == 0 ? false : true;
+                        retval = ((int)Buttons.GetObjectProperty("[2]")) == 0 ? false : true;
                         return retval;
                     case 3:
-                        retval = ((int)_GamePad.GetObjectProperty("buttons[3]")) == 0 ? false : true;
+                        retval = ((int)Buttons.GetObjectProperty("[3]")) == 0 ? false : true;
                         return retval;
                     case 4:
-                        retval = ((int)_GamePad.GetObjectProperty("buttons[4]")) == 0 ? false : true;
+                        retval = ((int)Buttons.GetObjectProperty("[4]")) == 0 ? false : true;
                         return retval;
                     case 5:
-                        retval = ((int)_GamePad.GetObjectProperty("buttons[5]")) == 0 ? false : true;
+                        retval = ((int)Buttons.GetObjectProperty("[5]")) == 0 ? false : true;
                         return retval;
                     case 6:
-                        retval = ((int)_GamePad.GetObjectProperty("buttons[6]")) == 0 ? false : true;
+                        retval = ((int)Buttons.GetObjectProperty("[6]")) == 0 ? false : true;
                         return retval;
                     case 7:
-                        retval = ((int)_GamePad.GetObjectProperty("buttons[7]")) == 0 ? false : true;
+                        retval = ((int)Buttons.GetObjectProperty("[7]")) == 0 ? false : true;
                         return retval;
                     case 8:
-                        retval = ((int)_GamePad.GetObjectProperty("buttons[8]")) == 0 ? false : true;
+                        retval = ((int)Buttons.GetObjectProperty("[8]")) == 0 ? false : true;
                         return retval;
                     case 9:
-                        retval = ((int)_GamePad.GetObjectProperty("buttons[9]")) == 0 ? false : true;
+                        retval = ((int)Buttons.GetObjectProperty("[9]")) == 0 ? false : true;
                         return retval;
                     case 10:
-                        retval = ((int)_GamePad.GetObjectProperty("buttons[10]")) == 0 ? false : true;
+                        retval = ((int)Buttons.GetObjectProperty("[10]")) == 0 ? false : true;
                         return retval;
                     case 11:
-                        retval = ((int)_GamePad.GetObjectProperty("buttons[11]")) == 0 ? false : true;
+                        retval = ((int)Buttons.GetObjectProperty("[11]")) == 0 ? false : true;
                         return retval;
                     case 12:
-                        retval = ((int)_GamePad.GetObjectProperty("buttons[12]")) == 0 ? false : true;
+                        retval = ((int)Buttons.GetObjectProperty("[12]")) == 0 ? false : true;
                         return retval;
                     case 13:
-                        retval = ((int)_GamePad.GetObjectProperty("buttons[13]")) == 0 ? false : true;
+                        retval = ((int)Buttons.GetObjectProperty("[13]")) == 0 ? false : true;
                         return retval;
                 }
                 throw new InvalidOperationException($"Unsupported button {iButtonId}.");
