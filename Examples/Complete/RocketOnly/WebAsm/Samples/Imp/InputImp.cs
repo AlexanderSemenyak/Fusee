@@ -284,10 +284,14 @@ namespace Fusee.Engine.Imp.Graphics.WebAsm
                     using (JSObject Gamepads = (JSObject)navigator.Invoke("getGamepads"))
                     {
                         Diagnostics.Log($"{Gamepads.Length} Gamepads connected:");
+                        
                         for (int i = 0; i < Gamepads.Length; i++)
                         {
                             using (JSObject Gamepad = (JSObject)Gamepads.GetObjectProperty(i.ToString()))
                             {
+                                //Checks if the connected gamepads are actual gamepads or just dummy connections.
+                                if (Gamepad == null)
+                                    Diagnostics.Log($"Gamepad {i} can not be accessed.");
                                 if (Gamepad != null)
                                 {
                                     string id = (string)Gamepad.GetObjectProperty("id");
@@ -442,22 +446,25 @@ namespace Fusee.Engine.Imp.Graphics.WebAsm
                     {
                         if(_GamePad != null)
                         {
-                            switch (iAxisId) 
+                            using (Axes = (JSObject)_GamePad.GetObjectProperty("axes"))
                             {
-                                case 0:
-                                    Axis = (float)_GamePad.GetObjectProperty("axes[0]");
-                                    return Axis;
-                                case 1:
-                                    Axis = (float)_GamePad.GetObjectProperty("1");
-                                    return Axis;
-                                case 2:
-                                    Axis = (float)_GamePad.GetObjectProperty("2");
-                                    return Axis;
-                                case 3:
-                                    Axis = (float)_GamePad.GetObjectProperty("3");
-                                    return Axis;
+                                switch (iAxisId)
+                                {
+                                    case 0:
+                                        Axis = (float)Axes.GetObjectProperty("[0]");
+                                        return Axis;
+                                    case 1:
+                                        Axis = (float)Axes.GetObjectProperty("[1]");
+                                        return Axis;
+                                    case 2:
+                                        Axis = (float)Axes.GetObjectProperty("[2]");
+                                        return Axis;
+                                    case 3:
+                                        Axis = (float)Axes.GetObjectProperty("[3]");
+                                        return Axis;
+                                }
+                                throw new InvalidOperationException($"Unsupported axis {iAxisId}.");
                             }
-                            throw new InvalidOperationException($"Unsupported axis {iAxisId}.");
                         }
                     }
                 }
