@@ -432,7 +432,7 @@ namespace Fusee.Engine.Imp.Graphics.WebAsm
         /// All Axes on this Device are polled.
         /// </summary>
         /// <param name="iAxisId">The Axis to be polled.</param>
-        /// <returns>No return, always throws.</returns>
+        /// <returns>A float value between -1 and 1 determining the offset of the axis.</returns>
         public float GetAxis(int iAxisId)
         {
             float Axis;
@@ -477,11 +477,10 @@ namespace Fusee.Engine.Imp.Graphics.WebAsm
 
 
         /// <summary>
-        /// This device does not support to-be-polled-buttons. All gamepad buttons are event-driven. Listen to the <see cref="ButtonValueChanged"/>
-        /// event to reveive gamepad notifications from this device.
+        /// All buttons on this device are polled.
         /// </summary>
-        /// <param name="iButtonId">No matter what you specify here, you'll evoke an exception.</param>
-        /// <returns>No return, always throws.</returns>
+        /// <param name="iButtonId">The button to be polled.</param>
+        /// <returns>A Boolean value determining wether the button is pressed or not.</returns>
         public bool GetButton(int iButtonId)
         {
             bool retval;
@@ -493,61 +492,60 @@ namespace Fusee.Engine.Imp.Graphics.WebAsm
                 {
                     using (_GamePad = (JSObject)Gamepads.GetObjectProperty(DeviceID.ToString()))
                     {
-                        using (Buttons = (JSObject)_GamePad.GetObjectProperty("buttons"))
+                        if (_GamePad != null)
                         {
-
+                            using (Buttons = (JSObject)_GamePad.GetObjectProperty("buttons"))
+                            {
+                                switch (iButtonId)
+                                {
+                                    case 0:
+                                        retval = ((int)Buttons.GetObjectProperty("[0]")) == 0 ? false : true;
+                                        return retval;
+                                    case 1:
+                                        retval = ((int)Buttons.GetObjectProperty("[1]")) == 0 ? false : true;
+                                        return retval;
+                                    case 2:
+                                        retval = ((int)Buttons.GetObjectProperty("[2]")) == 0 ? false : true;
+                                        return retval;
+                                    case 3:
+                                        retval = ((int)Buttons.GetObjectProperty("[3]")) == 0 ? false : true;
+                                        return retval;
+                                    case 4:
+                                        retval = ((int)Buttons.GetObjectProperty("[4]")) == 0 ? false : true;
+                                        return retval;
+                                    case 5:
+                                        retval = ((int)Buttons.GetObjectProperty("[5]")) == 0 ? false : true;
+                                        return retval;
+                                    case 6:
+                                        retval = ((int)Buttons.GetObjectProperty("[6]")) == 0 ? false : true;
+                                        return retval;
+                                    case 7:
+                                        retval = ((int)Buttons.GetObjectProperty("[7]")) == 0 ? false : true;
+                                        return retval;
+                                    case 8:
+                                        retval = ((int)Buttons.GetObjectProperty("[8]")) == 0 ? false : true;
+                                        return retval;
+                                    case 9:
+                                        retval = ((int)Buttons.GetObjectProperty("[9]")) == 0 ? false : true;
+                                        return retval;
+                                    case 10:
+                                        retval = ((int)Buttons.GetObjectProperty("[10]")) == 0 ? false : true;
+                                        return retval;
+                                    case 11:
+                                        retval = ((int)Buttons.GetObjectProperty("[11]")) == 0 ? false : true;
+                                        return retval;
+                                    case 12:
+                                        retval = ((int)Buttons.GetObjectProperty("[12]")) == 0 ? false : true;
+                                        return retval;
+                                    case 13:
+                                        retval = ((int)Buttons.GetObjectProperty("[13]")) == 0 ? false : true;
+                                        return retval;
+                                }
+                                throw new InvalidOperationException($"Unsupported button {iButtonId}.");
+                            }
                         }
                     }
                 }
-            }
-            if (_GamePad != null)
-            {
-                switch (iButtonId)
-                {
-                    case 0:
-                        retval = ((int)Buttons.GetObjectProperty("[0]")) == 0 ? false : true;
-                        return retval;
-                    case 1:
-                        retval = ((int)Buttons.GetObjectProperty("[1]")) == 0 ? false : true;
-                        return retval;
-                    case 2:
-                        retval = ((int)Buttons.GetObjectProperty("[2]")) == 0 ? false : true;
-                        return retval;
-                    case 3:
-                        retval = ((int)Buttons.GetObjectProperty("[3]")) == 0 ? false : true;
-                        return retval;
-                    case 4:
-                        retval = ((int)Buttons.GetObjectProperty("[4]")) == 0 ? false : true;
-                        return retval;
-                    case 5:
-                        retval = ((int)Buttons.GetObjectProperty("[5]")) == 0 ? false : true;
-                        return retval;
-                    case 6:
-                        retval = ((int)Buttons.GetObjectProperty("[6]")) == 0 ? false : true;
-                        return retval;
-                    case 7:
-                        retval = ((int)Buttons.GetObjectProperty("[7]")) == 0 ? false : true;
-                        return retval;
-                    case 8:
-                        retval = ((int)Buttons.GetObjectProperty("[8]")) == 0 ? false : true;
-                        return retval;
-                    case 9:
-                        retval = ((int)Buttons.GetObjectProperty("[9]")) == 0 ? false : true;
-                        return retval;
-                    case 10:
-                        retval = ((int)Buttons.GetObjectProperty("[10]")) == 0 ? false : true;
-                        return retval;
-                    case 11:
-                        retval = ((int)Buttons.GetObjectProperty("[11]")) == 0 ? false : true;
-                        return retval;
-                    case 12:
-                        retval = ((int)Buttons.GetObjectProperty("[12]")) == 0 ? false : true;
-                        return retval;
-                    case 13:
-                        retval = ((int)Buttons.GetObjectProperty("[13]")) == 0 ? false : true;
-                        return retval;
-                }
-                throw new InvalidOperationException($"Unsupported button {iButtonId}.");
             }
             return false;
         }
