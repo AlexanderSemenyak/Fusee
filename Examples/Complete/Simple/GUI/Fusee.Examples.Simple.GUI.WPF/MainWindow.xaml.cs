@@ -10,7 +10,6 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows;
-using System.Windows.Forms;
 using Path = System.IO.Path;
 
 namespace Fusee.Examples.Simple.GUI.WPF
@@ -50,9 +49,8 @@ namespace Fusee.Examples.Simple.GUI.WPF
                         Decoder = delegate (string id, object storage)
                         {
                             if (!System.IO.Path.GetExtension(id).ToLower().Contains("fus")) return null;
-                            var ser = new Serializer();
+                            var ser = new Serialization.Serializer();                            
                             return new ConvertSceneGraph().Convert(ser.Deserialize((Stream)storage, null, typeof(SceneContainer)) as SceneContainer);
-                            return null;
                         },
                         Checker = id => System.IO.Path.GetExtension(id).ToLower().Contains("fus")
                     });

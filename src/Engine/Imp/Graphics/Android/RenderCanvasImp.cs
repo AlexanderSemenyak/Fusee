@@ -399,8 +399,6 @@ namespace Fusee.Engine.Imp.Graphics.Android
 
         protected override void OnUnload(EventArgs e)
         {
-            _renderCanvasImp.DoUnLoad();
-            _renderCanvasImp.Dispose();
         }
 
         protected override void OnResize(EventArgs e)
@@ -426,6 +424,7 @@ namespace Fusee.Engine.Imp.Graphics.Android
         protected override void CreateFrameBuffer()
         {
             ContextRenderingApi = GLVersion.ES3;
+
             // the default GraphicsMode that is set consists of (16, 16, 0, 0, 2, false)
             try
             {

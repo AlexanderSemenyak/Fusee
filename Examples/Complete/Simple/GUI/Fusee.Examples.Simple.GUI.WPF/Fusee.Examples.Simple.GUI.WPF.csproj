@@ -15,50 +15,42 @@
     <None Remove="Assets\FuseeText.png" />
     <None Remove="Assets\Lato-Black.ttf" />
   </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="protobuf-portable-net" Version="2.0.0.668" />
-    <PackageReference Include="System.Drawing.Common" Version="4.5.1" />
-  </ItemGroup>
   
-  <ItemGroup>
-    <Reference Include="Fusee.Examples.Simple.Core">
-      <HintPath>$(FuseeRoot)\bin\$(Configuration)\Examples\Simple\Core\Fusee.Examples.Simple.Core.dll</HintPath>
-    </Reference>
+ <ItemGroup>
     <Reference Include="Fusee.Base.Common">
-      <HintPath>$(FuseeRoot)\bin\$(Configuration)\Libraries\Fusee.Base.Common.dll</HintPath>
+      <HintPath>$(FuseeEngineRoot)\bin\$(Configuration)\Libraries\Fusee.Base.Common.dll</HintPath>
     </Reference>
     <Reference Include="Fusee.Base.Core">
-      <HintPath>$(FuseeRoot)\bin\$(Configuration)\Libraries\Fusee.Base.Core.dll</HintPath>
+      <HintPath>$(FuseeEngineRoot)\bin\$(Configuration)\Libraries\Fusee.Base.Core.dll</HintPath>
     </Reference>
     <Reference Include="Fusee.Base.Imp.Desktop">
-      <HintPath>$(FuseeRoot)\bin\$(Configuration)\Libraries\Fusee.Base.Imp.Desktop.dll</HintPath>
+      <HintPath>$(FuseeEngineRoot)\bin\$(Configuration)\Libraries\Fusee.Base.Imp.Desktop.dll</HintPath>
     </Reference>
     <Reference Include="Fusee.Serialization">
-      <HintPath>$(FuseeRoot)\bin\$(Configuration)\Libraries\Fusee.Serialization.dll</HintPath>
+      <HintPath>$(FuseeEngineRoot)\bin\$(Configuration)\Libraries\Fusee.Serialization.dll</HintPath>
     </Reference>
     <Reference Include="Fusee.Engine.Common">
-      <HintPath>$(FuseeRoot)\bin\$(Configuration)\Libraries\Fusee.Engine.Common.dll</HintPath>
+      <HintPath>$(FuseeEngineRoot)\bin\$(Configuration)\Libraries\Fusee.Engine.Common.dll</HintPath>
     </Reference>
     <Reference Include="Fusee.Engine.Core">
-      <HintPath>$(FuseeRoot)\bin\$(Configuration)\Libraries\Fusee.Engine.Core.dll</HintPath>
+      <HintPath>$(FuseeEngineRoot)\bin\$(Configuration)\Libraries\Fusee.Engine.Core.dll</HintPath>
     </Reference>
     <Reference Include="Fusee.Math.Core">
-      <HintPath>$(FuseeRoot)\bin\$(Configuration)\Libraries\Fusee.Math.Core.dll</HintPath>
+      <HintPath>$(FuseeEngineRoot)\bin\$(Configuration)\Libraries\Fusee.Math.Core.dll</HintPath>
     </Reference>
     <Reference Include="Fusee.Engine.Imp.Graphics.Desktop">
-      <HintPath>$(FuseeRoot)\bin\$(Configuration)\Libraries\Fusee.Engine.Imp.Graphics.Desktop.dll</HintPath>
+      <HintPath>$(FuseeEngineRoot)\bin\$(Configuration)\Libraries\Fusee.Engine.Imp.Graphics.Desktop.dll</HintPath>
     </Reference>
     <Reference Include="Fusee.SerializationSerializer">
-      <HintPath>$(FuseeRoot)\bin\$(Configuration)\Libraries\Fusee.SerializationSerializer.dll</HintPath>
+      <HintPath>$(FuseeEngineRoot)\bin\$(Configuration)\Libraries\Fusee.SerializationSerializer.dll</HintPath>
     </Reference>
     <Reference Include="Fusee.Xene">
-      <HintPath>$(FuseeRoot)\bin\$(Configuration)\Libraries\Fusee.Xene.dll</HintPath>
+      <HintPath>$(FuseeEngineRoot)\bin\$(Configuration)\Libraries\Fusee.Xene.dll</HintPath>
     </Reference>
-    <Reference Include="System.Windows.Forms">
-      <HintPath>..\..\..\..\..\..\..\..\..\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.6.1\System.Windows.Forms.dll</HintPath>
-    </Reference>
-   
+   <!-- This useses mscorlib version 2.0.5.0 and breaks the whole build as windowsdesktop needs mscorlib >4!!  -->
+    <!--<Reference Include="protobuf-net">
+      <HintPath>$(FuseeEngineRoot)\ext\protobuf\$(Configuration)\protobuf-net.dll</HintPath>
+    </Reference>-->
   </ItemGroup>
   
   <ItemGroup>
@@ -71,6 +63,15 @@
     <Content Include="Assets\Lato-Black.ttf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="protobuf-net" Version="2.4.0" />
+    <PackageReference Include="System.Drawing.Common" Version="4.6.0-preview8.19405.3" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <ProjectReference Include="..\..\Core\Fusee.Examples.Simple.Core.csproj" />
   </ItemGroup>
   
   <ItemGroup>
