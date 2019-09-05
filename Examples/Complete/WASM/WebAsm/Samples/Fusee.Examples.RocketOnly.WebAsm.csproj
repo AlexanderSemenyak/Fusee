@@ -20,25 +20,21 @@
     <Reference Include="protobuf-net">
       <HintPath>$(FuseeEngineRoot)ext\protobuf\$(Configuration)\protobuf-net.dll</HintPath>
     </Reference>
-    <Reference Include="SkiaSharp.Wasm">
-      <HintPath>..\..\..\..\..\ext\Uno.SkiaSharp\SkiaSharp.Wasm.dll</HintPath>
+    <Reference Include="Uno.SkiaSharp">
+      <HintPath>$(FuseeEngineRoot)\ext\Uno.SkiaSharp\SkiaSharp.Wasm.dll</HintPath>
     </Reference>
-    
-    
     <ProjectReference Include="$(FuseeEngineRoot)src\Base\Common\Fusee.Base.Common.csproj" />
     <ProjectReference Include="$(FuseeEngineRoot)src\Base\Core\Fusee.Base.Core.csproj" />
     <ProjectReference Include="$(FuseeEngineRoot)src\Engine\Common\Fusee.Engine.Common.csproj" />
     <ProjectReference Include="$(FuseeEngineRoot)src\Engine\Core\Fusee.Engine.Core.csproj" />
     <ProjectReference Include="$(FuseeEngineRoot)src\Engine\Imp\Graphics\WebAsm\Fusee.Engine.Imp.Graphics.WebAsm.csproj" />
-    <ProjectReference Include="$(FuseeEngineRoot)src\Math\Core\Fusee.Math.Core.csproj" />
-    
+    <ProjectReference Include="$(FuseeEngineRoot)src\Math\Core\Fusee.Math.Core.csproj" />    
     <ProjectReference Include="$(FuseeEngineRoot)\src\Base\Imp\WebAsm\Fusee.Base.Imp.WebAsm.csproj" />
-
     <ProjectReference Include="..\..\Core\Fusee.Examples.RocketOnly.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="$(FuseeRoot)\ext\Uno.SkiaSharp\SkiaSharp.Wasm.dll" Link="Natives\SkiaSharp.Wasm.dll" />
+    <None Include="$(FuseeEngineRoot)\ext\Uno.SkiaSharp\SkiaSharp.Wasm.dll" Link="Natives\SkiaSharp.Wasm.dll" />
   </ItemGroup>
 
 
@@ -122,6 +118,9 @@
     </None>
     <Content Update="Assets\FuseeText.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Update="Assets\knight.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Update="Scripts\mono_support.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Fusee.Base.Core;
 using Fusee.Engine.Common;
@@ -51,8 +52,89 @@ namespace Fusee.Examples.RocketOnly.Core
             Console.WriteLine(_rocketScene.Children[0].Components[0].Name);
             Console.WriteLine(_rocketScene.Children.Count());
 
-            var x = await AssetStorage.GetAsync<ImageData>("Assets/FuseeText.png");
+            var x = await AssetStorage.GetAsync<ImageData>("Assets/knight.png");
             Console.WriteLine($"ImageData {x.Height}:{x.Width}");
+
+            RocketScene.Children.Add(new SceneNodeContainer
+            {
+                Components = new System.Collections.Generic.List<SceneComponentContainer>
+                {
+                    new TransformComponent
+                    {
+                        Rotation = new float3(M.Pi, 0 ,0),
+                        Scale = float3.One * 5,
+                        Translation = new float3(-5,0,3)
+                    },
+                    new ShaderEffectComponent
+                    {
+                        Effect = new ShaderEffect(new EffectPassDeclaration[] {
+                            new EffectPassDeclaration
+                            {
+                                VS = @"#version 300 es 
+in vec3 fuVertex;
+in vec3 fuNormal;
+in vec2 fuUV;
+
+out vec3 vNormal;
+out vec2 vUV;
+
+uniform mat4 FUSEE_MVP;
+
+
+void main(void){
+
+vNormal = normalize(fuNormal);
+vUV = fuUV;
+
+gl_Position = FUSEE_MVP * vec4(fuVertex, 1.0);
+
+}",
+
+                                PS = @"#version 300 es 
+
+precision highp float;
+
+
+in vec3 vNormal;
+in vec2 vUV;
+
+uniform sampler2D Texture;
+
+
+out vec4 oColor;
+
+void main(void)
+{
+    oColor = texture(Texture, vUV);
+}
+",
+                                StateSet = new RenderStateSet
+                                {
+                                    AlphaBlendEnable = true,
+                                    ZEnable = true
+                                }
+                            }
+
+                        }, new List<EffectParameterDeclaration>
+                        {
+                            new EffectParameterDeclaration
+                            {
+                                Name = "FUSEE_MVP",
+                                Value = float4x4.Identity
+                            },
+                            new EffectParameterDeclaration
+                            {
+                                Name = "Texture",
+                                Value = new Texture(x)
+                            },
+                        })
+
+                    },
+                    new Cube()
+                }
+            }); ;
+
+            //RocketScene.Children[RocketScene.Children.Count - 1].GetComponent<ShaderEffectComponent>().Effect.SetEffectParam("Texture", new Texture(x));
         }
 
         public SceneContainer RocketScene

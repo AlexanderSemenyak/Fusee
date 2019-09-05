@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using FileMode = Fusee.Base.Common.FileMode;
 using Path = Fusee.Base.Common.Path;
 
+
 namespace Fusee.Examples.RocketOnly.Main
 {
     internal static class Program
@@ -88,27 +89,22 @@ namespace Fusee.Examples.RocketOnly.Main
                     var ext = Path.GetExtension(id).ToLower();
                     switch (ext)
                     {
-                        case ".jpg":
-                        case ".jpeg":
+                        //case ".jpg": // not possible YET!
+                       // case ".jpeg":
                         case ".png":
                         case ".bmp":
                             // handle file
                             Console.WriteLine("Found image, processing");
-                            using (var memStream = new MemoryStream())
-                            {
-                                var stream = (Stream)storage;
-                                await stream.CopyToAsync(memStream).ConfigureAwait(false);
-                                memStream.Seek(0, SeekOrigin.Begin);
+                          
+                        var bmp =  SkiaSharp.SKBitmap.Decode((Stream)storage);
+                        Console.WriteLine($"Found image, {bmp.Width}, {bmp.Height}");
 
-                                var bmp =  SkiaSharp.SKBitmap.Decode(stream);
-                                Console.WriteLine($"Found image, {bmp.Width}, {bmp.Height}");
-
-                                var data = new Base.Core.ImageData(bmp.Width, bmp.Height)
-                                {
-                                    PixelData = bmp.Bytes
-                                };
-                                return data;
-                            };                           
+                        var data = new Base.Core.ImageData(bmp.Width, bmp.Height)
+                        {
+                            PixelData = bmp.Bytes
+                        };
+                        return data;
+                                                     
                     }
                     return null;
                 },
