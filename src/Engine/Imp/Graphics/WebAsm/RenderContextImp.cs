@@ -5,6 +5,7 @@ using Fusee.Base.Core;
 using Fusee.Math.Core;
 using Fusee.Engine.Common;
 using static Fusee.Engine.Imp.Graphics.WebAsm.WebGLRenderingContextBase;
+using static Fusee.Engine.Imp.Graphics.WebAsm.WebGL2RenderingContextBase;
 using WebAssembly.Core;
 using System.Runtime.InteropServices;
 using Fusee.Engine.Imp.WebAsm;
