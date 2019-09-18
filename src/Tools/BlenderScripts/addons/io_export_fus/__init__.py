@@ -204,7 +204,8 @@ class ExportFUS(bpy.types.Operator, ExportHelper):
             bpy.ops.wm.console_toggle()
             if geoObj:
                 #set blender to object mode (prevents problems)
-                bpy.ops.object.mode_set(mode="OBJECT")
+                if bpy.ops.object.mode_set.poll():
+                    bpy.ops.object.mode_set(mode="OBJECT")
 
                 #WEB Viewer
                 if self.isWeb:
