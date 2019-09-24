@@ -1029,22 +1029,53 @@ def GetParents(obj):
 
 
 def prepare_mesh(obj):
-    # This applies all the modifiers (without altering the scene)
+    # Create a copy of object
+    # Makes use of the new 2.8 override context (taken from https://blender.stackexchange.com/questions/135597/how-to-duplicate-an-object-in-2-8-via-the-python-api-without-using-bpy-ops-obje )
+    bpy.ops.object.duplicate(
+       {"object" : obj,
+       "selected_objects" : [obj]},
+       linked=False)
+    obj_copy = bpy.context.object
+
+    # Select the copy (and nothing else)
+    bpy.ops.object.select_all(action='DESELECT')
+    bpy.ops.object.mode_set(mode = 'OBJECT')
+    bpy.context.view_layer.objects.active = obj_copy
+    obj_copy.select_set(True)
+
+    # Flip normals on the copied object's copied mesh (Important: BEFORE any applied modifiers)
+    bpy.ops.object.mode_set(mode = 'EDIT')
+    bpy.ops.mesh.select_all(action='SELECT')
+    bpy.ops.mesh.normals_make_consistent(inside=False)
+    bpy.ops.object.mode_set(mode = 'OBJECT')
+
+    # Apply all the modifiers (without altering the scene)
     # Taken from https://docs.blender.org/api/blender2.8/bpy.types.Depsgraph.html, "Evaluated ID example"
     ev_depsgraph = bpy.context.evaluated_depsgraph_get()
-    object_eval = obj.evaluated_get(ev_depsgraph)
-    mesh = object_eval.data
+    obj_eval = obj_copy.evaluated_get(ev_depsgraph)
+    mesh_eval = obj_eval.data
 
     # Triangulate for web export
     bm = bmesh.new()
-    bm.from_mesh(mesh)
+    bm.from_mesh(mesh_eval)
+    # Normal recalculation already performed BEFORE modifiers were applied. Otherwise face recalculation yields normals facing inside
+    # bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
     bmesh.ops.triangulate(bm, faces=bm.faces)
-    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
-    bm.to_mesh(mesh)
+    mesh_triangulated = bpy.data.meshes.new("MeshTriangulated")
+    bm.to_mesh(mesh_triangulated)
     bm.free()
     del bm
+        
+    # Just for Debugging: link the triangulated mesh:
+    # obj_triangulated = bpy.data.objects.new("ObjectTriangulated", mesh_triangulated)
+    # bpy.context.collection.objects.link(obj_triangulated)
 
-    mesh.calc_normals()
-    mesh.calc_loop_triangles()
+    # Delete copied object
+    bpy.ops.object.select_all(action='DESELECT')
+    bpy.ops.object.mode_set(mode = 'OBJECT')
+    bpy.context.view_layer.objects.active = obj_copy
+    obj_copy.select_set(True)
+    bpy.ops.object.delete() 
 
-    return mesh
+    return mesh_triangulated
+
