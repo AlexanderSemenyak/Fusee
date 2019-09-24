@@ -24,7 +24,18 @@
     <PackageReference Include="WebAssembly.Net.Http" Version="0.1.0-preview1" />
     <PackageReference Include="WebAssembly.Net.WebSockets" Version="0.1.0-preview1" />  
   </ItemGroup>
-  
-  
 
+
+  <ItemGroup>
+    <Reference Include="SkiaSharp.Wasm">
+      <HintPath>..\..\..\..\ext\Uno.SkiaSharp\SkiaSharp.Wasm.dll</HintPath>
+    </Reference>
+    <Reference Include="Typography.GlyphLayout">
+      <HintPath>$(FuseeEngineRoot)\ext\Typography\Typography.GlyphLayout.dll</HintPath>
+    </Reference>
+    <Reference Include="Typography.OpenFont">
+      <HintPath>$(FuseeEngineRoot)\ext\Typography\Typography.OpenFont.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  
 </Project>

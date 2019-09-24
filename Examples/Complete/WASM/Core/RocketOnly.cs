@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Fusee.Base.Core;
+using Fusee.Base.Imp.WebAsm;
 using Fusee.Engine.Common;
 using Fusee.Engine.Core;
 using Fusee.Math.Core;
@@ -54,6 +55,9 @@ namespace Fusee.Examples.RocketOnly.Core
 
             var x = await AssetStorage.GetAsync<ImageData>("Assets/knight.png");
             Console.WriteLine($"ImageData {x.Height}:{x.Width}");
+
+            var font = await AssetStorage.GetAsync<Font>("Assets/Lato-Black.ttf");
+            Console.WriteLine($"FONT DATA {font.GetGlyphInfo(10).CharCode}");
 
             RocketScene.Children.Add(new SceneNodeContainer
             {

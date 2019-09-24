@@ -10,6 +10,8 @@ using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+//using Typography.OpenFont;
+//using Typography.TextLayout;
 using FileMode = Fusee.Base.Common.FileMode;
 using Path = Fusee.Base.Common.Path;
 
@@ -42,14 +44,19 @@ namespace Fusee.Examples.RocketOnly.Main
                 new AssetHandler
                 {
                     ReturnedType = typeof(Font),
-                    Decoder = (string id, object storage) =>
+                    DecoderAsync = async (string id, object storage) =>
                     {
                         if (Path.GetExtension(id).IndexOf("ttf", System.StringComparison.OrdinalIgnoreCase) >= 0)
                         {
-                            return new Font
+                            var font = new Font
                             {
-                                _fontImp = new FontImp(/* storage */)
+                                _fontImp = new FontImp((Stream)storage)
                             };
+
+                            Console.WriteLine($"FONT DATA {font.GetGlyphInfo(10).CharCode}");
+
+
+                            return font;
                         }
 
                         return null;
@@ -104,7 +111,6 @@ namespace Fusee.Examples.RocketOnly.Main
                             PixelData = bmp.Bytes
                         };
                         return data;
-                                                     
                     }
                     return null;
                 },
