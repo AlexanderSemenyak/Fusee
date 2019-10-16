@@ -54,102 +54,102 @@ namespace Fusee.Examples.RocketOnly.Core
             // Set the clear color for the backbuffer to white (100% intensity in all color channels R, G, B, A).
             RC.ClearColor = new float4(1, 1, 1, 1);
 
-            Console.WriteLine("trying to get asset");
-            var readVar = await AssetStorage.GetAsync<string>("Assets/LoremIpsum.txt");
-            Console.WriteLine(readVar);
+            //Console.WriteLine("trying to get asset");
+            //var readVar = await AssetStorage.GetAsync<string>("Assets/LoremIpsum.txt");
+            //Console.WriteLine(readVar);
 
             RocketScene = await AssetStorage.GetAsync<SceneContainer>("Assets/FUSEERocket.fus");
-            Console.WriteLine(_rocketScene.Children[0].Components[0].Name);
-            Console.WriteLine(_rocketScene.Children.Count());
+            //Console.WriteLine(_rocketScene.Children[0].Components[0].Name);
+            //Console.WriteLine(_rocketScene.Children.Count());
 
-            var x = await AssetStorage.GetAsync<ImageData>("Assets/knight.png");
-            Console.WriteLine($"ImageData {x.Height}:{x.Width}");
+            //var x = await AssetStorage.GetAsync<ImageData>("Assets/knight.png");
+            //Console.WriteLine($"ImageData {x.Height}:{x.Width}");
 
-            var fontLato = await AssetStorage.GetAsync<Font>("Assets/Lato-Black.ttf");
-            var guiLatoBlack = new FontMap(fontLato, 18);
-            var y = new GUIText(guiLatoBlack, "Hello World");
+            //var fontLato = await AssetStorage.GetAsync<Font>("Assets/Lato-Black.ttf");
+            //var guiLatoBlack = new FontMap(fontLato, 18);
+            //var y = new GUIText(guiLatoBlack, "Hello World");
 
             Gui = await CreateGui();
 
-            RocketScene.Children.Add(new SceneNodeContainer
-            {
-                Components = new System.Collections.Generic.List<SceneComponentContainer>
-                {
-                    new TransformComponent
-                    {
-                        Rotation = new float3(M.Pi, 0 ,0),
-                        Scale = float3.One * 5,
-                        Translation = new float3(-5,0,3)
-                    },
-                    new ShaderEffectComponent
-                    {
-                        Effect = new ShaderEffect(new EffectPassDeclaration[] {
-                            new EffectPassDeclaration
-                            {
-                                VS = @"#version 300 es 
-in vec3 fuVertex;
-in vec3 fuNormal;
-in vec2 fuUV;
+//            RocketScene.Children.Add(new SceneNodeContainer
+//            {
+//                Components = new System.Collections.Generic.List<SceneComponentContainer>
+//                {
+//                    new TransformComponent
+//                    {
+//                        Rotation = new float3(M.Pi, 0 ,0),
+//                        Scale = float3.One * 5,
+//                        Translation = new float3(-5,0,3)
+//                    },
+//                    new ShaderEffectComponent
+//                    {
+//                        Effect = new ShaderEffect(new EffectPassDeclaration[] {
+//                            new EffectPassDeclaration
+//                            {
+//                                VS = @"#version 300 es 
+//in vec3 fuVertex;
+//in vec3 fuNormal;
+//in vec2 fuUV;
 
-out vec3 vNormal;
-out vec2 vUV;
+//out vec3 vNormal;
+//out vec2 vUV;
 
-uniform mat4 FUSEE_MVP;
-
-
-void main(void){
-
-vNormal = normalize(fuNormal);
-vUV = fuUV;
-
-gl_Position = FUSEE_MVP * vec4(fuVertex, 1.0);
-
-}",
-
-                                PS = @"#version 300 es 
-
-precision highp float;
+//uniform mat4 FUSEE_MVP;
 
 
-in vec3 vNormal;
-in vec2 vUV;
+//void main(void){
 
-uniform sampler2D Texture;
+//vNormal = normalize(fuNormal);
+//vUV = fuUV;
+
+//gl_Position = FUSEE_MVP * vec4(fuVertex, 1.0);
+
+//}",
+
+//                                PS = @"#version 300 es 
+
+//precision highp float;
 
 
-out vec4 oColor;
+//in vec3 vNormal;
+//in vec2 vUV;
 
-void main(void)
-{
-    oColor = texture(Texture, vUV);
-}
-",
-                                StateSet = new RenderStateSet
-                                {
-                                    AlphaBlendEnable = true,
-                                    ZEnable = true
-                                }
-                            }
+//uniform sampler2D Texture;
 
-                        }, new List<EffectParameterDeclaration>
-                        {
-                            new EffectParameterDeclaration
-                            {
-                                Name = "FUSEE_MVP",
-                                Value = float4x4.Identity
-                            },
-                            new EffectParameterDeclaration
-                            {
-                                Name = "Texture",
-                                Value = new Texture(guiLatoBlack.Image)
-                            },
-                        })
 
-                    },
-                    //new Cube(),
-                    y
-                }
-            }); ;
+//out vec4 oColor;
+
+//void main(void)
+//{
+//    oColor = texture(Texture, vUV);
+//}
+//",
+//                                StateSet = new RenderStateSet
+//                                {
+//                                    AlphaBlendEnable = true,
+//                                    ZEnable = true
+//                                }
+//                            }
+
+//                        }, new List<EffectParameterDeclaration>
+//                        {
+//                            new EffectParameterDeclaration
+//                            {
+//                                Name = "FUSEE_MVP",
+//                                Value = float4x4.Identity
+//                            },
+//                            new EffectParameterDeclaration
+//                            {
+//                                Name = "Texture",
+//                                Value = new Texture(guiLatoBlack.Image)
+//                            },
+//                        })
+
+//                    },
+//                    //new Cube(),
+//                    y
+//                }
+//            }); ;
 
             //RocketScene.Children[RocketScene.Children.Count - 1].GetComponent<ShaderEffectComponent>().Effect.SetEffectParam("Texture", new Texture(x));
         }

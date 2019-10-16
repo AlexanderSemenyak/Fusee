@@ -3,6 +3,14 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
+# wasm specific 
+*.user
+.vs/
+bin/
+obj/
+node_modules/
+tools/
+
 # User-specific files
 *.rsuser
 *.suo
