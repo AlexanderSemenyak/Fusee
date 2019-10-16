@@ -1,0 +1,10 @@
+C:\Users\roetner\_DEV\Fusee\ext\SharpFont_mngd\obj\Debug\SharpFont_mngd.AssemblyInfoInputs.cache
+C:\Users\roetner\_DEV\Fusee\ext\SharpFont_mngd\obj\Debug\SharpFont_mngd.AssemblyInfo.cs
+C:\Users\roetner\_DEV\Fusee\ext\SharpFont_mngd\obj\Debug\SharpFont_mngd.dll
+C:\Users\roetner\_DEV\Fusee\ext\SharpFont_mngd\obj\Debug\SharpFont_mngd.pdb
+C:\Users\roetner\_DEV\Fusee\bin\Debug\SharpFont_mngd.deps.json
+C:\Users\roetner\_DEV\Fusee\bin\Debug\SharpFont_mngd.dll
+C:\Users\roetner\_DEV\Fusee\bin\Debug\SharpFont_mngd.pdb
+C:\Users\roetner\_DEV\Fusee\bin\Debug\Debug\SharpFont_mngd.deps.json
+C:\Users\roetner\_DEV\Fusee\bin\Debug\Debug\SharpFont_mngd.dll
+C:\Users\roetner\_DEV\Fusee\bin\Debug\Debug\SharpFont_mngd.pdb

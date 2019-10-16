@@ -112,7 +112,7 @@ namespace Fusee.Engine.GUI
             Normals = normals.ToArray();
 
             Vertices = _fontMap.FixTextKerning(Vertices, _text, 1);
-
+           
             var meshWidth = Vertices[Vertices.Length - 1].x - Vertices[0].x;
             var translateToZero = Vertices[0].x;
 

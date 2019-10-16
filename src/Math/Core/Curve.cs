@@ -387,7 +387,7 @@ namespace Fusee.Math.Core
 
                 var vertList = new List<float3>();
 
-                //Sample verts by performig a flatness test.
+                //Sample verts by performing a flatness test.
                 AdaptiveSamplingWArcreage(verts, acreage, ref vertList);
 
                 foreach (var vert in vertList)

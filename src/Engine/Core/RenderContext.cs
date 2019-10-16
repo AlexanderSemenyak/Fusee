@@ -1649,7 +1649,7 @@ namespace Fusee.Engine.Core
                     SetShader(sFxParam.CompiledShaders[i]);
 
                     foreach (var param in sFxParam.ParamsPerPass[i])
-                    {                       
+                    {
                         SetShaderParamT(param);
                     }
 
@@ -1719,6 +1719,7 @@ namespace Fusee.Engine.Core
                 SetShaderParamTexture(param.Info.Handle, (Texture)param.Value);
             }
         }
+
         /// <summary>
         /// Returns the hardware capabilities.
         /// </summary>

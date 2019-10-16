@@ -1,10 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+using Fusee.Base.Common;
 using Fusee.Base.Core;
 using Fusee.Base.Imp.WebAsm;
 using Fusee.Engine.Common;
 using Fusee.Engine.Core;
+using Fusee.Engine.GUI;
+using Fusee.Examples.UI.Core;
 using Fusee.Math.Core;
 using Fusee.Serialization;
 using Fusee.Xene;
@@ -39,6 +43,11 @@ namespace Fusee.Examples.RocketOnly.Core
         public string PixelShader = "";
         public ImageData CurrentTex;
 
+        private readonly CanvasRenderMode _canvasRenderMode = CanvasRenderMode.SCREEN;
+
+
+        private SceneContainer _gui;
+
         // Init is called on startup. 
         public async override void Init()
         {
@@ -56,8 +65,11 @@ namespace Fusee.Examples.RocketOnly.Core
             var x = await AssetStorage.GetAsync<ImageData>("Assets/knight.png");
             Console.WriteLine($"ImageData {x.Height}:{x.Width}");
 
-            var font = await AssetStorage.GetAsync<Font>("Assets/Lato-Black.ttf");
-            Console.WriteLine($"FONT DATA {font.GetGlyphInfo(10).CharCode}");
+            var fontLato = await AssetStorage.GetAsync<Font>("Assets/Lato-Black.ttf");
+            var guiLatoBlack = new FontMap(fontLato, 18);
+            var y = new GUIText(guiLatoBlack, "Hello World");
+
+            Gui = await CreateGui();
 
             RocketScene.Children.Add(new SceneNodeContainer
             {
@@ -129,12 +141,13 @@ void main(void)
                             new EffectParameterDeclaration
                             {
                                 Name = "Texture",
-                                Value = new Texture(x)
+                                Value = new Texture(guiLatoBlack.Image)
                             },
                         })
 
                     },
-                    new Cube()
+                    //new Cube(),
+                    y
                 }
             }); ;
 
@@ -154,6 +167,26 @@ void main(void)
                 _sceneRenderer = new SceneRenderer(_rocketScene);
                 Diagnostics.Log("Rocket Set");
                 projComp.Resize(Width, Height);
+            }
+        }
+
+        
+        
+
+        public SceneContainer Gui
+        {
+            get => _gui;
+            set
+            {
+                _gui = value;
+
+                //Add resize delegate
+                //var projComp = _rocketScene.Children[0].GetComponent<ProjectionComponent>();
+                //AddResizeDelegate(delegate { projComp.Resize(Width, Height); });
+                _guiRenderer = new SceneRenderer(_gui);
+                _gui.Children[0].GetComponent<ProjectionComponent>().Resize(Width, Height);
+                Diagnostics.Log("GUI Set");
+                //projComp.Resize(Width, Height);
             }
         }
 
@@ -208,7 +241,10 @@ void main(void)
 
             // Render the scene   
             if(_sceneRenderer != null)
-                _sceneRenderer.Render(RC);           
+                _sceneRenderer.Render(RC);
+
+            if (_gui != null)
+                _guiRenderer.Render(RC);
 
             // Swap buffers: Show the contents of the backbuffer (containing the currently rendered frame) on the front buffer.
             Present();
@@ -229,5 +265,101 @@ void main(void)
             var projection = float4x4.CreatePerspectiveFieldOfView(M.PiOver4, aspectRatio, 0.01f, 200.0f);
             RC.Projection = projection;
         }
+
+        private async Task<SceneContainer> CreateGui()
+        {
+            var vsTex = await AssetStorage.GetAsync<string>("Assets/texture.vert");
+            var psTex = await AssetStorage.GetAsync<string>("Assets/texture.frag");
+
+            var canvasWidth = Width / 100f;
+            var canvasHeight = Height / 100f;
+
+            var btnFuseeLogo = new GUIButton
+            {
+                Name = "Canvas_Button"
+            };
+            btnFuseeLogo.OnMouseEnter += BtnLogoEnter;
+            btnFuseeLogo.OnMouseExit += BtnLogoExit;
+            btnFuseeLogo.OnMouseDown += BtnLogoDown;
+
+            var guiFuseeLogo = new Texture(await AssetStorage.GetAsync<ImageData>("Assets/FuseeText.png"));
+            var fuseeLogo = new TextureNodeContainer(
+                "fuseeLogo",
+                vsTex,
+                psTex,
+                //Set the diffuse texture you want to use.
+                guiFuseeLogo,
+                //Define anchor points. They are given in percent, seen from the lower left corner, respectively to the width/height of the parent.
+                //In this setup the element will stretch horizontally but stay the same vertically if the parent element is scaled.
+                UIElementPosition.GetAnchors(AnchorPos.TOP_TOP_LEFT),
+                //Define Offset and therefor the size of the element.                
+                UIElementPosition.CalcOffsets(AnchorPos.TOP_TOP_LEFT, new float2(0, canvasHeight - 0.5f), canvasHeight, canvasWidth, new float2(1.75f, 0.5f))
+                );
+            fuseeLogo.AddComponent(btnFuseeLogo);
+
+            var fontLato = await AssetStorage.GetAsync<Font>("Assets/Lato-Black.ttf");
+            var guiLatoBlack = new FontMap(fontLato, 18);
+
+            Diagnostics.Log($"~~ {guiLatoBlack.Alphabet} loaded");
+            Diagnostics.Log($"~~ {guiLatoBlack.Image.Width} image width");
+
+            var text = new TextNodeContainer(
+                "FUSEE Simple Example",
+                "ButtonText",
+                vsTex,
+                psTex,
+                UIElementPosition.GetAnchors(AnchorPos.STRETCH_HORIZONTAL),
+                UIElementPosition.CalcOffsets(AnchorPos.STRETCH_HORIZONTAL, new float2(canvasWidth / 2 - 4, 0), canvasHeight, canvasWidth, new float2(8, 1)),
+                guiLatoBlack,
+                ColorUint.Tofloat4(ColorUint.Greenery), 250f);
+
+
+            var canvas = new CanvasNodeContainer(
+                "Canvas",
+                _canvasRenderMode,
+                new MinMaxRect
+                {
+                    Min = new float2(-canvasWidth / 2, -canvasHeight / 2f),
+                    Max = new float2(canvasWidth / 2, canvasHeight / 2f)
+                })
+            {
+                Children = new ChildList()
+                {
+                    //Simple Texture Node, contains the fusee logo.
+                    fuseeLogo,
+                    text
+                }
+            };
+
+            var canvasProjComp = new ProjectionComponent(ProjectionMethod.ORTHOGRAPHIC, ZNear, ZFar, _fovy);
+            canvas.Components.Insert(0, canvasProjComp);
+            AddResizeDelegate(delegate { canvasProjComp.Resize(Width, Height); });
+
+            return new SceneContainer
+            {
+                Children = new List<SceneNodeContainer>
+                {
+                    //Add canvas.
+                    canvas
+                }
+            };
+        }
+
+        public void BtnLogoEnter(CodeComponent sender)
+        {
+            _gui.Children.FindNodes(node => node.Name == "fuseeLogo").First().GetComponent<ShaderEffectComponent>().Effect.SetEffectParam("DiffuseColor", new float4(0.8f, 0.8f, 0.8f, 1f));
+        }
+
+        public void BtnLogoExit(CodeComponent sender)
+        {
+            _gui.Children.FindNodes(node => node.Name == "fuseeLogo").First().GetComponent<ShaderEffectComponent>().Effect.SetEffectParam("DiffuseColor", float4.One);
+        }
+
+        public void BtnLogoDown(CodeComponent sender)
+        {
+            OpenLink("http://fusee3d.org");
+        }
     }
 }
+
+  

@@ -4,8 +4,10 @@ using Fusee.Base.Imp.WebAsm;
 using Fusee.Engine.Core;
 using Fusee.Engine.Imp.Graphics.WebAsm;
 using Fusee.Serialization;
+using SkiaSharp;
 using System;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading;
@@ -53,9 +55,6 @@ namespace Fusee.Examples.RocketOnly.Main
                                 _fontImp = new FontImp((Stream)storage)
                             };
 
-                            Console.WriteLine($"FONT DATA {font.GetGlyphInfo(10).CharCode}");
-
-
                             return font;
                         }
 
@@ -102,15 +101,28 @@ namespace Fusee.Examples.RocketOnly.Main
                         case ".bmp":
                             // handle file
                             Console.WriteLine("Found image, processing");
-                          
-                        var bmp =  SkiaSharp.SKBitmap.Decode((Stream)storage);
-                        Console.WriteLine($"Found image, {bmp.Width}, {bmp.Height}");
 
-                        var data = new Base.Core.ImageData(bmp.Width, bmp.Height)
-                        {
-                            PixelData = bmp.Bytes
-                        };
-                        return data;
+                            using (var bitmap = SKBitmap.Decode((Stream)storage))
+                            {
+                                var rotated = new SKBitmap(bitmap.Width, bitmap.Height, true);
+                                //rotated.ColorType = bitmap.ColorType;
+                                //rotated.AlphaType = bitmap.AlphaType;
+
+                                using (var surface = new SKCanvas(rotated))
+                                {
+                                    surface.Clear();                                    
+                                    surface.Scale(1, -1, 0, bitmap.Height / 2.0f); // this mirrors the image within its' x-axis
+                                    surface.DrawBitmap(bitmap, 0, 0);
+                                }
+                                Console.WriteLine($"Found image, {rotated.Width}, {rotated.Height}");
+
+                                var data = new Base.Core.ImageData(rotated.Width, rotated.Height)
+                                {
+                                    PixelData = rotated.Bytes
+                                };
+
+                                return data;
+                            }
                     }
                     return null;
                 },
@@ -119,8 +131,8 @@ namespace Fusee.Examples.RocketOnly.Main
                     var ext = Path.GetExtension(id).ToLower();
                     switch (ext)
                     {
-                        case ".jpg":
-                        case ".jpeg":
+                       // case ".jpg":
+                       // case ".jpeg":
                         case ".png":
                         case ".bmp":
                             return true;

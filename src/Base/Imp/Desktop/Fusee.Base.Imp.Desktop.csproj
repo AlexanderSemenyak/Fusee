@@ -22,7 +22,7 @@
   <ItemGroup>
     <Reference Include="SharpFont">
       <HintPath>$(FuseeEngineRoot)\ext\Freetype\bin\SharpFont\$(Configuration)\SharpFont.dll</HintPath>
-    </Reference>
+    </Reference> 
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="$(FuseeEngineRoot)\src\Math\Core\Fusee.Math.Core.csproj" />
@@ -30,7 +30,7 @@
     <ProjectReference Include="$(FuseeEngineRoot)\src\Base\Core\Fusee.Base.Core.csproj" />
     <ProjectReference Include="$(FuseeEngineRoot)\src\Math\Core\Fusee.Math.Core.csproj" />
     <ProjectReference Include="$(FuseeEngineRoot)\src\Base\Common\Fusee.Base.Common.csproj" />
-    <ProjectReference Include="$(FuseeEngineRoot)\src\Base\Core\Fusee.Base.Core.csproj" />
+    <ProjectReference Include="$(FuseeEngineRoot)\src\Base\Core\Fusee.Base.Core.csproj" />      
   </ItemGroup>
 
 </Project>

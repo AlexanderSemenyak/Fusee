@@ -33,6 +33,14 @@ namespace Fusee.Base.Common
         /// </summary>
         public float Height;
 
+        /// <summary>
+        /// Returns the fully qualified name with all fields 
+        /// </summary>
+        /// <returns></returns>
+        public override string ToString()
+        {
+            return $"{nameof(GlyphInfo)}: CharCode: {CharCode}, AdvanceXY: ({AdvanceX},{AdvanceY}), W/H: ({Width}/{Height})";
+        }
 
         /* These values have gone to FontMap in Engine.Core
         /// <summary>

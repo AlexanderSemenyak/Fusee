@@ -11,6 +11,10 @@
     <DocumentationFile>$(OutputPath)\$(RootNamespace).xml</DocumentationFile>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="$(FuseeEngineRoot)\src\Math\Core\Fusee.Math.Core.csproj" />
     <ProjectReference Include="$(FuseeEngineRoot)\src\Base\Common\Fusee.Base.Common.csproj" />
@@ -28,14 +32,13 @@
 
   <ItemGroup>
     <Reference Include="SkiaSharp.Wasm">
-      <HintPath>..\..\..\..\ext\Uno.SkiaSharp\SkiaSharp.Wasm.dll</HintPath>
+      <HintPath>$(FuseeEngineRoot)\ext\Uno.SkiaSharp\SkiaSharp.Wasm.dll</HintPath>
     </Reference>
-    <Reference Include="Typography.GlyphLayout">
-      <HintPath>$(FuseeEngineRoot)\ext\Typography\Typography.GlyphLayout.dll</HintPath>
-    </Reference>
-    <Reference Include="Typography.OpenFont">
-      <HintPath>$(FuseeEngineRoot)\ext\Typography\Typography.OpenFont.dll</HintPath>
-    </Reference>
+      <Reference Include="SharpFont_mngd">
+          <HintPath>$(FuseeEngineRoot)\ext\SharpFont_mngd\Debug\SharpFont_mngd.dll</HintPath>
+      </Reference>
   </ItemGroup>
+
+
   
 </Project>

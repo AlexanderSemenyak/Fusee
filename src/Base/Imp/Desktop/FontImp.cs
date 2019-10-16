@@ -7,6 +7,7 @@ using Fusee.Base.Core;
 using Fusee.Math.Core;
 using SharpFont;
 
+
 namespace Fusee.Base.Imp.Desktop
 {
     /// <summary>
@@ -29,7 +30,7 @@ namespace Fusee.Base.Imp.Desktop
                 _sharpFont = new Library();
 
             byte[] fileArray;
-            using (MemoryStream ms = new MemoryStream())
+            using (var ms = new MemoryStream())
             {
                 stream.CopyTo(ms);
                 fileArray = ms.ToArray();
@@ -108,7 +109,7 @@ namespace Fusee.Base.Imp.Desktop
             var curve = new Curve();
 
             _face.LoadChar(c, LoadFlags.NoScale, LoadTarget.Normal);
-            
+
             curve.CurveParts = new List<CurvePart>();
             var orgPointCoords = _face.Glyph.Outline.Points;
             var pointTags = _face.Glyph.Outline.Tags;
@@ -116,7 +117,7 @@ namespace Fusee.Base.Imp.Desktop
 
             //Freetype contours are defined by their end points.
             var curvePartEndPoints = _face.Glyph.Outline.Contours;
-            
+
             var partTags = new List<byte>();
             var partVerts = new List<float3>();
 
@@ -178,9 +179,9 @@ namespace Fusee.Base.Imp.Desktop
                 pixelData = new byte[bmp.BufferData.Length];
                 Array.Copy(bmp.BufferData, pixelData, bmp.BufferData.Length);
             }
-            
-             ImageData ret = new ImageData(pixelData, bmp.Width, bmp.Rows,
-                new ImagePixelFormat(ColorFormat.Intensity));
+
+            ImageData ret = new ImageData(pixelData, bmp.Width, bmp.Rows,
+               new ImagePixelFormat(ColorFormat.Intensity));
 
             bitmapLeft = _face.Glyph.BitmapLeft;
             bitmapTop = _face.Glyph.BitmapTop;
