@@ -82,10 +82,6 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
 
-    <Content Include="Assets\LoremIpsum.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-
     <Content Include="Assets\Model.fus">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
