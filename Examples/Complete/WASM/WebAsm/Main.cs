@@ -4,17 +4,11 @@ using Fusee.Base.Imp.WebAsm;
 using Fusee.Engine.Core;
 using Fusee.Engine.Imp.Graphics.WebAsm;
 using Fusee.Serialization;
+using Fusee.Xene;
 using SkiaSharp;
 using System;
 using System.IO;
-using System.Linq;
-using System.Net.Http;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
-//using Typography.OpenFont;
-//using Typography.TextLayout;
-using FileMode = Fusee.Base.Common.FileMode;
 using Path = Fusee.Base.Common.Path;
 
 
@@ -52,9 +46,9 @@ namespace Fusee.Examples.RocketOnly.Main
                         {
                             var font = new Font
                             {
-                                _fontImp = new FontImp((Stream)storage)
+                                _fontImp = await Task.Factory.StartNew(() => new FontImp((Stream)storage)).ConfigureAwait(false)
                             };
-
+                            
                             return font;
                         }
 
@@ -70,13 +64,13 @@ namespace Fusee.Examples.RocketOnly.Main
                 new AssetHandler
                 {
                     ReturnedType = typeof(SceneContainer),
-                    DecoderAsync = async (string id, object storage) => // ignore the lack of await
+                    DecoderAsync = async (string id, object storage) =>
                     {
                         if (Path.GetExtension(id).IndexOf("fus", System.StringComparison.OrdinalIgnoreCase) >= 0)
                         {
                             var storageStream = (Stream)storage;
                             var ser = new Serializer();
-                            return new ConvertSceneGraph().Convert(ser.Deserialize(storageStream, null, typeof(SceneContainer)) as SceneContainer);
+                            return await Task.Factory.StartNew(() => new ConvertSceneGraph().Convert(ser.Deserialize(storageStream, null, typeof(SceneContainer)) as SceneContainer)).ConfigureAwait(false);
                         }
                         return null;
                     },
@@ -102,26 +96,22 @@ namespace Fusee.Examples.RocketOnly.Main
                             // handle file
                             Console.WriteLine("Found image, processing");
 
-                            using (var bitmap = SKBitmap.Decode((Stream)storage))
+                            using (var bitmap = await Task<SKBitmap>.Factory.StartNew(() => SKBitmap.Decode((Stream)storage)).ConfigureAwait(false))
                             {
-                                var rotated = new SKBitmap(bitmap.Width, bitmap.Height, true);
-                                //rotated.ColorType = bitmap.ColorType;
-                                //rotated.AlphaType = bitmap.AlphaType;
-
+                               var rotated = new SKBitmap(bitmap.Width, bitmap.Height, true);
+                              
                                 using (var surface = new SKCanvas(rotated))
                                 {
-                                    surface.Clear();                                    
+                                    surface.Clear();
                                     surface.Scale(1, -1, 0, bitmap.Height / 2.0f); // this mirrors the image within its' x-axis
                                     surface.DrawBitmap(bitmap, 0, 0);
                                 }
                                 Console.WriteLine($"Found image, {rotated.Width}, {rotated.Height}");
 
-                                var data = new Base.Core.ImageData(rotated.Width, rotated.Height)
+                                return new Base.Core.ImageData(rotated.Width, rotated.Height)
                                 {
                                     PixelData = rotated.Bytes
                                 };
-
-                                return data;
                             }
                     }
                     return null;
@@ -153,19 +143,8 @@ namespace Fusee.Examples.RocketOnly.Main
 
             // Start the app
             _app.Run();
-
-            LoadRocket();
-
         }
-
-        private async void LoadRocket()
-        {
-            //var stream = await WasmResourceLoader.LoadAsync("Assets/FUSEERocket.fus", WasmResourceLoader.GetLocalAddress());
-           // var seri = new Serializer();
-           // _app.RocketScene = new ConvertSceneGraph().Convert(seri.Deserialize(stream, null, typeof(SceneContainer)) as SceneContainer);
-
-        }
-
+        
         public override void Update(double elapsedMilliseconds)
         {
             if (_canvasImp != null)

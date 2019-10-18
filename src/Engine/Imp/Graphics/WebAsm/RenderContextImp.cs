@@ -5,7 +5,6 @@ using Fusee.Base.Core;
 using Fusee.Math.Core;
 using Fusee.Engine.Common;
 using static Fusee.Engine.Imp.Graphics.WebAsm.WebGLRenderingContextBase;
-using static Fusee.Engine.Imp.Graphics.WebAsm.WebGL2RenderingContextBase;
 using WebAssembly.Core;
 using System.Runtime.InteropServices;
 using Fusee.Engine.Imp.WebAsm;
@@ -171,8 +170,11 @@ namespace Fusee.Engine.Imp.Graphics.WebAsm
 
             gl.GenerateMipmap(TEXTURE_2D);
 
+            //! A common mistake is to set one of the mipmap filtering options as the magnification filter. This doesn't have any effect since mipmaps
+            // are primarily used for when textures get downscaled: texture magnification doesn't use mipmaps and giving it a mipmap filtering option will
+            // generate an OpenGL GL_INVALID_ENUM error code.
             gl.TexParameteri(TEXTURE_2D, TEXTURE_MIN_FILTER, (int)LINEAR_MIPMAP_LINEAR);
-            gl.TexParameteri(TEXTURE_2D, TEXTURE_MAG_FILTER, (int)LINEAR_MIPMAP_LINEAR);
+            gl.TexParameteri(TEXTURE_2D, TEXTURE_MAG_FILTER, (int)LINEAR);
 
             gl.TexParameteri(TEXTURE_2D, TEXTURE_WRAP_S, (repeat) ? (int)REPEAT : (int)CLAMP_TO_EDGE);
             gl.TexParameteri(TEXTURE_2D, TEXTURE_WRAP_T, (repeat) ? (int)REPEAT : (int)CLAMP_TO_EDGE);
@@ -767,7 +769,6 @@ namespace Fusee.Engine.Imp.Graphics.WebAsm
             }
             gl.Uniform1i(hParam, texUnit);
             gl.ActiveTexture((uint)(int)(TEXTURE0 + texUnit));
-            //gl.BindTexture(TextureTarget.TextureCubeMap, ((Texture)texId).handle);
             gl.BindTexture(TEXTURE_2D, ((TextureHandle)texId).Handle);
         }
 
@@ -907,10 +908,10 @@ namespace Fusee.Engine.Imp.Graphics.WebAsm
             gl.LinkProgram(program); // AAAARRRRRGGGGHHHH!!!! Must be called AFTER BindAttribLocation
 
             // mr: Detach Shader & delete
-            //gl.DetachShader(program, fragmentObject);
-            //gl.DetachShader(program, vertexObject);
-            //gl.DeleteShader(fragmentObject);
-            //gl.DeleteShader(vertexObject);
+            gl.DetachShader(program, fragmentObject);
+            gl.DetachShader(program, vertexObject);
+            gl.DeleteShader(fragmentObject);
+            gl.DeleteShader(vertexObject);
 
             return new ShaderProgramImp { Program = program };
         }
@@ -997,7 +998,7 @@ namespace Fusee.Engine.Imp.Graphics.WebAsm
         /// <exception cref="ApplicationException"></exception>
         public void SetVertices(IMeshImp mr, float3[] vertices)
         {
-            Diagnostics.Log("[SetVertices]");
+            
             if (vertices == null || vertices.Length == 0)
             {
                 throw new ArgumentException("Vertices must not be null or empty");
@@ -1009,7 +1010,6 @@ namespace Fusee.Engine.Imp.Graphics.WebAsm
                 ((MeshImp)mr).VertexBufferObject = gl.CreateBuffer();
 
             gl.BindBuffer(ARRAY_BUFFER, ((MeshImp)mr).VertexBufferObject);
-            Diagnostics.Log("[Before gl.BufferData]");
 
             var verticesFlat = new float[vertices.Length * 3];
             unsafe
@@ -1020,8 +1020,7 @@ namespace Fusee.Engine.Imp.Graphics.WebAsm
                 }
             }
             gl.BufferData(ARRAY_BUFFER, verticesFlat, STATIC_DRAW);
-
-            Diagnostics.Log("[After gl.BufferData]");
+            
             vboBytes = (int) gl.GetBufferParameter(ARRAY_BUFFER, BUFFER_SIZE);
             if (vboBytes != vertsBytes)
                 throw new ApplicationException(String.Format("Problem uploading vertex buffer to VBO (vertices). Tried to upload {0} bytes, uploaded {1}.", vertsBytes, vboBytes));

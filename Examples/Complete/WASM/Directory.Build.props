@@ -1,9 +1,9 @@
 <Project>
-  <PropertyGroup>
+  <!--<PropertyGroup>
     <FuseeRoot Condition=" '$(FuseeRoot)' == '' ">$(MSBuildThisFileDirectory)..\..\..\</FuseeRoot>
-    <!-- Build into main FUSEE bin directory -->
-    <!--<FuseeBuildRoot>$(FuseeRoot)</FuseeBuildRoot>-->
-    <!-- Build into local bin directory -->
+    --><!-- Build into main FUSEE bin directory --><!--
+    --><!--<FuseeBuildRoot>$(FuseeRoot)</FuseeBuildRoot>--><!--
+    --><!-- Build into local bin directory --><!--
     <FuseeBuildRoot>$(MSBuildThisFileDirectory)</FuseeBuildRoot>
     <BaseOutputPath>$(FuseeBuildRoot)\bin\$(Configuration)</BaseOutputPath>
     <FuseeEngineRoot Condition=" '$(FuseeRoot)' != '' ">$(FuseeRoot)\</FuseeEngineRoot>
@@ -11,14 +11,35 @@
 
     <FuseeProjectRoot>$(MSBuildThisFileDirectory)\</FuseeProjectRoot>
 
-    <!--Build into main FUSEE bin directory-->
+    --><!--Build into main FUSEE bin directory--><!--
     <BaseOutputPath>$(FuseeEngineRoot)\bin\$(Configuration)</BaseOutputPath>
 
-    <!--Build into local bin directory-->
-    <!--<BaseOutputPath>$(FuseeProjectRoot)\bin\$(Configuration)</BaseOutputPath>-->
+    --><!--Build into local bin directory--><!--
+    --><!--<BaseOutputPath>$(FuseeProjectRoot)\bin\$(Configuration)</BaseOutputPath>--><!--
 
-    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>-->
 
-  
-  </PropertyGroup>
+
+      <PropertyGroup>
+          <FuseeRoot Condition=" '$(FuseeRoot)' == '' ">$(MSBuildThisFileDirectory)..\..\..\</FuseeRoot>
+          <!-- Build into main FUSEE bin directory -->
+          <FuseeBuildRoot>$(FuseeRoot)</FuseeBuildRoot>
+          <!-- Build into local bin directory -->
+          <!-- <FuseeBuildRoot>$(MSBuildThisFileDirectory)</FuseeBuildRoot> -->
+          <BaseOutputPath>$(FuseeBuildRoot)\bin\$(Configuration)</BaseOutputPath>
+          <BaseOutputPath>$(FuseeBuildRoot)\bin\$(Configuration)</BaseOutputPath>
+          <FuseeEngineRoot Condition=" '$(FuseeRoot)' != '' ">$(FuseeRoot)\</FuseeEngineRoot>
+          <FuseeEngineRoot Condition=" '$(FuseeEngineRoot)' == '' ">..\..\..\</FuseeEngineRoot>
+
+          <FuseeProjectRoot>$(MSBuildThisFileDirectory)\</FuseeProjectRoot>
+
+          <!--Build into main FUSEE bin directory-->
+          <BaseOutputPath>$(FuseeEngineRoot)\bin\$(Configuration)</BaseOutputPath>
+
+          <!--Build into local bin directory-->
+          <!--<BaseOutputPath>$(FuseeProjectRoot)\bin\$(Configuration)</BaseOutputPath>-->
+
+          <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+
+      </PropertyGroup>
 </Project>

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Fusee.Base.Core;
 using Fusee.Engine.Common;
 using Fusee.Engine.Core;
@@ -52,7 +53,7 @@ namespace Fusee.Examples.GeometryEditing.Core
         private bool _isScaling;
 
         // Init is called on startup. 
-        public override void Init()
+        public override async Task<bool> Init()
         {
 
             ////////////////// Fill SceneNodeContainer ////////////////////////////////
@@ -92,7 +93,9 @@ namespace Fusee.Examples.GeometryEditing.Core
             //AddGeometryToSceneNode(sphere, new float3(0,0,0));
 
             //Geometry cuboid = CreateGeometry.CreateCuboidGeometry(5, 2, 5);
-            //AddGeometryToSceneNode(cuboid, new float3(-5,0,0));         
+            //AddGeometryToSceneNode(cuboid, new float3(-5,0,0));     
+
+            return true;
         }
 
         // RenderAFrame is called once a frame

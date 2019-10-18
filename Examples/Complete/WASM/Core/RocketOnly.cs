@@ -1,14 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Fusee.Base.Common;
 using Fusee.Base.Core;
-using Fusee.Base.Imp.WebAsm;
 using Fusee.Engine.Common;
 using Fusee.Engine.Core;
 using Fusee.Engine.GUI;
-using Fusee.Examples.UI.Core;
 using Fusee.Math.Core;
 using Fusee.Serialization;
 using Fusee.Xene;
@@ -27,10 +24,8 @@ namespace Fusee.Examples.RocketOnly.Core
         private const float Damping = 0.8f;
 
         private SceneContainer _rocketScene;
-        private SceneContainer _scene;
         private SceneRenderer _sceneRenderer;
 
-        private TransformComponent _cubeTransform;
         private const float ZNear = 1f;
         private const float ZFar = 1000;
         private float _fovy = M.PiOver4;
@@ -39,157 +34,29 @@ namespace Fusee.Examples.RocketOnly.Core
 
         private bool _keys;
 
-        public string VertexShader = "";
-        public string PixelShader = "";
-        public ImageData CurrentTex;
-
         private readonly CanvasRenderMode _canvasRenderMode = CanvasRenderMode.SCREEN;
-
 
         private SceneContainer _gui;
 
         // Init is called on startup. 
-        public async override void Init()
+        public async override Task<bool> Init()
         {
             // Set the clear color for the backbuffer to white (100% intensity in all color channels R, G, B, A).
             RC.ClearColor = new float4(1, 1, 1, 1);
 
-            //Console.WriteLine("trying to get asset");
-            //var readVar = await AssetStorage.GetAsync<string>("Assets/LoremIpsum.txt");
-            //Console.WriteLine(readVar);
+            _rocketScene = await AssetStorage.GetAsync<SceneContainer>("FUSEERocket.fus");
+            _gui = await CreateGui();
 
-            RocketScene = await AssetStorage.GetAsync<SceneContainer>("Assets/FUSEERocket.fus");
-            //Console.WriteLine(_rocketScene.Children[0].Components[0].Name);
-            //Console.WriteLine(_rocketScene.Children.Count());
+            var projComp = _rocketScene.Children[0].GetComponent<ProjectionComponent>();
+            AddResizeDelegate(delegate { projComp.Resize(Width, Height); });
+            projComp.Resize(Width, Height);
+            _gui.Children[0].GetComponent<ProjectionComponent>().Resize(Width, Height);
 
-            //var x = await AssetStorage.GetAsync<ImageData>("Assets/knight.png");
-            //Console.WriteLine($"ImageData {x.Height}:{x.Width}");
+            _sceneRenderer = new SceneRenderer(_rocketScene);
+            _guiRenderer = new SceneRenderer(_gui);
 
-            //var fontLato = await AssetStorage.GetAsync<Font>("Assets/Lato-Black.ttf");
-            //var guiLatoBlack = new FontMap(fontLato, 18);
-            //var y = new GUIText(guiLatoBlack, "Hello World");
-
-            Gui = await CreateGui();
-
-//            RocketScene.Children.Add(new SceneNodeContainer
-//            {
-//                Components = new System.Collections.Generic.List<SceneComponentContainer>
-//                {
-//                    new TransformComponent
-//                    {
-//                        Rotation = new float3(M.Pi, 0 ,0),
-//                        Scale = float3.One * 5,
-//                        Translation = new float3(-5,0,3)
-//                    },
-//                    new ShaderEffectComponent
-//                    {
-//                        Effect = new ShaderEffect(new EffectPassDeclaration[] {
-//                            new EffectPassDeclaration
-//                            {
-//                                VS = @"#version 300 es 
-//in vec3 fuVertex;
-//in vec3 fuNormal;
-//in vec2 fuUV;
-
-//out vec3 vNormal;
-//out vec2 vUV;
-
-//uniform mat4 FUSEE_MVP;
-
-
-//void main(void){
-
-//vNormal = normalize(fuNormal);
-//vUV = fuUV;
-
-//gl_Position = FUSEE_MVP * vec4(fuVertex, 1.0);
-
-//}",
-
-//                                PS = @"#version 300 es 
-
-//precision highp float;
-
-
-//in vec3 vNormal;
-//in vec2 vUV;
-
-//uniform sampler2D Texture;
-
-
-//out vec4 oColor;
-
-//void main(void)
-//{
-//    oColor = texture(Texture, vUV);
-//}
-//",
-//                                StateSet = new RenderStateSet
-//                                {
-//                                    AlphaBlendEnable = true,
-//                                    ZEnable = true
-//                                }
-//                            }
-
-//                        }, new List<EffectParameterDeclaration>
-//                        {
-//                            new EffectParameterDeclaration
-//                            {
-//                                Name = "FUSEE_MVP",
-//                                Value = float4x4.Identity
-//                            },
-//                            new EffectParameterDeclaration
-//                            {
-//                                Name = "Texture",
-//                                Value = new Texture(guiLatoBlack.Image)
-//                            },
-//                        })
-
-//                    },
-//                    //new Cube(),
-//                    y
-//                }
-//            }); ;
-
-            //RocketScene.Children[RocketScene.Children.Count - 1].GetComponent<ShaderEffectComponent>().Effect.SetEffectParam("Texture", new Texture(x));
+            return true;
         }
-
-        public SceneContainer RocketScene
-        {
-            get => _rocketScene;
-            set
-            {
-                _rocketScene = value;
-
-                //Add resize delegate
-                var projComp = _rocketScene.Children[0].GetComponent<ProjectionComponent>();
-                AddResizeDelegate(delegate { projComp.Resize(Width, Height); });
-                _sceneRenderer = new SceneRenderer(_rocketScene);
-                Diagnostics.Log("Rocket Set");
-                projComp.Resize(Width, Height);
-            }
-        }
-
-        
-        
-
-        public SceneContainer Gui
-        {
-            get => _gui;
-            set
-            {
-                _gui = value;
-
-                //Add resize delegate
-                //var projComp = _rocketScene.Children[0].GetComponent<ProjectionComponent>();
-                //AddResizeDelegate(delegate { projComp.Resize(Width, Height); });
-                _guiRenderer = new SceneRenderer(_gui);
-                _gui.Children[0].GetComponent<ProjectionComponent>().Resize(Width, Height);
-                Diagnostics.Log("GUI Set");
-                //projComp.Resize(Width, Height);
-            }
-        }
-
 
         // RenderAFrame is called once a frame
         public override void RenderAFrame()
@@ -239,37 +106,19 @@ namespace Fusee.Examples.RocketOnly.Core
             var mtxCam = float4x4.LookAt(0, +2, -10, 0, +2, 0, 0, 1, 0);
             RC.View = mtxCam * mtxRot;
 
-            // Render the scene   
-            if(_sceneRenderer != null)
-                _sceneRenderer.Render(RC);
-
-            if (_gui != null)
-                _guiRenderer.Render(RC);
+            // Render the scene
+            _sceneRenderer.Render(RC);
+            _guiRenderer.Render(RC);
 
             // Swap buffers: Show the contents of the backbuffer (containing the currently rendered frame) on the front buffer.
             Present();
         }
 
-        // Is called when the window was resized
-        public override void Resize(ResizeEventArgs rea)
-        {
-            // Set the new rendering area to the entire new windows size
-            RC.Viewport(0, 0, Width, Height);
-
-            // Create a new projection matrix generating undistorted images on the new aspect ratio.
-            var aspectRatio = Width / (float)Height;
-
-            // 0.25*PI Rad -> 45° Opening angle along the vertical direction. Horizontal opening angle is calculated based on the aspect ratio
-            // Front clipping happens at 0.01 (Objects nearer than 1 world unit get clipped)
-            // Back clipping happens at 200 (Anything further away from the camera than 200 world units gets clipped, polygons will be cut)
-            var projection = float4x4.CreatePerspectiveFieldOfView(M.PiOver4, aspectRatio, 0.01f, 200.0f);
-            RC.Projection = projection;
-        }
-
+      
         private async Task<SceneContainer> CreateGui()
         {
-            var vsTex = await AssetStorage.GetAsync<string>("Assets/texture.vert");
-            var psTex = await AssetStorage.GetAsync<string>("Assets/texture.frag");
+            var vsTex = await AssetStorage.GetAsync<string>("texture.vert");
+            var psTex = await AssetStorage.GetAsync<string>("texture.frag");
 
             var canvasWidth = Width / 100f;
             var canvasHeight = Height / 100f;
@@ -282,7 +131,7 @@ namespace Fusee.Examples.RocketOnly.Core
             btnFuseeLogo.OnMouseExit += BtnLogoExit;
             btnFuseeLogo.OnMouseDown += BtnLogoDown;
 
-            var guiFuseeLogo = new Texture(await AssetStorage.GetAsync<ImageData>("Assets/FuseeText.png"));
+            var guiFuseeLogo = new Texture(await AssetStorage.GetAsync<ImageData>("FuseeText.png"));
             var fuseeLogo = new TextureNodeContainer(
                 "fuseeLogo",
                 vsTex,
@@ -297,11 +146,8 @@ namespace Fusee.Examples.RocketOnly.Core
                 );
             fuseeLogo.AddComponent(btnFuseeLogo);
 
-            var fontLato = await AssetStorage.GetAsync<Font>("Assets/Lato-Black.ttf");
+            var fontLato = await AssetStorage.GetAsync<Font>("Lato-Black.ttf");
             var guiLatoBlack = new FontMap(fontLato, 18);
-
-            Diagnostics.Log($"~~ {guiLatoBlack.Alphabet} loaded");
-            Diagnostics.Log($"~~ {guiLatoBlack.Image.Width} image width");
 
             var text = new TextNodeContainer(
                 "FUSEE Simple Example",
@@ -361,5 +207,3 @@ namespace Fusee.Examples.RocketOnly.Core
         }
     }
 }
-
-  

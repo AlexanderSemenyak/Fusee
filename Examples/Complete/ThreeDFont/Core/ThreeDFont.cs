@@ -7,6 +7,7 @@ using Fusee.Math.Core;
 using static Fusee.Engine.Core.Input;
 using Fusee.Serialization;
 using Fusee.Xene;
+using System.Threading.Tasks;
 
 namespace Fusee.Examples.ThreeDFont.Core
 {
@@ -27,7 +28,7 @@ namespace Fusee.Examples.ThreeDFont.Core
         private ThreeDFontHelper _threeDFontHelper;
 
         // Init is called on startup. 
-        public override void Init()
+        public override async Task<bool> Init()
         {
             var fontLato = AssetStorage.Get<Font>("Lato-Black.ttf");
             var vladimir = AssetStorage.Get<Font>("VLADIMIR.TTF");
@@ -165,6 +166,8 @@ namespace Fusee.Examples.ThreeDFont.Core
 
             // Set the clear color for the backbuffer
             RC.ClearColor = new float4(0, 0.61f, 0.88f, 1);
+
+            return true;
         }
 
         // RenderAFrame is called once a frame

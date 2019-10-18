@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading.Tasks;
 using Fusee.Base.Core;
 using Fusee.Engine.Common;
 using Fusee.Math.Core;
@@ -1022,7 +1023,7 @@ namespace Fusee.Engine.Core
         /// <param name="shininess">The resulting effect's shininess.</param>
         /// <param name="specularIntensity">The resulting effects specular intensity.</param>
         /// <returns>A ShaderEffect ready to use as a component in scene graphs.</returns>
-        public static ShaderEffect MakeShaderEffect(float4 diffuseColor, float4 specularColor, float shininess, float specularIntensity = 0.5f)
+        public static async Task<ShaderEffect> MakeShaderEffect(float4 diffuseColor, float4 specularColor, float shininess, float specularIntensity = 0.5f)
         {
             MaterialComponent temp = new MaterialComponent
             {
@@ -1038,7 +1039,7 @@ namespace Fusee.Engine.Core
                 }
             };
             
-            return MakeShaderEffectFromMatComp(temp);
+            return await MakeShaderEffectFromMatComp(temp);
         }
 
         /// <summary>
@@ -1051,7 +1052,7 @@ namespace Fusee.Engine.Core
         /// <param name="diffuseMix">Determines how much the diffuse color and the color from the thexture are mixed.</param>
         /// <param name="specularIntensity">The resulting effects specular intensity.</param>
         /// <returns>A ShaderEffect ready to use as a component in scene graphs.</returns>
-        public static ShaderEffect MakeShaderEffect(float4 diffuseColor, float4 specularColor, float shininess, string texName, float diffuseMix, float specularIntensity = 0.5f)
+        public static async Task<ShaderEffect> MakeShaderEffect(float4 diffuseColor, float4 specularColor, float shininess, string texName, float diffuseMix, float specularIntensity = 0.5f)
         {
             MaterialComponent temp = new MaterialComponent
             {
@@ -1069,7 +1070,7 @@ namespace Fusee.Engine.Core
                 }
             };
 
-            return MakeShaderEffectFromMatComp(temp);
+            return await MakeShaderEffectFromMatComp(temp);
         }
         
         /// <summary> 
@@ -1079,7 +1080,7 @@ namespace Fusee.Engine.Core
         /// <param name="wc">Only pass over a WeightComponent if you use bone animations in the current node (usage: pass currentNode.GetWeights())</param> 
         /// <returns></returns> 
         /// <exception cref="Exception"></exception> 
-        public static ShaderEffect MakeShaderEffectFromMatComp(MaterialComponent mc, WeightComponent wc = null)
+        public static async Task<ShaderEffect> MakeShaderEffectFromMatComp(MaterialComponent mc, WeightComponent wc = null)
         {
             ShaderCodeBuilder scb = null;
 
@@ -1115,13 +1116,13 @@ namespace Fusee.Engine.Core
                         }
                     }
                 },
-                effectParameters
+                await effectParameters
             );
             return ret;
         }
         
 
-        private static IEnumerable<EffectParameterDeclaration> AssembleEffectParamers(MaterialComponent mc)
+        private static async Task<IEnumerable<EffectParameterDeclaration>> AssembleEffectParamers(MaterialComponent mc)
         {
             var effectParameters = new List<EffectParameterDeclaration>();
 
@@ -1142,7 +1143,7 @@ namespace Fusee.Engine.Core
                     effectParameters.Add(new EffectParameterDeclaration
                     {
                         Name = DiffuseTextureName,
-                        Value = LoadTexture(mc.Diffuse.Texture)
+                        Value = await LoadTexture("Assets/" + mc.Diffuse.Texture)
                     });
                 }
             }
@@ -1174,7 +1175,7 @@ namespace Fusee.Engine.Core
                     effectParameters.Add(new EffectParameterDeclaration
                     {
                         Name = SpecularTextureName,
-                        Value = LoadTexture(mc.Specular.Texture)
+                        Value = await LoadTexture("Assets/" + mc.Specular.Texture)
                     });
                 }
             }
@@ -1196,7 +1197,7 @@ namespace Fusee.Engine.Core
                     effectParameters.Add(new EffectParameterDeclaration
                     {
                         Name = EmissiveTextureName,
-                        Value = LoadTexture(mc.Emissive.Texture)
+                        Value = await LoadTexture("Assets/" + mc.Emissive.Texture)
                     });
                 }
             }
@@ -1211,7 +1212,7 @@ namespace Fusee.Engine.Core
                 effectParameters.Add(new EffectParameterDeclaration
                 {
                     Name = BumpTextureName,
-                    Value = LoadTexture(mc.Bump.Texture)
+                    Value = LoadTexture("Assets/" + mc.Bump.Texture)
                 });
             }
 
@@ -1298,13 +1299,13 @@ namespace Fusee.Engine.Core
             return effectParameters;
         }
 
-        private static Texture LoadTexture(string path)
+        private static async Task<Texture> LoadTexture(string path)
         {
-            var image = AssetStorage.Get<ImageData>(path);
+            var image = await AssetStorage.GetAsync<ImageData>(path);
             if (image != null)
                 return new Texture(image);
 
-            image = AssetStorage.Get<ImageData>("DefaultTexture.png");
+            image = await AssetStorage.GetAsync<ImageData>("AssetStorage/DefaultTexture.png");
             if (image != null)
                 return new Texture(image);
 

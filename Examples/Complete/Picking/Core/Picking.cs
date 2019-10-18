@@ -6,6 +6,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Fusee.Base.Common;
 using Fusee.Base.Core;
 using Fusee.Engine.Common;
@@ -61,7 +62,7 @@ namespace Fusee.Examples.Picking.Core
         private float2 _pickPos;
 
         // Init is called on startup. 
-        public override void Init()
+        public override async Task<bool> Init()
         {
             _initWindowWidth = Width;
             _initWindowHeight = Height;
@@ -88,11 +89,16 @@ namespace Fusee.Examples.Picking.Core
             AddResizeDelegate(delegate { projComp.Resize(Width, Height); });
 
 #if GUI_SIMPLE
-            _gui = CreateGui();
+            _gui = await CreateGui();
             // Create the interaction handler
             _sih = new SceneInteractionHandler(_gui);
             _guiRenderer = new SceneRenderer(_gui);
 #endif
+
+            projComp.Resize(Width, Height);
+            _gui.Children[0].GetComponent<ProjectionComponent>().Resize(Width, Height);
+
+            return true;
         }
 
         // RenderAFrame is called once a frame
@@ -238,10 +244,10 @@ namespace Fusee.Examples.Picking.Core
         }
 
 #if GUI_SIMPLE
-        private SceneContainer CreateGui()
+        private async Task<SceneContainer> CreateGui()
         {
-            var vsTex = AssetStorage.Get<string>("texture.vert");
-            var psTex = AssetStorage.Get<string>("texture.frag");
+            var vsTex = await AssetStorage.GetAsync<string>("texture.vert");
+            var psTex = await AssetStorage.GetAsync<string>("texture.frag");
 
             var btnFuseeLogo = new GUIButton
             {
@@ -251,7 +257,7 @@ namespace Fusee.Examples.Picking.Core
             btnFuseeLogo.OnMouseExit += BtnLogoExit;
             btnFuseeLogo.OnMouseDown += BtnLogoDown;
 
-            var guiFuseeLogo = new Texture(AssetStorage.Get<ImageData>("FuseeText.png"));
+            var guiFuseeLogo = new Texture(await AssetStorage.GetAsync<ImageData>("FuseeText.png"));
             var fuseeLogo = new TextureNodeContainer(
                 "fuseeLogo",
                 vsTex,
@@ -266,7 +272,7 @@ namespace Fusee.Examples.Picking.Core
                 );
             fuseeLogo.AddComponent(btnFuseeLogo);
 
-            var fontLato = AssetStorage.Get<Font>("Lato-Black.ttf");
+            var fontLato = await AssetStorage.GetAsync<Font>("Lato-Black.ttf");
             var guiLatoBlack = new FontMap(fontLato, 18);
 
             var text = new TextNodeContainer(

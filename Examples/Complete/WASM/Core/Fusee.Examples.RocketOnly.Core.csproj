@@ -11,15 +11,11 @@
 
   <ItemGroup>
     <None Remove="Assets\FuseeText.png" />
-    <None Remove="Assets\LoremIpsum.txt" />
   </ItemGroup>
 
   <ItemGroup>
     <Content Include="Assets\FuseeText.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Assets\LoremIpsum.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
 

@@ -1009,6 +1009,7 @@ namespace Fusee.Engine.Imp.Graphics.WebAsm
 
     public partial class WebGLVertexArrayObject : WebGLObject
     {
+
     }
 
     public partial class WebGL2RenderingContextBase

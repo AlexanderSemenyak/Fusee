@@ -566,7 +566,7 @@ namespace Fusee.Engine.Core
         /// Sets the rendercontext for the given scene.
         /// </summary>
         /// <param name="rc"></param>
-        public void SetContext(RenderContext rc)
+        public async void SetContext(RenderContext rc)
         {
             if (rc == null)
                 throw new ArgumentNullException("rc");
@@ -589,7 +589,7 @@ namespace Fusee.Engine.Core
                         Shininess = 22
                     }
                 };
-                _defaultEffect = ShaderCodeBuilder.MakeShaderEffectFromMatComp(defaultMat);
+                _defaultEffect = await ShaderCodeBuilder.MakeShaderEffectFromMatComp(defaultMat);
 
                 //_defaultEffect.AttachToContext(_rc);
                 _rc.SetShaderEffect(_defaultEffect);

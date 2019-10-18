@@ -24,6 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="System.Numerics.Vectors" Version="4.6.0-preview5.19224.8" />
     <PackageReference Include="WebAssembly.Bindings" Version="0.1.0-preview1" />
     <PackageReference Include="WebAssembly.Net.Http" Version="0.1.0-preview1" />
     <PackageReference Include="WebAssembly.Net.WebSockets" Version="0.1.0-preview1" />  

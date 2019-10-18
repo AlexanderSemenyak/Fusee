@@ -10,6 +10,7 @@ using System.Linq;
 using Fusee.Base.Common;
 using Fusee.Xene;
 using FontMap = Fusee.Engine.Core.FontMap;
+using System.Threading.Tasks;
 
 namespace Fusee.Examples.UI.Core
 {
@@ -49,12 +50,12 @@ namespace Fusee.Examples.UI.Core
         private float fov = M.PiOver4;
 
         //Build a scene graph consisting out of a canvas and other UI elements.
-        private SceneContainer CreateNineSliceScene()
+        private async Task<SceneContainer> CreateNineSliceScene()
         {
-            var vsTex = AssetStorage.Get<string>("texture.vert");
-            var psTex = AssetStorage.Get<string>("texture.frag");
-            var vsNineSlice = AssetStorage.Get<string>("nineSlice.vert");
-            var psNineSlice = AssetStorage.Get<string>("nineSliceTile.frag");
+            var vsTex = await AssetStorage.GetAsync<string>("Assets/texture.vert");
+            var psTex = await AssetStorage.GetAsync<string>("Assets/texture.frag");
+            var vsNineSlice = await AssetStorage.GetAsync<string>("Assets/nineSlice.vert");
+            var psNineSlice = await AssetStorage.GetAsync<string>("Assets/nineSliceTile.frag");
 
             var canvasScaleFactor = _initWindowWidth / _canvasWidth;
             float textSize = 2;
@@ -219,7 +220,7 @@ namespace Fusee.Examples.UI.Core
 
             var canvasMat = new ShaderEffectComponent
             {
-                Effect = ShaderCodeBuilder.MakeShaderEffectFromMatComp(new MaterialComponent
+                Effect = await ShaderCodeBuilder.MakeShaderEffectFromMatComp(new MaterialComponent
                 {
                     Diffuse = new MatChannelContainer { Color = new float4(1, 0, 0,1) },
                 })
@@ -256,10 +257,10 @@ namespace Fusee.Examples.UI.Core
             Debug.WriteLine("Canvas: Btn up!");
         }
 
-        public void OnBtnCanvasEnter(CodeComponent sender)
+        public async void OnBtnCanvasEnter(CodeComponent sender)
         {
             Debug.WriteLine("Canvas: Btn entered!" + Time.Frames);
-            var color = ShaderCodeBuilder.MakeShaderEffectFromMatComp(new MaterialComponent
+            var color = await ShaderCodeBuilder.MakeShaderEffectFromMatComp(new MaterialComponent
             {
                 Diffuse = new MatChannelContainer { Color = new float4(1, 0.4f, 0.1f,1) },
             });
@@ -267,10 +268,10 @@ namespace Fusee.Examples.UI.Core
                 .Effect = color;
         }
 
-        public void OnBtnCanvasExit(CodeComponent sender)
+        public async void OnBtnCanvasExit(CodeComponent sender)
         {
             Debug.WriteLine("Canvas: Exit Btn!");
-            var color = ShaderCodeBuilder.MakeShaderEffectFromMatComp(new MaterialComponent
+            var color = await ShaderCodeBuilder.MakeShaderEffectFromMatComp(new MaterialComponent
             {
                 Diffuse = new MatChannelContainer { Color = new float4(1, 0, 0,1) },
             });
@@ -311,7 +312,7 @@ namespace Fusee.Examples.UI.Core
         #endregion
 
         // Init is called on startup. 
-        public override void Init()
+        public override async Task<bool> Init()
         {
             _initWindowWidth = Width;
             _initWindowHeight = Height;
@@ -361,13 +362,15 @@ namespace Fusee.Examples.UI.Core
             _btnCat.OnMouseOver += OnMouseOverBtnCat;
 
             // Set the scene by creating a scene graph
-            _scene = CreateNineSliceScene();
+            _scene = await CreateNineSliceScene();
                         
             // Create the interaction handler
             _sih = new SceneInteractionHandler(_scene);
 
             // Wrap a SceneRenderer around the model.
             _sceneRenderer = new SceneRenderer(_scene);
+
+            return true;
         }
 
 

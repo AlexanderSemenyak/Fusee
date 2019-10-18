@@ -14,7 +14,7 @@ namespace Fusee.Engine.Imp.Graphics.WebAsm
         private int _height;
 
 
-        public RenderCanvasImp(JSObject canvas, /* TODO: remove rest of parameters */ WebGLRenderingContextBase gl, int width, int height)
+        public RenderCanvasImp(JSObject canvas, /* TODO: remove rest of parameters */ WebGL2RenderingContextBase gl, int width, int height)
         {
             _canvas = canvas;
 
@@ -53,7 +53,7 @@ namespace Fusee.Engine.Imp.Graphics.WebAsm
             // Nohting to do in WebGL
         }
 
-        public void Run()
+        public void Run()        
         {
             DoInit();
             DoResize(_width, _height);
@@ -66,7 +66,12 @@ namespace Fusee.Engine.Imp.Graphics.WebAsm
 
         public void SetWindowSize(int width, int height, int posx = -1, int posy = -1, bool borderHidden = false)
         {
-            throw new NotImplementedException();
+            _canvas.SetObjectProperty("width", _width);
+            _canvas.SetObjectProperty("height", _height);
+            _width = width;
+            _height = height;
+            Resize?.Invoke(this, new ResizeEventArgs(width, height));
+            
         }
 
         public void DoRender()

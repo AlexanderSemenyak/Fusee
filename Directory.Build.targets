@@ -14,11 +14,13 @@
     </BuildDependsOn>
   </PropertyGroup>
 
-  <PropertyGroup>
-    <!--LIBRARY-->
-    <AssetDestinationFolder Condition=" '$(OutputType)' == 'Library' ">$(OutputPath)$(AssemblyName).Assets\</AssetDestinationFolder>
+  <PropertyGroup>   
+    <!--LIBRARY W/O WASM-->
+    <AssetDestinationFolder Condition=" '$(OutputType)' == 'Library'">$(OutputPath)$(AssemblyName).Assets\</AssetDestinationFolder>
     <!--DESKTOP-->
     <AssetDestinationFolder Condition="  $(AssemblyName.Contains('Desktop')) And '$(OutputType)' != 'Library'">$(OutputPath)Assets\</AssetDestinationFolder>
+    <!--WASM-->
+    <AssetDestinationFolder Condition="  $(AssemblyName.Contains('WebAsm'))">$(OutputPath)Assets\</AssetDestinationFolder>
   </PropertyGroup>
 
   <Target Name="FuseeBeforeBuild">

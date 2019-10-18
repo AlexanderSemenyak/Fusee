@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Dynamic;
 using System.IO;
 using System.Linq;
@@ -93,15 +94,15 @@ namespace Fusee.Base.Core
         {
             foreach (var assetProvider in _providers)
             {
-                if (await assetProvider.CanGetAsync(id, typeof(T)))
+                if (await assetProvider.CanGetAsync(id, typeof(T)).ConfigureAwait(false))
                 {
-                    return (T)await assetProvider.GetAssetAsync(id, typeof(T));
+                    return (T)await assetProvider.GetAssetAsync(id, typeof(T)).ConfigureAwait(false);
                 }
             }
-            
+
             return default;
         }
-
+    
         /// <summary>
         /// Staticton implementation of <see cref="RegisterAssetProvider"/>.
         /// </summary>

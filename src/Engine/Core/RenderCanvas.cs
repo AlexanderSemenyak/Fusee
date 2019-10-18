@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Fusee.Base.Common;
 using Fusee.Engine.Common;
 
@@ -168,6 +169,8 @@ namespace Fusee.Engine.Core
             return -1;
         }
 
+        protected bool _appInitialized;
+
         /// <summary>
         ///     Inits the canvas for the rendering loop.
         /// </summary>
@@ -189,11 +192,13 @@ namespace Fusee.Engine.Core
             Network.Instance.NetworkImp = NetworkImplementor;
             VideoManager.Instance.VideoManagerImp = VideoManagerImplementor;
 
-            CanvasImplementor.Init += delegate { Init(); };
+            CanvasImplementor.Init += async delegate { await Init().ConfigureAwait(false); _appInitialized = true; };
             CanvasImplementor.UnLoad += delegate { DeInit(); };
 
             CanvasImplementor.Render += delegate
             {
+                if (!_appInitialized) return; // let init() finish!
+
                 // pre-rendering
                 Network.Instance.OnUpdateFrame();
                 Input.Instance.PreRender();
@@ -238,13 +243,14 @@ namespace Fusee.Engine.Core
         ///     Override this method in inherited classes of RenderCanvas to apply initialization code. Typically, an application
         ///     will call one-time initialization code on the render context (<see cref="RC" />) to set render states.
         /// </remarks>
-        public virtual void Init()
+        public virtual async Task<bool> Init()
         {
+            return false;
         }
 
         /// <summary>
-        ///     Used to release the ressources of all audio and network instances.
-        ///     All audio and network ressources get reset.
+        ///     Used to release the resources of all audio and network instances.
+        ///     All audio and network resources get reset.
         /// </summary>
         public virtual void DeInit()
         {

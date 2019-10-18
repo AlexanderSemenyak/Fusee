@@ -10,6 +10,7 @@ using Fusee.Xene;
 using static Fusee.Engine.Core.Input;
 using static Fusee.Engine.Core.Time;
 using Fusee.Engine.GUI;
+using System.Threading.Tasks;
 
 namespace Fusee.Examples.Simple.Core
 {
@@ -37,7 +38,7 @@ namespace Fusee.Examples.Simple.Core
         private bool _keys;
 
         // Init is called on startup. 
-        public override void Init()
+        public override async Task<bool> Init()
         {
             _gui = CreateGui();
             Resize(new ResizeEventArgs(Width, Height));
@@ -57,6 +58,8 @@ namespace Fusee.Examples.Simple.Core
             // Wrap a SceneRenderer around the model.
             _sceneRenderer = new SceneRenderer(_rocketScene);
             _guiRenderer = new SceneRenderer(_gui);
+
+            return true;
         }
 
 

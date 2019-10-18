@@ -9,12 +9,14 @@ namespace Fusee.Base.Imp.WebAsm
 {
     public abstract class WebAsmBase
     {
-        protected WebGLRenderingContextBase gl;
+        protected WebGL2RenderingContextBase gl;
         protected float4 clearColor;
         protected JSObject canvas;
         protected int canvasWidth;
         protected int canvasHeight;
     
+       
+
         public virtual bool EnableFullScreen => true;
 
         public virtual void Init(JSObject canvas, float4 clearColor)
@@ -32,6 +34,7 @@ namespace Fusee.Base.Imp.WebAsm
 
         public virtual void Run()
         {
+
         }
 
         public virtual void Update(double elapsedMilliseconds)

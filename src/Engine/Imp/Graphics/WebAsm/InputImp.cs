@@ -312,16 +312,15 @@ namespace Fusee.Engine.Imp.Graphics.WebAsm
             //    callbackClosure.OnCanvasMouseWheel.call(callbackClosure, event.wheelDelta);
             //};
         }
-
-        // [JSExternal]
+        
         private float GetWindowWidth()
         {
-            return (float)(int)_canvas.GetObjectProperty("width");
+                return (float)(int)_canvas.GetObjectProperty("width");
         }
-        // [JSExternal]
+
         private float GetWindowHeight()
         {
-            return (float)(int)_canvas.GetObjectProperty("height");
+                return (float)(int)_canvas.GetObjectProperty("height");
         }
         #endregion
 
