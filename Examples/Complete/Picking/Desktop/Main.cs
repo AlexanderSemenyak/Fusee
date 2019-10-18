@@ -38,7 +38,7 @@ namespace Fusee.Examples.Picking.Desktop
                 new AssetHandler
                 {
                     ReturnedType = typeof(Font),
-                    Decoder = delegate (string id, object storage)
+                    DecoderAsync = async (string id, object storage) =>
                     {
                         if (!Path.GetExtension(id).ToLower().Contains("ttf")) return null;
                         return new Font{ _fontImp = new FontImp((Stream)storage) };
@@ -49,7 +49,7 @@ namespace Fusee.Examples.Picking.Desktop
                 new AssetHandler
                 {
                     ReturnedType = typeof(SceneContainer),
-                    Decoder = delegate (string id, object storage)
+                    DecoderAsync = async (string id, object storage) =>
                     {
                         if (!Path.GetExtension(id).ToLower().Contains("fus")) return null;
                         var ser = new Serializer();

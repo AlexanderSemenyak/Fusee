@@ -36,8 +36,6 @@ namespace Fusee.Examples.Picking.Main
             IO.IOImp = new Fusee.Base.Imp.WebAsm.IOImp();
 
 
-        
-
             var fap = new Fusee.Base.Imp.WebAsm.AssetProvider();
             fap.RegisterTypeHandler(
                 new AssetHandler

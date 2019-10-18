@@ -192,7 +192,7 @@ namespace Fusee.Engine.Core
             Network.Instance.NetworkImp = NetworkImplementor;
             VideoManager.Instance.VideoManagerImp = VideoManagerImplementor;
 
-            CanvasImplementor.Init += async delegate { await Init().ConfigureAwait(false); _appInitialized = true; };
+            CanvasImplementor.Init += async delegate { await Init(); _appInitialized = true; };
             CanvasImplementor.UnLoad += delegate { DeInit(); };
 
             CanvasImplementor.Render += delegate
