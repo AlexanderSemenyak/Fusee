@@ -27,9 +27,9 @@ namespace Fusee.Base.Imp.WebAsm
             canvasWidth = (int)canvas.GetObjectProperty("width");
             canvasHeight = (int)canvas.GetObjectProperty("height");
 
-            var webglContextAttrib = new JSObject();
-            webglContextAttrib.SetObjectProperty("alpha", false);
-            gl = new Fusee.Engine.Imp.Graphics.WebAsm.WebGL2RenderingContext(canvas, webglContextAttrib);
+            //var webglContextAttrib = new JSObject();
+            //webglContextAttrib.SetObjectProperty("alpha", false);
+            gl = new Fusee.Engine.Imp.Graphics.WebAsm.WebGL2RenderingContext(canvas, new WebGLContextAttributes { Alpha = false });
         }
 
         public virtual void Run()

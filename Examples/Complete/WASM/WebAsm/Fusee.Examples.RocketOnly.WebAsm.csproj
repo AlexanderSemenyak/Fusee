@@ -1,106 +1,106 @@
 ﻿<Project Sdk="Mono.WebAssembly.Sdk">
-  <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-    <NoWarn>NU1701;NU1604</NoWarn>
-    <MonoWasmLinkMode>None</MonoWasmLinkMode>
-      <DefineConstants>PLATFORM_WASM</DefineConstants>
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <NoWarn>NU1701;NU1604</NoWarn>
+        <MonoWasmLinkMode>None</MonoWasmLinkMode>
+        <DefineConstants>PLATFORM_WASM</DefineConstants>
 
-      <StartupObject />
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-  </PropertyGroup>
+        <StartupObject />
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    </PropertyGroup>
 
-  <PropertyGroup>
-    <OutputPath>$(BaseOutputPath)\Examples\RocketOnly\WebAsm\</OutputPath>
-  </PropertyGroup>
+    <PropertyGroup>
+        <OutputPath>$(BaseOutputPath)\Examples\RocketOnly\WebAsm\</OutputPath>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <Reference Include="Fusee.SerializationSerializer">
-      <HintPath>$(FuseeEngineRoot)\bin\$(Configuration)\Libraries\Fusee.SerializationSerializer.dll</HintPath>
-    </Reference>
-    <Reference Include="protobuf-net">
-      <HintPath>$(FuseeEngineRoot)ext\protobuf\$(Configuration)\protobuf-net.dll</HintPath>
-    </Reference>
-    <Reference Include="Uno.SkiaSharp">
-      <HintPath>$(FuseeEngineRoot)\ext\Uno.SkiaSharp\SkiaSharp.Wasm.dll</HintPath>
-    </Reference>
+    <ItemGroup>
+        <Reference Include="Fusee.SerializationSerializer">
+            <HintPath>$(FuseeEngineRoot)\bin\$(Configuration)\Libraries\Fusee.SerializationSerializer.dll</HintPath>
+        </Reference>
+        <Reference Include="protobuf-net">
+            <HintPath>$(FuseeEngineRoot)ext\protobuf\$(Configuration)\protobuf-net.dll</HintPath>
+        </Reference>
+        <Reference Include="Uno.SkiaSharp">
+            <HintPath>$(FuseeEngineRoot)\ext\Uno.SkiaSharp\SkiaSharp.Wasm.dll</HintPath>
+        </Reference>
 
-    <ProjectReference Include="$(FuseeEngineRoot)src\Base\Common\Fusee.Base.Common.csproj" />
-    <ProjectReference Include="$(FuseeEngineRoot)src\Base\Core\Fusee.Base.Core.csproj" />
-    <ProjectReference Include="$(FuseeEngineRoot)src\Engine\Common\Fusee.Engine.Common.csproj" />
-    <ProjectReference Include="$(FuseeEngineRoot)src\Engine\Core\Fusee.Engine.Core.csproj" />
-    <ProjectReference Include="$(FuseeEngineRoot)src\Engine\Imp\Graphics\WebAsm\Fusee.Engine.Imp.Graphics.WebAsm.csproj" />
-    <ProjectReference Include="$(FuseeEngineRoot)src\Math\Core\Fusee.Math.Core.csproj" />    
-    <ProjectReference Include="$(FuseeEngineRoot)\src\Base\Imp\WebAsm\Fusee.Base.Imp.WebAsm.csproj" />
-    <ProjectReference Include="..\Core\Fusee.Examples.RocketOnly.Core.csproj" />
-  </ItemGroup>
+        <ProjectReference Include="$(FuseeEngineRoot)src\Base\Common\Fusee.Base.Common.csproj" />
+        <ProjectReference Include="$(FuseeEngineRoot)src\Base\Core\Fusee.Base.Core.csproj" />
+        <ProjectReference Include="$(FuseeEngineRoot)src\Engine\Common\Fusee.Engine.Common.csproj" />
+        <ProjectReference Include="$(FuseeEngineRoot)src\Engine\Core\Fusee.Engine.Core.csproj" />
+        <ProjectReference Include="$(FuseeEngineRoot)src\Engine\Imp\Graphics\WebAsm\Fusee.Engine.Imp.Graphics.WebAsm.csproj" />
+        <ProjectReference Include="$(FuseeEngineRoot)src\Math\Core\Fusee.Math.Core.csproj" />
+        <ProjectReference Include="$(FuseeEngineRoot)\src\Base\Imp\WebAsm\Fusee.Base.Imp.WebAsm.csproj" />
+        <ProjectReference Include="..\Core\Fusee.Examples.RocketOnly.Core.csproj" />
+    </ItemGroup>
 
-  <ItemGroup>
-    <None Include="$(FuseeEngineRoot)\ext\Uno.SkiaSharp\SkiaSharp.Wasm.dll" Link="Natives\SkiaSharp.Wasm.dll" />
-  </ItemGroup>
+    <ItemGroup>
+        <None Include="$(FuseeEngineRoot)\ext\Uno.SkiaSharp\SkiaSharp.Wasm.dll" Link="Natives\SkiaSharp.Wasm.dll" />
+    </ItemGroup>
 
 
-  <ItemGroup>
-   
-    <PackageReference Include="System.Drawing.Common" Version="4.6.0-preview8.19405.3" />
-   
-    <PackageReference Include="System.Memory" Version="4.5.3" />
+    <ItemGroup>
 
-    <PackageReference Include="WebAssembly.Bindings" Version="0.1.0-preview1" />
-    <PackageReference Include="WebAssembly.Net.Http" Version="0.1.0-preview1" />
-    <PackageReference Include="WebAssembly.Net.WebSockets" Version="0.1.0-preview1" />
-  </ItemGroup>
-  
-  <ItemGroup>
-    <None Remove="Assets\FuseeAnim.gif" />
-    <None Remove="Assets\FuseeSpinning.gif" />
-    <None Remove="Assets\LoremIpsum.txt" />
-    <None Remove="canvaskit.js" />
-    <None Remove="index.html" />
-    <None Remove="Scripts\mono_support.js" />
-    <None Remove="Scripts\SkiaSharp.js" />
+        <PackageReference Include="System.Drawing.Common" Version="4.6.0-preview8.19405.3" />
 
-    <None Remove="canvaskit.wasm" />
+        <PackageReference Include="System.Memory" Version="4.5.3" />
 
-    <Content Include="Assets\FuseeAnim.gif">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+        <PackageReference Include="WebAssembly.Bindings" Version="0.2.0" />
+        <PackageReference Include="WebAssembly.Net.Http" Version="0.2.0" />
+        <PackageReference Include="WebAssembly.Net.WebSockets" Version="0.2.0" />
+    </ItemGroup>
 
-    <Content Include="Assets\FuseeSpinning.gif">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="canvaskit.wasm">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    <ItemGroup>
+        <None Remove="Assets\FuseeAnim.gif" />
+        <None Remove="Assets\FuseeSpinning.gif" />
+        <None Remove="Assets\LoremIpsum.txt" />
+        <None Remove="canvaskit.js" />
+        <None Remove="index.html" />
+        <None Remove="Scripts\mono_support.js" />
+        <None Remove="Scripts\SkiaSharp.js" />
 
-    <!-- TODO move into Content for best practice -->
-  </ItemGroup>
+        <None Remove="canvaskit.wasm" />
 
-  <ItemGroup>
-    <None Remove="server.py" />
-    <_WasmItem Remove="Assets\Styles\browser.css" />
-    <_WasmItem Remove="Scripts\loading.js" />
-    <Content Include="server.py">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
+        <Content Include="Assets\FuseeAnim.gif">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
 
-  <ItemGroup>
-    <Content Update="Assets\knight.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Update="Scripts\mono_support.js">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Update="Scripts\SkiaSharp.js">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
+        <Content Include="Assets\FuseeSpinning.gif">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+        <Content Include="canvaskit.wasm">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Content>
 
-  <ItemGroup>
-    <None Update="Assets\Styles\browser.css">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
+        <!-- TODO move into Content for best practice -->
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Remove="server.py" />
+        <_WasmItem Remove="Assets\Styles\browser.css" />
+        <_WasmItem Remove="Scripts\loading.js" />
+        <Content Include="server.py">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Content>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Content Update="Assets\knight.png">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Content>
+        <Content Update="Scripts\mono_support.js">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+        <Content Update="Scripts\SkiaSharp.js">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Update="Assets\Styles\browser.css">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
 </Project>
