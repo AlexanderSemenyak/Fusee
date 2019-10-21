@@ -56,5 +56,8 @@
     <Reference Include="protobuf-net">
       <HintPath>$(FuseeEngineRoot)\ext\protobuf\$(Configuration)\protobuf-net.dll</HintPath>
     </Reference>
+      <Reference Include="SharpFont_mngd">
+          <HintPath>$(FuseeEngineRoot)\ext\SharpFont_mngd\Debug\SharpFont_mngd.dll</HintPath>
+      </Reference>
   </ItemGroup>
 </Project>

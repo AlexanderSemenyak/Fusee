@@ -56,7 +56,7 @@ namespace Fusee.Base.Imp.Desktop
             RegisterTypeHandler(new AssetHandler
             {
                 ReturnedType = typeof(ImageData),
-                Decoder = delegate (string id, object storage)
+                DecoderAsync = async (string id, object storage) =>
                 {
                     string ext = Path.GetExtension(id).ToLower();
                     switch (ext)
@@ -88,7 +88,7 @@ namespace Fusee.Base.Imp.Desktop
             RegisterTypeHandler(new AssetHandler
             {
                 ReturnedType = typeof(string),
-                Decoder = delegate (string id, object storage)
+                DecoderAsync = async (string id, object storage) =>
                 {
                     string ret;
                     using (var sr = new StreamReader((Stream)storage, System.Text.Encoding.Default, true))
@@ -162,12 +162,50 @@ namespace Fusee.Base.Imp.Desktop
 
         protected override Task<Stream> GetStreamAsync(string id)
         {
-            throw new NotImplementedException();
+            return Task<Stream>.Factory.StartNew(() => { 
+                if (id == null) throw new ArgumentNullException(nameof(id));
+
+                // If it is an absolute path (e.g. C:\SomeDir\AnAssetFile.ext) open it directly
+                if (Path.IsPathRooted(id))
+                    return new FileStream(id, FileMode.Open);
+
+                // Path seems relative. First see if the file exists at the current working directory
+                if (File.Exists(id))
+                    return new FileStream(id, FileMode.Open);
+
+                // At last, look at the specifie base directories
+                foreach (var baseDir in _baseDirs)
+                {
+                    string path = Path.Combine(baseDir, id);
+                    if (File.Exists(path))
+                        return new FileStream(path, FileMode.Open);
+                }
+                return null;
+            });
         }
 
         protected override Task<bool> CheckExistsAsync(string id)
         {
-            throw new NotImplementedException();
+            return Task.Factory.StartNew(() =>
+            {
+                if (id == null) throw new ArgumentNullException(nameof(id));
+
+                // If it is an absolute path (e.g. C:\SomeDir\AnAssetFile.ext) directly check its presence
+                if (Path.IsPathRooted(id))
+                    return File.Exists(id);
+
+                // Path seems relative. First see if the file exists at the current working directory
+                if (File.Exists(id))
+                    return true;
+
+                foreach (var baseDir in _baseDirs)
+                {
+                    string path = Path.Combine(baseDir, id);
+                    if (File.Exists(path))
+                        return true;
+                }
+                return false;
+            });
         }
     }
 }

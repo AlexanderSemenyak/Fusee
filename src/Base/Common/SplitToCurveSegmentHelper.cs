@@ -157,7 +157,6 @@ namespace Fusee.Base.Common
                 default:
                     throw new ArgumentOutOfRangeException();
             }
-
             return segment;
         }
 
@@ -224,6 +223,7 @@ namespace Fusee.Base.Common
                         i = i - 1;
                 }
             }
+            
             FixSegments(segments);
 
             part.CurveSegments = segments;

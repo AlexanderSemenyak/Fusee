@@ -1,9 +1,4 @@
-﻿#define GUI_SIMPLE
-
-// dynamic magic works @desktopbuild only! 
-#define WEBBUILD
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -15,9 +10,8 @@ using Fusee.Engine.GUI;
 using Fusee.Math.Core;
 using Fusee.Serialization;
 using Fusee.Xene;
-#if GUI_SIMPLE
-
-#endif
+using static Fusee.Engine.Core.Input;
+using static Fusee.Engine.Core.Time;
 
 namespace Fusee.Examples.Picking.Core
 {
@@ -42,8 +36,6 @@ namespace Fusee.Examples.Picking.Core
         private float _aspectRatio;
         private float _fovy = M.PiOver4;
 
-#if GUI_SIMPLE
-
         private SceneRenderer _guiRenderer;
         private SceneContainer _gui;
         private SceneInteractionHandler _sih;
@@ -55,7 +47,6 @@ namespace Fusee.Examples.Picking.Core
         private float _canvasWidth = 16;
         private float _canvasHeight = 9;
 
-#endif
         private PickResult _currentPick;
         private float4 _oldColor;
         private bool _pick;
@@ -80,23 +71,18 @@ namespace Fusee.Examples.Picking.Core
 
             // Create the robot model
             _scene = CreateScene();
-
-            // Wrap a SceneRenderer around the model.
-            _sceneRenderer = new SceneRenderer(_scene);
-            _scenePicker = new ScenePicker(_scene);
+            _gui = await CreateGui();
 
             var projComp = _scene.Children[0].GetComponent<ProjectionComponent>();
             AddResizeDelegate(delegate { projComp.Resize(Width, Height); });
-
-#if GUI_SIMPLE
-            _gui = await CreateGui();
-            // Create the interaction handler
-            _sih = new SceneInteractionHandler(_gui);
-            _guiRenderer = new SceneRenderer(_gui);
-#endif
-
             projComp.Resize(Width, Height);
             _gui.Children[0].GetComponent<ProjectionComponent>().Resize(Width, Height);
+
+            // Create the interaction handler
+            _sceneRenderer = new SceneRenderer(_scene);
+            _sih = new SceneInteractionHandler(_gui);
+            _guiRenderer = new SceneRenderer(_gui);
+            _scenePicker = new ScenePicker(_scene);
 
             return true;
         }
@@ -104,39 +90,38 @@ namespace Fusee.Examples.Picking.Core
         // RenderAFrame is called once a frame
         public override void RenderAFrame()
         {
-
             // Clear the backbuffer
             RC.Clear(ClearFlags.Color | ClearFlags.Depth);
 
             // Mouse and keyboard movement
-            if (Input.Keyboard.LeftRightAxis != 0 || Input.Keyboard.UpDownAxis != 0)
+            if (Keyboard.LeftRightAxis != 0 || Keyboard.UpDownAxis != 0)
             {
                 _keys = true;
             }
 
-            if (Input.Mouse.LeftButton)
+            if (Mouse.LeftButton)
             {
                 _pick = true;
-                _pickPos = Input.Mouse.Position;
+                _pickPos = Mouse.Position;
                 _keys = false;
-                _angleVelHorz = -RotationSpeed * Input.Mouse.XVel * Time.DeltaTime * 0.0005f;
-                _angleVelVert = -RotationSpeed * Input.Mouse.YVel * Time.DeltaTime * 0.0005f;
+                _angleVelHorz = -RotationSpeed * Mouse.XVel * DeltaTime * 0.0005f;
+                _angleVelVert = -RotationSpeed * Mouse.YVel * DeltaTime * 0.0005f;
             }
-            else if (Input.Touch.GetTouchActive(TouchPoints.Touchpoint_0))
+            else if (Touch.GetTouchActive(TouchPoints.Touchpoint_0))
             {
                 _pick = true;
-                _pickPos = Input.Touch.GetPosition(TouchPoints.Touchpoint_0);
-                var touchVel = Input.Touch.GetVelocity(TouchPoints.Touchpoint_0);
-                _angleVelHorz = -RotationSpeed * touchVel.x * Time.DeltaTime * 0.0005f;
-                _angleVelVert = -RotationSpeed * touchVel.y * Time.DeltaTime * 0.0005f;
+                _pickPos = Touch.GetPosition(TouchPoints.Touchpoint_0);
+                var touchVel = Touch.GetVelocity(TouchPoints.Touchpoint_0);
+                _angleVelHorz = -RotationSpeed * touchVel.x * DeltaTime * 0.0005f;
+                _angleVelVert = -RotationSpeed * touchVel.y * DeltaTime * 0.0005f;
             }
             else
             {
                 _pick = false;
                 if (_keys)
                 {
-                    _angleVelHorz = -RotationSpeed * Input.Keyboard.LeftRightAxis * Time.DeltaTime;
-                    _angleVelVert = -RotationSpeed * Input.Keyboard.UpDownAxis * Time.DeltaTime;
+                    _angleVelHorz = -RotationSpeed * Keyboard.LeftRightAxis * DeltaTime;
+                    _angleVelVert = -RotationSpeed * Keyboard.UpDownAxis * DeltaTime;
                 }
                 else
                 {
@@ -163,7 +148,7 @@ namespace Fusee.Examples.Picking.Core
 
                 PickResult newPick = _scenePicker.Pick(pickPosClip).ToList().OrderBy(pr => pr.ClipPos.z).FirstOrDefault();
 
-#if WEBBUILD
+
 
                 if (newPick?.Node != _currentPick?.Node)
                 {
@@ -181,47 +166,28 @@ namespace Fusee.Examples.Picking.Core
                     }
                     _currentPick = newPick;
                 }
-#else
-                if (newPick?.Node != _currentPick?.Node)
-                {
-                    dynamic shaderEffectComponent; // this needs to be dynamic! & reference Microsoft.CSharp.dll
 
-                    if (_currentPick != null)
-                    {
-                        shaderEffectComponent = _currentPick.Node.GetComponent<ShaderEffectComponent>().Effect;
-                        shaderEffectComponent.DiffuseColor = _oldColor;
-
-                    }
-                    if (newPick != null)
-                    {
-                        shaderEffectComponent = newPick.Node.GetComponent<ShaderEffectComponent>().Effect;
-                        _oldColor = (float4) shaderEffectComponent.DiffuseColor;
-                        shaderEffectComponent.DiffuseColor = ColorUint.Tofloat4(ColorUint.LawnGreen);
-                    }
-                    _currentPick = newPick;
-                }
-#endif
                 _pick = false;
             }
 
             RC.View = mtxCam * mtxRot;
             // Render the scene loaded in Init()
             _sceneRenderer.Render(RC);
-#if GUI_SIMPLE
+
 
             //Set the view matrix for the interaction handler.
             _sih.View = RC.View;
 
-            // Constantly check for interactive objects.
-            if (!Input.Mouse.Desc.Contains("Android"))
-                _sih.CheckForInteractiveObjects(Input.Mouse.Position, Width, Height);
+            //// Constantly check for interactive objects.
+            if (!Mouse.Desc.Contains("Android"))
+                _sih.CheckForInteractiveObjects(Mouse.Position, Width, Height);
 
-            if (Input.Touch.GetTouchActive(TouchPoints.Touchpoint_0) && !Input.Touch.TwoPoint)
-            {
-                _sih.CheckForInteractiveObjects(Input.Touch.GetPosition(TouchPoints.Touchpoint_0), Width, Height);
-            }
+            //if (Input.Touch.GetTouchActive(TouchPoints.Touchpoint_0) && !Input.Touch.TwoPoint)
+            //{
+            //    _sih.CheckForInteractiveObjects(Input.Touch.GetPosition(TouchPoints.Touchpoint_0), Width, Height);
+            //}
             _guiRenderer.Render(RC);          
-#endif           
+         
             // Swap buffers: Show the contents of the backbuffer (containing the currently rerndered farame) on the front buffer.
             Present();
         }
@@ -243,7 +209,6 @@ namespace Fusee.Examples.Picking.Core
             
         }
 
-#if GUI_SIMPLE
         private async Task<SceneContainer> CreateGui()
         {
             var vsTex = await AssetStorage.GetAsync<string>("texture.vert");
@@ -327,7 +292,7 @@ namespace Fusee.Examples.Picking.Core
         {
             OpenLink("http://fusee3d.org");
         }
-#endif
+
 
         private SceneContainer CreateScene()
         {

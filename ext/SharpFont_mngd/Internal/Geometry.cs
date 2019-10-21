@@ -52,7 +52,8 @@ namespace SharpFont_mngd {
     public enum PointType {
         OnCurve,
         Quadratic,
-        Cubic
+        Cubic,
+        Undefined // ? (mr) perhaps needed
     }
 
     public static class Geometry {

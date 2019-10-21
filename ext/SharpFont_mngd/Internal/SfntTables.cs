@@ -664,9 +664,10 @@ namespace SharpFont_mngd {
         public int MaxY;
     }
 
-    class SimpleGlyph : BaseGlyph {
+    public class SimpleGlyph : BaseGlyph {
         public Point[] Points;
         public int[] ContourEndpoints;
+        public float Advance;
     }
 
     struct Subglyph {
