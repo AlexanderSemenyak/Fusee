@@ -101,12 +101,20 @@ namespace Fusee.Base.Imp.Android
 
         protected override Task<Stream> GetStreamAsync(string id)
         {
-            throw new NotImplementedException();
+            if (id == null) throw new ArgumentNullException(nameof(id));
+
+            return Task.Factory.StartNew(() => _androidContext.Assets.Open(id));
         }
 
         protected override Task<bool> CheckExistsAsync(string id)
         {
-            throw new NotImplementedException();
+            if (id == null) throw new ArgumentNullException(nameof(id));
+
+            string dir = Path.GetDirectoryName(id);
+            string file = Path.GetFileName(id);
+
+            return Task.Factory.StartNew(() => _androidContext.Assets.List(dir).Contains(file));
+
         }
     }
 }

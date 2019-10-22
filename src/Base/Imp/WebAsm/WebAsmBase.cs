@@ -15,8 +15,6 @@ namespace Fusee.Base.Imp.WebAsm
         protected int canvasWidth;
         protected int canvasHeight;
     
-       
-
         public virtual bool EnableFullScreen => true;
 
         public virtual void Init(JSObject canvas, float4 clearColor)
@@ -29,12 +27,11 @@ namespace Fusee.Base.Imp.WebAsm
 
             //var webglContextAttrib = new JSObject();
             //webglContextAttrib.SetObjectProperty("alpha", false);
-            gl = new Fusee.Engine.Imp.Graphics.WebAsm.WebGL2RenderingContext(canvas, new WebGLContextAttributes { Alpha = false });
+            gl = new Fusee.Engine.Imp.Graphics.WebAsm.WebGL2RenderingContext(canvas, new WebGLContextAttributes {  Alpha = true, Antialias = true });
         }
 
         public virtual void Run()
         {
-
         }
 
         public virtual void Update(double elapsedMilliseconds)

@@ -69,8 +69,8 @@ namespace Fusee.Examples.ThreeDFont.Main
                         if (Path.GetExtension(id).IndexOf("fus", System.StringComparison.OrdinalIgnoreCase) >= 0)
                         {
                             var storageStream = (Stream)storage;
-                            var ser = new Serializer();
-                            return await Task.Factory.StartNew(() => new ConvertSceneGraph().Convert(ser.Deserialize(storageStream, null, typeof(SceneContainer)) as SceneContainer)).ConfigureAwait(false);
+                            return null;
+                            //return await Task.Factory.StartNew(() => new ConvertSceneGraph().Convert(ProtoBuf.Serializer.Deserialize<SceneContainer>((Stream)storageStream)));
                         }
                         return null;
                     },

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Net.Http;
 using System.Threading.Tasks;
 using Fusee.Base.Common;
 using Fusee.Base.Core;
@@ -160,9 +159,9 @@ namespace Fusee.Base.Imp.Desktop
             return false;
         }
 
-        protected override Task<Stream> GetStreamAsync(string id)
+        protected override async Task<Stream> GetStreamAsync(string id)
         {
-            return Task<Stream>.Factory.StartNew(() => { 
+            return await Task<Stream>.Factory.StartNew(() => { 
                 if (id == null) throw new ArgumentNullException(nameof(id));
 
                 // If it is an absolute path (e.g. C:\SomeDir\AnAssetFile.ext) open it directly
@@ -184,9 +183,9 @@ namespace Fusee.Base.Imp.Desktop
             });
         }
 
-        protected override Task<bool> CheckExistsAsync(string id)
+        protected override async Task<bool> CheckExistsAsync(string id)
         {
-            return Task.Factory.StartNew(() =>
+            return await Task.Factory.StartNew(() =>
             {
                 if (id == null) throw new ArgumentNullException(nameof(id));
 

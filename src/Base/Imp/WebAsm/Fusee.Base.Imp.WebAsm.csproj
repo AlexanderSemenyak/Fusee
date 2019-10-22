@@ -1,4 +1,5 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">  
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  
   <PropertyGroup>
     <RootNamespace>Fusee.Base.Imp.WebAsm</RootNamespace>
     <PackageId>Fusee.Base.Imp.WebAsm</PackageId>
@@ -24,22 +25,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Numerics.Vectors" Version="4.6.0-preview5.19224.8" />
     <PackageReference Include="WebAssembly.Bindings" Version="0.2.0" />
     <PackageReference Include="WebAssembly.Net.Http" Version="0.2.0" />
-    <PackageReference Include="WebAssembly.Net.WebSockets" Version="0.2.0" />  
-  </ItemGroup>
+    <PackageReference Include="WebAssembly.Net.WebSockets" Version="0.2.0" />
 
-
-  <ItemGroup>
-    <Reference Include="SkiaSharp.Wasm">
-      <HintPath>$(FuseeEngineRoot)\ext\Uno.SkiaSharp\SkiaSharp.Wasm.dll</HintPath>
-    </Reference>
       <Reference Include="SharpFont_mngd">
           <HintPath>$(FuseeEngineRoot)\ext\SharpFont_mngd\Debug\SharpFont_mngd.dll</HintPath>
       </Reference>
   </ItemGroup>
-
-
-  
 </Project>

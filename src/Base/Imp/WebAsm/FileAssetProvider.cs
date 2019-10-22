@@ -10,7 +10,7 @@ namespace Fusee.Base.Imp.WebAsm
     {
         public static async Task<string> LoadMe(string uri)
         {
-            var httpClient = new HttpClient { BaseAddress = new Uri(WasmResourceLoader.GetLocalAddress() + "/Assets/") };
+            var httpClient = new HttpClient { BaseAddress = new Uri(WasmResourceLoader.GetLocalAddress()) };
             try
             {
                 var response = await httpClient.GetAsync(uri);

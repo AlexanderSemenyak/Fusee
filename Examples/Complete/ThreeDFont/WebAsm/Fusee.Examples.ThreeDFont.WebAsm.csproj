@@ -1,10 +1,8 @@
 ﻿<Project Sdk="Mono.WebAssembly.Sdk">
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <NoWarn>NU1701;NU1604</NoWarn>
-    <MonoWasmLinkMode>None</MonoWasmLinkMode>
-      <DefineConstants>PLATFORM_WASM</DefineConstants>
-
+      <MonoWasmLinkMode>None</MonoWasmLinkMode>   
+      <DefineConstants>PLATFORM_WebAsm</DefineConstants>
       <StartupObject />
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -15,13 +13,7 @@
     <OutputPath>$(BaseOutputPath)\Examples\ThreeDFont\WebAsm\</OutputPath>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Reference Include="Fusee.SerializationSerializer">
-      <HintPath>$(FuseeEngineRoot)\bin\$(Configuration)\Libraries\Fusee.SerializationSerializer.dll</HintPath>
-    </Reference>
-    <Reference Include="protobuf-net">
-      <HintPath>$(FuseeEngineRoot)ext\protobuf\$(Configuration)\protobuf-net.dll</HintPath>
-    </Reference>
+  <ItemGroup>  
     <Reference Include="Uno.SkiaSharp">
       <HintPath>$(FuseeEngineRoot)\ext\Uno.SkiaSharp\SkiaSharp.Wasm.dll</HintPath>
     </Reference>
@@ -37,15 +29,16 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="$(FuseeEngineRoot)\ext\Uno.SkiaSharp\SkiaSharp.Wasm.dll" Link="Natives\SkiaSharp.Wasm.dll" />
+      <None Include="$(FuseeEngineRoot)\ext\Uno.SkiaSharp\SkiaSharp.Wasm.dll" Link="Natives\SkiaSharp.Wasm.dll" />
   </ItemGroup>
 
 
-  <ItemGroup>
-   
-    <PackageReference Include="System.Drawing.Common" Version="4.6.0-preview8.19405.3" />
-   
-    <PackageReference Include="System.Memory" Version="4.5.3" />
+  <ItemGroup>   
+
+      <Reference Include="SharpFont_mngd">
+          <HintPath>$(FuseeEngineRoot)\ext\SharpFont_mngd\Debug\SharpFont_mngd.dll</HintPath>
+      </Reference>
+
 
     <PackageReference Include="WebAssembly.Bindings" Version="0.2.0" />
     <PackageReference Include="WebAssembly.Net.Http" Version="0.2.0" />
@@ -86,10 +79,7 @@
     </Content>
   </ItemGroup>
 
-  <ItemGroup>
-    <Content Update="Assets\knight.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+  <ItemGroup> 
     <Content Update="Scripts\mono_support.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

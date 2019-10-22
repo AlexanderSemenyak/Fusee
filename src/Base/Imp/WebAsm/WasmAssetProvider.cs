@@ -46,7 +46,10 @@ namespace Fusee.Base.Imp.WebAsm
         /// <exception cref="System.ArgumentNullException"></exception>
         public AssetProvider(string baseDir = null) : base()
         {
-            _baseDir = WasmResourceLoader.GetLocalAddress() + "Assets/";
+            _baseDir = (string.IsNullOrEmpty(baseDir)) ? "Assets" : baseDir;
+
+            if (_baseDir[_baseDir.Length - 1] != '/')
+                _baseDir += '/';
 
             // Text file -> String handler. Keep this one the last entry as it doesn't check the extension
             RegisterTypeHandler(new AssetHandler
@@ -58,7 +61,7 @@ namespace Fusee.Base.Imp.WebAsm
                     using (var streamReader = new StreamReader(storageStream, Encoding.ASCII))
                     {
                         return await streamReader.ReadToEndAsync();
-                    }
+                    }                 
                 },
                 Checker = id => true // If it's there, we can handle it...
             });
@@ -67,7 +70,7 @@ namespace Fusee.Base.Imp.WebAsm
         }
 
         /// <summary>
-        /// Creates a stream for the asset identified by id using <see cref="HttpClient"/>
+        /// Creates a stream for the asset identified by id using <see cref="FileStream"/>
         /// </summary>
         /// <param name="id">The asset identifier.</param>
         /// <returns>
@@ -77,14 +80,14 @@ namespace Fusee.Base.Imp.WebAsm
         [Obsolete("Use GetStreamAsync instead")]
         protected override Stream GetStream(string id)
         {
-            var baseAddress = _baseDir;
+            var baseAddress = WasmResourceLoader.GetLocalAddress();
             var httpClient = new HttpClient { BaseAddress = new Uri(baseAddress) };
             var response = httpClient.GetAsync(id);
             return response.Result.Content.ReadAsStreamAsync().Result;
         }
 
         /// <summary>
-        /// Creates an async stream for the asset identified by id using <see cref="HttpClient"/>
+        /// Creates an async stream for the asset identified by id using <see cref="FileStream"/>
         /// </summary>
         /// <param name="id">The asset identifier.</param>
         /// <returns>
@@ -95,7 +98,7 @@ namespace Fusee.Base.Imp.WebAsm
         {
             Console.WriteLine("Trying to get stream async");
 
-            var baseAddress = _baseDir;
+            var baseAddress = WasmResourceLoader.GetLocalAddress();
             var httpClient = new HttpClient { BaseAddress = new Uri(baseAddress) };
 
 #if DEBUG
@@ -107,7 +110,7 @@ namespace Fusee.Base.Imp.WebAsm
                 response.EnsureSuccessStatusCode();
                 return await response.Content.ReadAsStreamAsync();
             }
-            catch (HttpRequestException exception)
+            catch (Exception exception)
             {
                 Console.WriteLine($"[Error] {nameof(WasmResourceLoader)}.{nameof(GetStreamAsync)}(): {exception}");
                 return null;
@@ -115,7 +118,7 @@ namespace Fusee.Base.Imp.WebAsm
         }
 
         /// <summary>
-        /// Checks the existence of the identified asset using <see cref="HttpClient"/>
+        /// Checks the existence of the identified asset using <see cref="File.Exists"/>
         /// </summary>
         /// <param name="id">The asset identifier.</param>
         /// <returns>
@@ -127,7 +130,7 @@ namespace Fusee.Base.Imp.WebAsm
         {
             if (id == null) throw new ArgumentNullException(nameof(id));
 
-            var baseAddress = _baseDir;
+            var baseAddress = WasmResourceLoader.GetLocalAddress();
             var httpClient = new HttpClient { BaseAddress = new Uri(baseAddress) };
 
             var response = httpClient.GetAsync(id);
@@ -138,7 +141,7 @@ namespace Fusee.Base.Imp.WebAsm
         {
             if (id == null) throw new ArgumentNullException(nameof(id));
 
-            var baseAddress = _baseDir;
+            var baseAddress = WasmResourceLoader.GetLocalAddress();
             var httpClient = new HttpClient { BaseAddress = new Uri(baseAddress) };
 
             var response = await httpClient.GetAsync(id);

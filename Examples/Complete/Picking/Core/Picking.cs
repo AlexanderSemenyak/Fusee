@@ -26,7 +26,7 @@ namespace Fusee.Examples.Picking.Core
         private const float Damping = 0.8f;
 
         private SceneContainer _scene;
-        private SceneRenderer _sceneRenderer;
+        private SceneRendererForward _sceneRenderer;
         private ScenePicker _scenePicker;
 
         private bool _keys;
@@ -36,7 +36,7 @@ namespace Fusee.Examples.Picking.Core
         private float _aspectRatio;
         private float _fovy = M.PiOver4;
 
-        private SceneRenderer _guiRenderer;
+        private SceneRendererForward _guiRenderer;
         private SceneContainer _gui;
         private SceneInteractionHandler _sih;
         private readonly CanvasRenderMode _canvasRenderMode = CanvasRenderMode.SCREEN;
@@ -79,9 +79,9 @@ namespace Fusee.Examples.Picking.Core
             _gui.Children[0].GetComponent<ProjectionComponent>().Resize(Width, Height);
 
             // Create the interaction handler
-            _sceneRenderer = new SceneRenderer(_scene);
+            _sceneRenderer = new SceneRendererForward(_scene);
             _sih = new SceneInteractionHandler(_gui);
-            _guiRenderer = new SceneRenderer(_gui);
+            _guiRenderer = new SceneRendererForward(_gui);
             _scenePicker = new ScenePicker(_scene);
 
             return true;
@@ -265,7 +265,11 @@ namespace Fusee.Examples.Picking.Core
 
             var canvasProjComp = new ProjectionComponent(ProjectionMethod.ORTHOGRAPHIC, ZNear, ZFar, _fovy);
             canvas.Components.Insert(0, canvasProjComp);
-            AddResizeDelegate(delegate { canvasProjComp.Resize(Width, Height); });
+            AddResizeDelegate(delegate
+            {
+                canvasProjComp.Resize(Width, Height);
+                RC.Viewport(0, 0, Width, Height);
+            });
 
 
             return new SceneContainer

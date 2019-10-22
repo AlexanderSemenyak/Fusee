@@ -8,7 +8,7 @@ using WebAssembly;
 namespace Fusee.Engine.Imp.Graphics.WebAsm
 {    public class RenderCanvasImp : IRenderCanvasImp
     {
-        internal WebGLRenderingContextBase _gl;
+        internal WebGL2RenderingContextBase _gl;
         internal JSObject _canvas;
         private int _width;
         private int _height;

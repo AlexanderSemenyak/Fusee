@@ -4,7 +4,6 @@
     <!-- Build into main FUSEE bin directory -->
     <FuseeBuildRoot>$(FuseeRoot)</FuseeBuildRoot>
     <!-- Build into local bin directory -->
-    <BaseOutputPath>$(FuseeBuildRoot)\bin\$(Configuration)</BaseOutputPath>   
     <!-- <FuseeBuildRoot>$(MSBuildThisFileDirectory)</FuseeBuildRoot> -->
     <BaseOutputPath>$(FuseeBuildRoot)\bin\$(Configuration)</BaseOutputPath>   
     <FuseeEngineRoot Condition=" '$(FuseeRoot)' != '' ">$(FuseeRoot)\</FuseeEngineRoot>

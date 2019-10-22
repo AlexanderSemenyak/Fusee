@@ -25,7 +25,7 @@ namespace Fusee.Examples.Bone.Core
         private const float Damping = 0.8f;
 
         private SceneContainer _scene;
-        private SceneRenderer _sceneRenderer;
+        private SceneRendererForward _sceneRenderer;
         private float4x4 _sceneCenter;
         private float4x4 _sceneScale;
         private float4x4 _projection;
@@ -240,11 +240,14 @@ namespace Fusee.Examples.Bone.Core
             }
 
             var projComp = _scene.Children[0].GetComponent<ProjectionComponent>();
-            AddResizeDelegate(delegate { projComp.Resize(Width, Height); });
+            AddResizeDelegate(delegate
+            {
+                projComp.Resize(Width, Height);
+                RC.Viewport(0, 0, Width, Height);
+            });
 
             // Wrap a SceneRenderer around the model.
-            _sceneRenderer = new SceneRenderer(_scene);
-
+            _sceneRenderer = new SceneRendererForward(_scene);
             return true;
         }
 
