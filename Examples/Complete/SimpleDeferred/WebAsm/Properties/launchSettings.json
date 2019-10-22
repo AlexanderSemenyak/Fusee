@@ -1,0 +1,18 @@
+{
+  "profiles": {
+    "WebLaunch": {
+      "commandName": "Executable",
+      "executablePath": "python.exe",
+      "commandLineArgs": "server.py",
+      "workingDirectory": "$(OutputPath)",
+      "launchBrowser": true,
+      "launchUrl": "http://localhost:8000/",
+      "nativeDebugging": false
+    },
+    "DebugBuildTargets": {
+      "commandName": "Executable",
+      "executablePath": "C:\\Windows\\Microsoft.NET\\Framework64\\v4.0.30319\\MSBuild.exe",
+      "commandLineArgs": "C:\\Users\\roetner\\_DEV\\Fusee\\Examples\\Complete\\ThreeDFont\\WebAsm"
+    }
+  }
+}

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Fusee.Base.Core;
 using Fusee.Engine.Common;
 using Fusee.Serialization;
 
@@ -68,6 +69,8 @@ namespace Fusee.Engine.Core
             // Configure newly created TextureHandle to reflect Texture's properties on GPU (allocate buffers)
             ITextureHandle textureHandle = _renderContextImp.CreateTexture(texture);
 
+            Fusee.Base.Core.Diagnostics.Log($"RegisterNewTexture {textureHandle}");
+
             // Setup handler to observe changes of the texture data and dispose event (deallocation)
             texture.TextureChanged += TextureChanged;
 
@@ -119,8 +122,12 @@ namespace Fusee.Engine.Core
 
         public ITextureHandle GetWritableTextureHandleFromTexture(WritableTexture texture)
         {
+            Diagnostics.Log($"GetWritableTextureHandleFromTexture =  {texture}");
+
+
             if (!_identifierToTextureHandleDictionary.TryGetValue(texture.SessionUniqueIdentifier, out var foundTextureHandle))
             {
+                Diagnostics.Log($"RegisterNewTexture =  {texture}");
                 return RegisterNewTexture(texture);
             }
             return foundTextureHandle;

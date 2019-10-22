@@ -311,6 +311,9 @@ namespace Fusee.Engine.Core
             float zNear;
             float zFar;
 
+            Diagnostics.Log("[in CreateShadowParams before switch]");
+
+
             switch (lr.Light.Type)
             {
                 case LightType.Parallel:
@@ -461,7 +464,7 @@ namespace Fusee.Engine.Core
         /// </summary>
         /// <param name="rc">The <see cref="RenderContext"/>.</param>        
         public void Render(RenderContext rc)
-        {  
+        {
             SetContext(rc);
             AccumulateLight();            
             _rc.EnableDepthClamp();
@@ -474,17 +477,49 @@ namespace Fusee.Engine.Core
 
             _rc.ClearColor = _texClearColor;
 
+
             //TODO: if platform != Desktop ignore point lights - because a geometry shader is used to create the (cube) shadow map in one pass.
             //Create shadow textures in GBuffer RenderTarget and one RenderTarget for each shadow map.
             _rc.Viewport(0, 0, (int)ShadowMapRes, (int)ShadowMapRes);
+
+            Diagnostics.Log("[after viewport]");
+
+
             _currentPass = DeferredPasses.SHADOW;
+
+            Diagnostics.Log($"[set _shadowEffect] {_shadowEffect}");
+
             _rc.SetShaderEffect(_shadowEffect);
+
+            Diagnostics.Log("[after set shadow]");
+
+            Diagnostics.Log("[light vis] ...");
+            Diagnostics.Log($"{LightViseratorResults.Count}");
+
             foreach (var lightVisRes in LightViseratorResults)
             {
-                if (!lightVisRes.Item2.Light.IsCastingShadows || !lightVisRes.Item2.Light.Active) continue;
+                Diagnostics.Log($"res : {lightVisRes}");
+                Diagnostics.Log($"res itm1 : {lightVisRes.Item1}");
+                Diagnostics.Log($"res itm2 : {lightVisRes.Item2}");
+                Diagnostics.Log($"res itm2 isCastingShadow : {lightVisRes.Item2.Light.IsCastingShadows}");
+                Diagnostics.Log($"res itm2 isactive?: {lightVisRes.Item2.Light.Active}");
+
+                if (!lightVisRes.Item2.Light.IsCastingShadows || !lightVisRes.Item2.Light.Active)
+                {
+                    Diagnostics.Log($"continue");
+                    continue;
+                }
+                Diagnostics.Log("[within loop before key]");
 
                 var key = new Tuple<SceneNodeContainer, LightComponent>(lightVisRes.Item1, lightVisRes.Item2.Light);
+
+                Diagnostics.Log($"[within loop after key {key}]");
+
+                Diagnostics.Log("[before CreateShadowParams]");
+
                 var shadowParams = CreateShadowParams(lightVisRes.Item2, ShadowMapRes, key);
+
+                Diagnostics.Log("[after CreateShadowParams]");
 
                 if (lightVisRes.Item2.Light.Type == LightType.Point)
                 {
@@ -501,21 +536,41 @@ namespace Fusee.Engine.Core
                 }
                 else
                 {
+                    Diagnostics.Log("[within set fx param light space]");
+
+
                     _shadowEffect.SetEffectParam("LightSpaceMatrix", shadowParams.LightSpaceMats[0]);
                     _shadowEffect.SetEffectParam("LightMatClipPlanes", _shadowRenderTargets[key].ClipPlanesForLightMat);
                     _shadowEffect.SetEffectParam("LightType", (int)lightVisRes.Item2.Light.Type);
 
+                    Diagnostics.Log("[after set fx param]");
+
                     rc.SetRenderTarget(shadowParams.ShadowMap);
                 }
+
+                Diagnostics.Log("[Before traverse]");
                 
                 Traverse(_sc.Children);
             }
 
+            Diagnostics.Log("[Gem pass #1]");
+
             //Pass 1: Geometry pass
             _rc.Viewport(0, 0, (int)_gBufferRenderTarget.TextureResolution, (int)_gBufferRenderTarget.TextureResolution);
+
+            Diagnostics.Log("[Gem pass #1] after viewport");
+
             _currentPass = DeferredPasses.GEOMETRY;
+
+            Diagnostics.Log("[Gem pass #1] set target");
+
             rc.SetRenderTarget(_gBufferRenderTarget);
+
+            Diagnostics.Log("[Gem pass #1] before traverse");
+
             Traverse(_sc.Children);
+
+            Diagnostics.Log("[SSOA pass #2]");
 
             //Pass 2: SSAO
             _currentPass = DeferredPasses.SSAO;
@@ -525,6 +580,7 @@ namespace Fusee.Engine.Core
             rc.SetRenderTarget(_ssaoRenderTexture);
             Traverse(_quadScene.Children);
 
+            Diagnostics.Log("[Blur pass #3]");
             //Pass 3: Blur SSAO Texture
             _currentPass = DeferredPasses.SSAO_BLUR;
             if (_blurEffect == null)
@@ -538,6 +594,7 @@ namespace Fusee.Engine.Core
 
             _currentPass = DeferredPasses.LIGHTING;
 
+            Diagnostics.Log("[pass #4 & 5]");
             //Pass 4 & 5: FXAA and Lighting
             if (!FxaaOn)
             {

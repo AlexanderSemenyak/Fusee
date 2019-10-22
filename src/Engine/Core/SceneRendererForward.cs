@@ -109,7 +109,7 @@ namespace Fusee.Engine.Core
                 };
             }
             // if there is no light in scene then add one (legacyMode)
-            _lightResults.Add(new Tuple<SceneNodeContainer, LightResult>(CurrentNode, new LightResult(_legacyLight)
+            _lightResults.Add(new Tuple<SceneNodeContainer, LightResult>((CurrentNode == null ? new SceneNodeContainer() : CurrentNode), new LightResult(_legacyLight)
             {
 
                 Rotation = float4x4.Identity,

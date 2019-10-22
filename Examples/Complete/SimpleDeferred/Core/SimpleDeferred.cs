@@ -56,19 +56,24 @@ namespace Fusee.Examples.SimpleDeferred.Core
         public override async Task<bool> Init()
         {
             _cameraPos = new float3(0, 20, -10);
-            _gui = CreateGui();
+            _gui = await CreateGui();
 
             // Create the interaction handler
             _sih = new SceneInteractionHandler(_gui);
 
             // Set the clear color for the backbuffer to white (100% intensity in all color channels R, G, B, A).
             RC.ClearColor = _backgroundColorDay = new float4(0.9f, 0.95f, 1, 1);
-            _backgroundColorNight = new float4(0, 0, 0.09f, 1);
+            //_backgroundColorNight = new float4(0, 0, 0.09f, 1);
+
+            Diagnostics.Log("Loading sponza");
 
             // Load the rocket model
-            //_rocketScene = AssetStorage.Get<SceneContainer>("sponza.fus");
-            _rocketScene = AssetStorage.Get<SceneContainer>("sponza_wo_textures.fus");
-            //_rocketScene = AssetStorage.Get<SceneContainer>("shadowTest.fus");            
+            //_rocketScene = await AssetStorage.GetAsync<SceneContainer>("sponza.fus");
+            //_rocketScene = await AssetStorage.GetAsync<SceneContainer>("sponza_wo_textures.fus");
+            //_rocketScene = AssetStorage.Get<SceneContainer>("shadowTest.fus");   
+            _rocketScene = await AssetStorage.GetAsync<SceneContainer>("FUSEERocket.fus");
+
+            Diagnostics.Log("Sponza loaded ...");
 
             //Add resize delegate
             var perspectiveProjComp = _rocketScene.Children[0].GetComponent<ProjectionComponent>();
@@ -86,7 +91,7 @@ namespace Fusee.Examples.SimpleDeferred.Core
             _sun = new LightComponent() { Type = LightType.Parallel, Color = new float4(0.99f, 0.9f, 0.8f, 1), Active = true, Strength = 1f, IsCastingShadows = true, Bias = 0.025f };
             var redLight = new LightComponent() { Type = LightType.Point, Color = new float4(1, 0, 0, 1), MaxDistance = 150, Active = true, IsCastingShadows = false, Bias = 0.015f };
             var blueLight = new LightComponent() { Type = LightType.Spot, Color = new float4(0, 0, 1, 1), MaxDistance = 1000, Active = true, OuterConeAngle = 25, InnerConeAngle = 5, IsCastingShadows = true, Bias = 0.000008f };
-            var greenLight = new LightComponent() { Type = LightType.Point, Color = new float4(0, 1, 0, 1), MaxDistance = 600, Active = true, IsCastingShadows = true, Bias = 8f };
+            var greenLight = new LightComponent() { Type = LightType.Point, Color = new float4(0, 1, 0, 1), MaxDistance = 600, Active = true, IsCastingShadows = false, Bias = 8f };
 
             _sunTransform = new TransformComponent() { Translation = new float3(0, 10, 0), Rotation = new float3(M.DegreesToRadians(90), 0, 0), Scale = new float3(500, 500, 500) };                        
 
@@ -189,6 +194,8 @@ namespace Fusee.Examples.SimpleDeferred.Core
             // Wrap a SceneRenderer around the GUI.
             _guiRenderer = new SceneRendererForward(_gui);
 
+            perspectiveProjComp.Resize(Width, Height);
+
             return true;
         }
 
@@ -196,6 +203,8 @@ namespace Fusee.Examples.SimpleDeferred.Core
         // RenderAFrame is called once a frame
         public override void RenderAFrame()
         {
+            Diagnostics.Log("~~ render");
+
             // Clear the backbuffer
             RC.Clear(ClearFlags.Color | ClearFlags.Depth);
 
@@ -320,10 +329,10 @@ namespace Fusee.Examples.SimpleDeferred.Core
             return viewMatrix;
         }
 
-        private SceneContainer CreateGui()
+        private async Task<SceneContainer> CreateGui()
         {
-            var vsTex = AssetStorage.Get<string>("texture.vert");
-            var psTex = AssetStorage.Get<string>("texture.frag");
+            var vsTex = await AssetStorage.GetAsync<string>("texture.vert");
+            var psTex = await AssetStorage.GetAsync<string>("texture.frag");
 
             var canvasWidth = Width / 100f;
             var canvasHeight = Height / 100f;
@@ -336,7 +345,7 @@ namespace Fusee.Examples.SimpleDeferred.Core
             btnFuseeLogo.OnMouseExit += BtnLogoExit;
             btnFuseeLogo.OnMouseDown += BtnLogoDown;
 
-            var guiFuseeLogo = new Texture(AssetStorage.Get<ImageData>("FuseeText.png"));
+            var guiFuseeLogo = new Texture(await AssetStorage.GetAsync<ImageData>("FuseeText.png"));
             var fuseeLogo = new TextureNodeContainer(
                 "fuseeLogo",
                 vsTex,
@@ -351,7 +360,7 @@ namespace Fusee.Examples.SimpleDeferred.Core
                 );
             fuseeLogo.AddComponent(btnFuseeLogo);
 
-            var fontLato = AssetStorage.Get<Font>("Lato-Black.ttf");
+            var fontLato = await AssetStorage.GetAsync<Font>("Lato-Black.ttf");
             var guiLatoBlack = new FontMap(fontLato, 18);
 
             var text = new TextNodeContainer(

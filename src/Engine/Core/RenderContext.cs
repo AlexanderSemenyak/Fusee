@@ -1537,18 +1537,27 @@ namespace Fusee.Engine.Core
         /// <param name="renderTarget">The render target.</param>
         public void SetRenderTarget(RenderTarget renderTarget = null)
         {
+            Diagnostics.Log("~~~~~~~~~~~~~~ Texhandles broken?");
             ITextureHandle[] texHandles = null;
             if (renderTarget != null)
             {
+                Diagnostics.Log("~~~~~~~~~~~~~~ Set Render target");
                 texHandles = new ITextureHandle[renderTarget.RenderTextures.Length];
 
                 for (int i = 0; i < renderTarget.RenderTextures.Length; i++)
                 {
+                    Diagnostics.Log($"~~~~~~~~~~~~~~ Set Render target {i}");
+
                     var tex = renderTarget.RenderTextures[i];
+                    Diagnostics.Log($"tex =  {tex}");
+
                     if (renderTarget.RenderTextures[i] == null) continue;
+                    Diagnostics.Log($"get writable tex =  {tex}");
                     texHandles[i] = _textureManager.GetWritableTextureHandleFromTexture((WritableTexture)tex);
                 }
             }
+            Diagnostics.Log($"~~~~~~~~~~~~~~ Set Render target before imp!");
+            Diagnostics.Log($"{renderTarget}, {texHandles}");
 
             _rci.SetRenderTarget(renderTarget, texHandles);
         }

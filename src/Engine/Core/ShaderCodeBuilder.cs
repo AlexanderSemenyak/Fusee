@@ -2469,6 +2469,7 @@ namespace Fusee.Engine.Core
                 },
                 effectParameters
             );
+
             return ret;
         }
 

@@ -98,7 +98,7 @@ namespace Fusee.Base.Imp.WebAsm
         {
             Console.WriteLine("Trying to get stream async");
 
-            var baseAddress = WasmResourceLoader.GetLocalAddress();
+            var baseAddress = WasmResourceLoader.GetLocalAddress() + "Assets/";
             var httpClient = new HttpClient { BaseAddress = new Uri(baseAddress) };
 
 #if DEBUG
@@ -141,7 +141,7 @@ namespace Fusee.Base.Imp.WebAsm
         {
             if (id == null) throw new ArgumentNullException(nameof(id));
 
-            var baseAddress = WasmResourceLoader.GetLocalAddress();
+            var baseAddress = WasmResourceLoader.GetLocalAddress() + "Assets/";
             var httpClient = new HttpClient { BaseAddress = new Uri(baseAddress) };
 
             var response = await httpClient.GetAsync(id);
