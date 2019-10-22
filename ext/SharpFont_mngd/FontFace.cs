@@ -330,6 +330,7 @@ namespace SharpFont_mngd
             var transform = Matrix3x2.CreateScale(scale);
 
             var currentGlyphAsSimple = glyphs[glyphIndex] as SimpleGlyph;
+            if (currentGlyphAsSimple == null) return null;
 
             Geometry.ComposeGlyphs(glyphIndex, 0, ref transform, points, contours, glyphs);
 
