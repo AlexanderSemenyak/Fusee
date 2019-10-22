@@ -2429,7 +2429,7 @@ namespace Fusee.Engine.Core
         /// <param name="numberOfLights">The number of lights in the scene. Needs to be predefined because it's a #define parameter in the shader code, used for looping through the lights.</param>
         /// <returns></returns> 
         /// <exception cref="Exception"></exception> 
-        public static async Task<ShaderEffect> MakeShaderEffectFromMatComp(MaterialComponent mc, WeightComponent wc = null)
+        public static async Task<ShaderEffect> MakeShaderEffectFromMatComp(MaterialComponent mc, WeightComponent wc = null, int numberOfLights = 1)
         {
             ShaderCodeBuilder scb = null;
 
@@ -2447,7 +2447,7 @@ namespace Fusee.Engine.Core
                 scb = new ShaderCodeBuilder(mc, null, numberOfLights, wc); // TODO, CurrentNode.GetWeights() != null); 
             }
 
-            var effectParameters = AssembleEffectParamers(mc, numberOfLights);
+            var effectParameters = await AssembleEffectParamers(mc, numberOfLights);
 
             if (scb == null) throw new Exception("Material could not be evaluated or be built!");
             var ret = new ShaderEffect(new[]
@@ -2467,12 +2467,12 @@ namespace Fusee.Engine.Core
                         }
                     }
                 },
-                await effectParameters
+                effectParameters
             );
             return ret;
         }
 
-        private static async Task<IEnumerable<EffectParameterDeclaration>> AssembleEffectParamers(MaterialComponent mc)
+        private static async Task<IEnumerable<EffectParameterDeclaration>> AssembleEffectParamers(MaterialComponent mc, int numberOfLights)
         {
             var effectParameters = new List<EffectParameterDeclaration>();
 
@@ -2493,7 +2493,7 @@ namespace Fusee.Engine.Core
                     effectParameters.Add(new EffectParameterDeclaration
                     {
                         Name = DiffuseTextureName,
-                        Value = await LoadTexture("Assets/" + mc.Diffuse.Texture)
+                        Value = await LoadTexture(mc.Diffuse.Texture)
                     });
                 }
             }
@@ -2525,7 +2525,7 @@ namespace Fusee.Engine.Core
                     effectParameters.Add(new EffectParameterDeclaration
                     {
                         Name = SpecularTextureName,
-                        Value = await LoadTexture("Assets/" + mc.Specular.Texture)
+                        Value = await LoadTexture(mc.Specular.Texture)
                     });
                 }
             }
@@ -2547,7 +2547,7 @@ namespace Fusee.Engine.Core
                     effectParameters.Add(new EffectParameterDeclaration
                     {
                         Name = EmissiveTextureName,
-                        Value = await LoadTexture("Assets/" + mc.Emissive.Texture)
+                        Value = await LoadTexture(mc.Emissive.Texture)
                     });
                 }
             }
@@ -2562,7 +2562,7 @@ namespace Fusee.Engine.Core
                 effectParameters.Add(new EffectParameterDeclaration
                 {
                     Name = BumpTextureName,
-                    Value = LoadTexture("Assets/" + mc.Bump.Texture)
+                    Value = await LoadTexture(mc.Bump.Texture)
                 });
             }
 
