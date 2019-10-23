@@ -24,7 +24,8 @@
     <ProjectReference Include="$(FuseeEngineRoot)src\Engine\Core\Fusee.Engine.Core.csproj" />
     <ProjectReference Include="$(FuseeEngineRoot)src\Engine\Imp\Graphics\WebAsm\Fusee.Engine.Imp.Graphics.WebAsm.csproj" />
     <ProjectReference Include="$(FuseeEngineRoot)src\Math\Core\Fusee.Math.Core.csproj" />    
-    <ProjectReference Include="$(FuseeEngineRoot)\src\Base\Imp\WebAsm\Fusee.Base.Imp.WebAsm.csproj" />
+    <ProjectReference Include="$(FuseeEngineRoot)\src\Base\Imp\WebAsm\Fusee.Base.Imp.WebAsm.csproj" />    
+    <ProjectReference Include="..\..\..\..\src\Serialization\Fusee.Serialization.csproj" />
     <ProjectReference Include="..\Core\Fusee.Examples.ThreeDFont.Core.csproj" />
   </ItemGroup>
 
@@ -35,14 +36,21 @@
 
   <ItemGroup>   
 
-      <Reference Include="SharpFont_mngd">
-          <HintPath>$(FuseeEngineRoot)\ext\SharpFont_mngd\Debug\SharpFont_mngd.dll</HintPath>
-      </Reference>   
 
-      <PackageReference Include="protobuf-portable-net" Version="2.0.0.668" />
+      <PackageReference Include="protobuf-net.Core" Version="3.0.0-alpha.105" />
+      <Reference Include="protobuf-net">
+          <HintPath>$(FuseeEngineRoot)\ext\protobuf\protobuf-net.dll</HintPath>
+
+      </Reference>
+
+      <Reference Include="protobuf-net.Core">
+          <HintPath>$(FuseeEngineRoot)\ext\protobuf\protobuf-net.Core.dll</HintPath>
+
+      </Reference>
 
 
-    <PackageReference Include="WebAssembly.Bindings" Version="0.2.0" />
+
+      <PackageReference Include="WebAssembly.Bindings" Version="0.2.0" />
     <PackageReference Include="WebAssembly.Net.Http" Version="0.2.0" />
     <PackageReference Include="WebAssembly.Net.WebSockets" Version="0.2.0" />
   </ItemGroup>

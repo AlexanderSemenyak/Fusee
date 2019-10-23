@@ -13,8 +13,12 @@
     <DocumentationFile>$(OutputPath)\$(RootNamespace).xml</DocumentationFile>
   </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="protobuf-portable-net" Version="2.0.0.668" />
+    <ItemGroup>
+        <PackageReference Include="protobuf-net.Core" Version="3.0.0-alpha.103" />
+    </ItemGroup>
+
+
+    <ItemGroup>
     <PackageReference Include="System.Memory" Version="4.5.3" />
   </ItemGroup>
 </Project>

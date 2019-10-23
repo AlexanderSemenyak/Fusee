@@ -7,8 +7,11 @@ using Fusee.Serialization;
 using Fusee.Xene;
 using SkiaSharp;
 using System;
+using System.ComponentModel;
 using System.IO;
+using System.Runtime.InteropServices.ComTypes;
 using System.Threading.Tasks;
+using System.Reflection.Emit;
 using Path = Fusee.Base.Common.Path;
 
 
@@ -69,8 +72,12 @@ namespace Fusee.Examples.ThreeDFont.Main
                         if (Path.GetExtension(id).IndexOf("fus", System.StringComparison.OrdinalIgnoreCase) >= 0)
                         {
                             var storageStream = (Stream)storage;
-                            return null;
-                            //return await Task.Factory.StartNew(() => new ConvertSceneGraph().Convert(ProtoBuf.Serializer.Deserialize<SceneContainer>((Stream)storageStream)));
+                            return await Task.Factory.StartNew(() =>
+                            {                                
+                                var scene = ProtoBuf.Serializer.Deserialize(new SceneContainer().GetType(), storageStream) as SceneContainer;
+                                return new ConvertSceneGraph().Convert(scene);
+                            });
+
                         }
                         return null;
                     },

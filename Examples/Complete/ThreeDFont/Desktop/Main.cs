@@ -7,9 +7,17 @@ using Fusee.Serialization;
 using FileMode = Fusee.Base.Common.FileMode;
 using Path = Fusee.Base.Common.Path;
 using System.Reflection;
+using System.Threading.Tasks;
+using System.ComponentModel;
+using ProtoBuf.Serializers;
+using ProtoBuf;
+using ProtoBuf.Meta;
+using System.Reflection.Emit;
+using System;
 
 namespace Fusee.Examples.ThreeDFont.Desktop
 {
+  
     public class ThreeDFont
     {
         public static void Main()
@@ -35,8 +43,15 @@ namespace Fusee.Examples.ThreeDFont.Desktop
                     ReturnedType = typeof(SceneContainer),
                     DecoderAsync = async (string id, object storage) =>
                     {
-                        if (!Path.GetExtension(id).ToLower().Contains("fus")) return null;
-                        return new ConvertSceneGraph().Convert(ProtoBuf.Serializer.Deserialize<SceneContainer>((Stream)storage));
+                        return await Task.Factory.StartNew(() =>
+                        {
+                            var scene = ProtoBuf.Serializer.Deserialize<SceneContainer>((Stream)storage);
+                            return new ConvertSceneGraph().Convert(
+                                scene
+                            );
+                        });
+
+
                     },
                     Checker = id => Path.GetExtension(id).ToLower().Contains("fus")
                 });

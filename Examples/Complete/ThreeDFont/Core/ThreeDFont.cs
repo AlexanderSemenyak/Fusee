@@ -30,6 +30,10 @@ namespace Fusee.Examples.ThreeDFont.Core
         // Init is called on startup. 
         public override async Task<bool> Init()
         {
+            var scene = await AssetStorage.GetAsync<SceneContainer>("FUSEERocket.fus");
+
+            Diagnostics.Log($"Found scene {scene.Children[0]}");
+
             var fontLato = await AssetStorage.GetAsync<Font>("Lato-Black.ttf");
             var vladimir = await AssetStorage.GetAsync<Font>("VLADIMIR.ttf");
             var gnuSerif = await AssetStorage.GetAsync<Font>("GNU-FreeSerif.ttf");
