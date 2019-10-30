@@ -31,7 +31,7 @@ class VertexWeight:
         self.Weight = weight
 
 # returns a serialized object, that can be saved to a file
-def SerializeData(objects, isWeb, isOnlySelected, smoothing, lamps, smoothingDist, smoothingAngle):
+def SerializeData(objects, export_props):
     # init sceneContainer
     sceneContainer = Scene.SceneContainer()
     # write sceneHeader
@@ -47,12 +47,9 @@ def SerializeData(objects, isWeb, isOnlySelected, smoothing, lamps, smoothingDis
     # differentiate between the following 2 situations:
     # serialize only selected objects
     textures = []
-    if isOnlySelected == True:
+    if export_props["isOnlySelected"] == True:
         for obj in objects:
-            root = GetNode(objects=obj, isWeb=isWeb,
-                           isOnlySelected=isOnlySelected, smoothing=smoothing,
-                           lamps=lamps, smoothingDist=smoothingDist,
-                           smoothingAngle=smoothingAngle)
+            root = GetNode(obj, export_props)
             sceneChildren = sceneContainer.Children.add()
             sceneChildren.payload = root.obj.SerializePartialToString()
             textures = textures + root.tex
@@ -60,10 +57,7 @@ def SerializeData(objects, isWeb, isOnlySelected, smoothing, lamps, smoothingDis
     # serialize all top-level objects and their hierarchy
     else:
         for obj in objects:
-            root = GetNode(objects=obj, isWeb=isWeb,
-                           isOnlySelected=isOnlySelected, smoothing=smoothing,
-                           lamps=lamps, smoothingDist=smoothingDist,
-                           smoothingAngle=smoothingAngle)
+            root = GetNode(obj, export_props)
             sceneChildren = sceneContainer.Children.add()
             sceneChildren.payload = root.obj.SerializePartialToString()
             textures = textures + root.tex
@@ -104,9 +98,9 @@ def add_vertex(vi, face, i, mesh, uv_layer):
 
 
 
-def GetNode(objects, isWeb, isOnlySelected, smoothing, lamps, smoothingDist, smoothingAngle):
+def GetNode(objects, export_props):
     obj = objects
-    if obj.type == 'LAMP' and lamps:
+    if obj.type == 'LAMP' and export_props["isLamps"]:
         serializedData = namedtuple('serializedData', ['obj', 'tex'])
         obj = bpy.data.lamps[obj.data.name]
 
@@ -167,19 +161,7 @@ def GetNode(objects, isWeb, isOnlySelected, smoothing, lamps, smoothingDist, smo
 
         # set current object as the active one
         bpy.context.view_layer.objects.active = obj
-        '''
-        #set to edit mode, in order to make all needed modifications
-        bpy.ops.object.mode_set(mode='EDIT')
-        #select mesh
-        bpy.ops.mesh.select_all(action='SELECT')
-        #triangulate mesh (doesn't matter if mesh is already triangulated)
-        bpy.ops.mesh.quads_convert_to_tris()
-        #set back to Object mode
-        bpy.ops.object.mode_set(mode="OBJECT")
-        #Apply Transforms
-        #bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
-        '''
-
+ 
         # TRANSFORM COMPONENT
         # Neutralize the blender-specific awkward parent inverse as it is not supported by FUSEE's scenegraph
         if obj.parent is None:
@@ -202,10 +184,14 @@ def GetNode(objects, isWeb, isOnlySelected, smoothing, lamps, smoothingDist, smo
         transformComponent.Rotation.z = -rot_eul.y
 
         # scale
-        # TODO: Check if it's better to apply scale to geometry (maybe based on a user preference)
-        transformComponent.Scale.x = scale.x
-        transformComponent.Scale.y = scale.z
-        transformComponent.Scale.z = scale.y
+        if export_props["doApplyScale"]:
+            transformComponent.Scale.x = 1.0
+            transformComponent.Scale.y = 1.0
+            transformComponent.Scale.z = 1.0
+        else:
+            transformComponent.Scale.x = scale.x
+            transformComponent.Scale.y = scale.z
+            transformComponent.Scale.z = scale.y
 
         '''
         #set current object as the active one
@@ -219,7 +205,7 @@ def GetNode(objects, isWeb, isOnlySelected, smoothing, lamps, smoothingDist, smo
         # convert the mesh again to a bmesh, after splitting the edges
         bm = bmesh.new()
         # bm.from_mesh(bpy.context.scene.objects.active.data)      
-        damesh = prepare_mesh(bpy.context.active_object)
+        damesh = prepare_mesh(bpy.context.active_object, export_props)
         bm.from_mesh(damesh)
 
         # <CM's Checks>
@@ -252,138 +238,6 @@ def GetNode(objects, isWeb, isOnlySelected, smoothing, lamps, smoothingDist, smo
 
         # </CM's Checks
 
-        # <Export for completely smooth shaded models.>
-        # Does NOT export redundant vertices. Not in use because a mesh can have both, smooth and flat shaded faces.
-        # Therefore the optimal solution would be mixture of both, the above and the following method to support the export of meshes with the minimal number of vertices.
-
-        '''
-        class AddVert:
-            pass
-        
-        mesh = rootmesh.Mesh
-        bm.from_mesh(damesh)
-        uv_lay = bm.loops.layers.uv.active       
-
-        vertList = list()
-
-        for i, vert in enumerate(bm.verts):
-            addVert = AddVert()
-            addVert.thisVert = vert
-            addVert.wasAdded = False
-            vertList.append(addVert)            
-
-        vertices = [None]*len(bm.verts)
-        normals = [None]*len(bm.verts)
-        uvs = [None]*len(bm.verts)
-
-        for face in bm.faces:
-                
-            for loop in face.loops:
-        
-                vertIndex = loop.vert.index                       
-        
-                mesh.Triangles.append(vertIndex)               
-
-                value = vertList[vertIndex]
-        
-                if uv_lay is not None:
-                    uv = loop[uv_lay].uv
-            
-                if(value.wasAdded == False):
-
-                    vertices[vertIndex] = value.thisVert.co 
-
-                    normals[vertIndex] = loop.vert.normal                                    
-                
-                    if uv_lay is not None:
-                        uvs[vertIndex] = uv           
-            
-                    value.wasAdded = True
-                    vertList[vertIndex] = value 
-
-        # fill output mesh
-        for i, vert in enumerate(vertices):            
-            outVert = mesh.Vertices.add()                    
-            outVert.x = vert.x
-            outVert.y = vert.z
-            outVert.z = vert.y
-    
-            outNormal = mesh.Normals.add()            
-            outNormal.x = normals[i].x
-            outNormal.y = normals[i].z
-            outNormal.z = normals[i].y           
-    
-            if len(uvs) != 0:
-                outUv = mesh.UVs.add()
-                outUv.x = uvs[i].x
-                outUv.y = uvs[i].y
- 
-        '''
-        # </Export for completely smooth shaded models>
-
-        '''
-        #count faces
-        faces = []
-        for face in bm.faces:
-            faces.append(face.index)
-        faceCount = len(faces)
-
-        #get vertex-indices, -normals and -coordinates per face
-        vertFCoList =[None]*(faceCount*3)
-        vertIndexList = []
-        vertFNormList = [None]*(faceCount*3)
-        for face in bm.faces:
-            for vert in face.verts:
-                #continous list of vertex indices, corresponding to the faces
-                vertIndex = vert.index
-                vertIndexList.append(vertIndex)
-                #list of vertex coordinates 
-                vertFCoList[vertIndex] = vert.co
-                #list of vertex normals
-                vertFNormList[vertIndex] = vert.normal
-
-
-        #copy normals, to have a list with the same structure as the original one
-        vertNormList = copy.copy(vertFNormList)
-
-        #write data to protobuf structure              
-        mesh = rootmesh.Mesh
-        for vert in range(0,len(vertIndexList)):
-            vertexIndex = vertIndexList[vert]
-            vertexCo = vertFCoList[vert]
-            vertexNormal = vertNormList[vert]
-            rootVert = mesh.Vertices.add()
-            #VERTICES
-            #the coordinate system of Blender is different to that one used by Fusee,
-            #therefore the axis need to be changed:
-            rootVert.x = vertexCo.x
-            rootVert.y = vertexCo.z
-            rootVert.z = vertexCo.y
-            mesh.Triangles.append(vertexIndex)
-            normal = mesh.Normals.add()
-            #NORMALS
-            #the coordinate system of Blender is different to that one used by Fusee,
-            #therefore the axis need to be changed:
-            normal.x = vertexNormal.x
-            normal.y = vertexNormal.z
-            normal.z = vertexNormal.y
-
-        #get UVs and write the to protobuf structure
-        uvActive = data.uv_layers.active
-        if uvActive is not None:
-            #BMESH
-            uvList = [None]*(len(vertIndexList))
-            uv_layer = bm.loops.layers.uv.active
-            for face in bm.faces:
-                for loop in face.loops:
-                    index = loop.vert.index
-                    uv = loop[uv_layer].uv
-                    uvList[index] = uv     
-            for uvs in uvList:
-                uv = mesh.UVs.add()
-                uv.x = uvs.x
-                uv.y = uvs.y    
-        '''
 
         # BoundingBox
         bbox = obj.bound_box
@@ -395,7 +249,7 @@ def GetNode(objects, isWeb, isOnlySelected, smoothing, lamps, smoothingDist, smo
         bboxMin = min(bboxList)
         bboxMax = max(bboxList)
         # the coordinate system of Blender is different to that one used by Fusee,
-        # therefore the axis need to be changed:
+        # therefore the axie need to be changed:
         mesh.BoundingBox.max.x = bboxMax[0]
         mesh.BoundingBox.max.y = bboxMax[2]
         mesh.BoundingBox.max.z = bboxMax[1]
@@ -408,18 +262,18 @@ def GetNode(objects, isWeb, isOnlySelected, smoothing, lamps, smoothingDist, smo
         # also check if the material uses nodes -> cycles rendering, otherwise use default material
         textures = []
         rootMaterialComponent = None
-        rootMaterialComponent, textures = GetMaterial(obj, isWeb)       
+        rootMaterialComponent, textures = GetMaterial(obj, export_props["isWeb"])
 
         rootComponent1.payload = rootTransformComponent.SerializePartialToString()
         rootComponent2.payload = rootMaterialComponent.SerializePartialToString()
         rootComponent3.payload = rootmesh.SerializePartialToString()
 
 
-        # if obj has got children, find them recursively,
+        # if obj has children, find them recursively,
         # serialize them and write them to root as children
         # save textures
         # return root node
-        if len(obj.children) == 0 or isOnlySelected == True:
+        if len(obj.children) == 0 or export_props["isOnlySelected"] == True:
             # write output
             serializedData.obj = root
             serializedData.tex = textures
@@ -427,10 +281,7 @@ def GetNode(objects, isWeb, isOnlySelected, smoothing, lamps, smoothingDist, smo
         else:
             # Hierarchy 2 (children of root)
             for children in obj.children:
-                child = GetNode(objects=children, isWeb=isWeb,
-                                isOnlySelected=False, smoothing=smoothing,
-                                lamps=lamps, smoothingDist=smoothingDist,
-                                smoothingAngle=smoothingAngle)
+                child = GetNode(children, export_props)
                 rootChildren = root.Children.add()
                 rootChildren.payload = child.obj.SerializePartialToString()
                 textures = textures + child.tex
@@ -439,7 +290,7 @@ def GetNode(objects, isWeb, isOnlySelected, smoothing, lamps, smoothingDist, smo
             return serializedData
 
     elif obj.type == 'ARMATURE':
-         return GetArmaturePayload(objects, isWeb, isOnlySelected, smoothing, lamps, smoothingDist, smoothingAngle)
+         return GetArmaturePayload(objects, export_props)
 
 # BONES structure not yet valid. One needs to be the parent of the other!
 def create_bone_payload(boneNode, obj, bone):
@@ -500,12 +351,13 @@ def PrintVertList(bla):
             for j in range(0, len(bla[i])):
                 print("VertexIdx: " + str(i) + " Joint idx: " + str(bla[i][j].JointIndex) + " and a weight of: " + str(bla[i][j].Weight))
 
-def GetArmaturePayload(objects, isWeb, isOnlySelected, smoothing, lamps, smoothingDist, smoothingAngle):
+def GetArmaturePayload(objects, export_props):
         serializedData = namedtuple('serializedData', ['obj', 'tex'])
 
         print('-- found BoneAnimation')
         obj = objects
         data = obj.data
+        armatureName = obj.name
 
         root = Scene.SceneNodeContainer()
 
@@ -530,7 +382,9 @@ def GetArmaturePayload(objects, isWeb, isOnlySelected, smoothing, lamps, smoothi
         rootComponent3 = rootChildrenMesh.Components.add() # material
         rootComponent4 = rootChildrenMesh.Components.add() # mesh
 
-        #root.Name = obj.name
+        root.Name = armatureName + "_Group"
+
+        rootChildrenMesh.Name = bpy.context.active_object.children[0].name
 
         print('--' + root.Name)
 
@@ -663,7 +517,7 @@ def GetArmaturePayload(objects, isWeb, isOnlySelected, smoothing, lamps, smoothi
         # convert the mesh again to a bmesh, after splitting the edges
         bm = bmesh.new()
         # bm.from_mesh(bpy.context.scene.objects.active.data)
-        damesh = prepare_mesh(bpy.context.active_object.children[0])      
+        damesh = prepare_mesh(bpy.context.active_object.children[0], export_props)
         bm.from_mesh(damesh)
         
         uvActive = obj.children[0].data.uv_layers.active
@@ -734,7 +588,7 @@ def GetArmaturePayload(objects, isWeb, isOnlySelected, smoothing, lamps, smoothi
         # check, if a material is set, otherwise use default material
         # also check if the material uses nodes -> cycles rendering, otherwise use default material
         textures = []
-        rootMaterialComponent, textures = GetMaterial(obj.children[0], isWeb)     
+        rootMaterialComponent, textures = GetMaterial(obj.children[0], export_props["isWeb"])     
 
         # SCENE NODE CONTAINER
         # write rootComponents to rootNode        
@@ -758,10 +612,7 @@ def GetArmaturePayload(objects, isWeb, isOnlySelected, smoothing, lamps, smoothi
         else:
             # Hierarchy 2 (children of root)
             for children in obj.children:
-                child = GetNode(objects=children, isWeb=isWeb,
-                                isOnlySelected=False, smoothing=smoothing,
-                                lamps=lamps, smoothingDist=smoothingDist,
-                                smoothingAngle=smoothingAngle)
+                child = GetNode(children, export_props)
                 rootChildren = root.Children.add()
                 rootChildren.payload = child.obj.SerializePartialToString()
                 textures = textures + child.tex'''
@@ -1028,34 +879,44 @@ def GetParents(obj):
         GetParents(obj.parent)
 
 
-def prepare_mesh(obj):
-    # Create a copy of object
+def prepare_mesh(obj, export_props):
+    # Create a (deep (linked=False)) copy of obj.
     # Makes use of the new 2.8 override context (taken from https://blender.stackexchange.com/questions/135597/how-to-duplicate-an-object-in-2-8-via-the-python-api-without-using-bpy-ops-obje )
     bpy.ops.object.duplicate(
        {"object" : obj,
        "selected_objects" : [obj]},
        linked=False)
-    obj_copy = bpy.context.object
+    # In case obj has an armature parent, bpy.context.active as well as bpy.context.object point to obj's parent AND NOT AS DOCUMENTED to the newly duplicated object.
+    # As debugging shows, the first (and only) object contained in bpy.context.selected_objects points to the duplication.
+    obj_copy = bpy.context.selected_objects[0]
 
     # Select the copy (and nothing else)
-    bpy.ops.object.select_all(action='DESELECT')
     bpy.ops.object.mode_set(mode = 'OBJECT')
+    bpy.ops.object.select_all(action='DESELECT')
     bpy.context.view_layer.objects.active = obj_copy
     obj_copy.select_set(True)
 
-    # Flip normals on the copied object's copied mesh (Important: BEFORE any applied modifiers)
-    bpy.ops.object.mode_set(mode = 'EDIT')
-    bpy.ops.mesh.select_all(action='SELECT')
-    bpy.ops.mesh.normals_make_consistent(inside=False)
-    bpy.ops.object.mode_set(mode = 'OBJECT')
+    # Apply Scale
+    if export_props["doApplyScale"]:
+        bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
+
+    # Flip normals on the copied object's copied mesh (Important: This happens BEFORE any modifiers are applied)
+    if export_props["doRecalcOutside"]:
+        bpy.ops.object.mode_set(mode = 'EDIT')
+        bpy.ops.mesh.select_all(action='SELECT')
+        bpy.ops.mesh.normals_make_consistent(inside=False)
+        bpy.ops.object.mode_set(mode = 'OBJECT')
 
     # Apply all the modifiers (without altering the scene)
     # Taken from https://docs.blender.org/api/blender2.8/bpy.types.Depsgraph.html, "Evaluated ID example"
-    ev_depsgraph = bpy.context.evaluated_depsgraph_get()
-    obj_eval = obj_copy.evaluated_get(ev_depsgraph)
-    mesh_eval = obj_eval.data
+    if export_props["doApplyModifiers"]:
+        ev_depsgraph = bpy.context.evaluated_depsgraph_get()
+        obj_eval = obj_copy.evaluated_get(ev_depsgraph)
+        mesh_eval = obj_eval.data
+    else:
+        mesh_eval = obj_copy.data
 
-    # Triangulate for web export
+    # Triangulate
     bm = bmesh.new()
     bm.from_mesh(mesh_eval)
     # Normal recalculation already performed BEFORE modifiers were applied. Otherwise face recalculation yields normals facing inside
@@ -1070,9 +931,9 @@ def prepare_mesh(obj):
     # obj_triangulated = bpy.data.objects.new("ObjectTriangulated", mesh_triangulated)
     # bpy.context.collection.objects.link(obj_triangulated)
 
-    # Delete copied object
-    bpy.ops.object.select_all(action='DESELECT')
+    # Delete duplicated object
     bpy.ops.object.mode_set(mode = 'OBJECT')
+    bpy.ops.object.select_all(action='DESELECT')
     bpy.context.view_layer.objects.active = obj_copy
     obj_copy.select_set(True)
     bpy.ops.object.delete() 
