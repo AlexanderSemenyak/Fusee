@@ -4,7 +4,7 @@
     <PackageId>Fusee.Math.Core</PackageId>
     <TargetFramework>netstandard2.0</TargetFramework>
     <Description>Core Math implementation for the Fusee Project</Description>
-    <LangVersion>8</LangVersion>
+      <LangVersion>8</LangVersion>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
@@ -12,13 +12,8 @@
     <OutputPath>$(BaseOutputPath)\Libraries</OutputPath>
     <DocumentationFile>$(OutputPath)\$(RootNamespace).xml</DocumentationFile>
   </PropertyGroup>
-
-    <ItemGroup>
-        <PackageReference Include="protobuf-net.Core" Version="3.0.0-alpha.103" />
-    </ItemGroup>
-
-
-    <ItemGroup>
+    <ItemGroup>        
     <PackageReference Include="System.Memory" Version="4.5.3" />
-  </ItemGroup>
+     <PackageReference Include="protobuf-net.Core" Version="3.0.0-alpha.122" />
+  </ItemGroup>    
 </Project>

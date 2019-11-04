@@ -34,21 +34,13 @@
   </ItemGroup>
 
 
-  <ItemGroup>   
-
-
-      <PackageReference Include="protobuf-net.Core" Version="3.0.0-alpha.105" />
-      <Reference Include="protobuf-net">
-          <HintPath>$(FuseeEngineRoot)\ext\protobuf\protobuf-net.dll</HintPath>
-
-      </Reference>
-
+  <ItemGroup>
       <Reference Include="protobuf-net.Core">
           <HintPath>$(FuseeEngineRoot)\ext\protobuf\protobuf-net.Core.dll</HintPath>
-
       </Reference>
-
-
+      <Reference Include="protobuf-net">
+          <HintPath>$(FuseeEngineRoot)\ext\protobuf\protobuf-net.dll</HintPath>
+      </Reference>
 
       <PackageReference Include="WebAssembly.Bindings" Version="0.2.0" />
     <PackageReference Include="WebAssembly.Net.Http" Version="0.2.0" />
