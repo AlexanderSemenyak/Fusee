@@ -2,4 +2,5 @@
     "msbuild-sdks": {
     "Mono.WebAssembly.Sdk": "0.2.0"  
   }
+  
 }

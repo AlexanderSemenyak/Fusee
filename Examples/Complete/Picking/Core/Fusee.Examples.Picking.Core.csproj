@@ -2,17 +2,13 @@
   <PropertyGroup>
     <RootNamespace>Fusee.Examples.Picking.Core</RootNamespace>
     <PackageId>Fusee.Examples.Picking.Core</PackageId>
-    <TargetFramework>netcoreapp3.0</TargetFramework>
+    <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
 
   <PropertyGroup>
     <OutputPath>$(BaseOutputPath)\Examples\Picking\Core\</OutputPath>
   </PropertyGroup>
-
-  <ItemGroup>
-    <PackageReference Include="System.IO.Packaging" Version="4.0.4" />
-  </ItemGroup>
-
+    
   <ItemGroup>
     <Reference Include="Fusee.Base.Common">
       <HintPath>$(FuseeEngineRoot)\bin\$(Configuration)\Libraries\Fusee.Base.Common.dll</HintPath>

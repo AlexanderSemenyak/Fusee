@@ -16,15 +16,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Reference Include="Fusee.SerializationSerializer">
-      <HintPath>$(FuseeEngineRoot)\bin\$(Configuration)\Libraries\Fusee.SerializationSerializer.dll</HintPath>
-    </Reference>
+
     <Reference Include="protobuf-net">
-      <HintPath>$(FuseeEngineRoot)ext\protobuf\$(Configuration)\protobuf-net.dll</HintPath>
+      <HintPath>$(FuseeEngineRoot)ext\protobuf\protobuf-net.dll</HintPath>
     </Reference>
     <Reference Include="Uno.SkiaSharp">
       <HintPath>$(FuseeEngineRoot)\ext\Uno.SkiaSharp\SkiaSharp.Wasm.dll</HintPath>
     </Reference>
+
+      <PackageReference Include="System.Collections.Immutable" Version="*" />
 
     <ProjectReference Include="$(FuseeEngineRoot)src\Base\Common\Fusee.Base.Common.csproj" />
     <ProjectReference Include="$(FuseeEngineRoot)src\Base\Core\Fusee.Base.Core.csproj" />

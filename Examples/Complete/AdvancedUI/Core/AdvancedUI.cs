@@ -125,7 +125,7 @@ namespace Fusee.Examples.AdvancedUI.Core
             }
 
             _canvasHeight = _uiHelper.CanvasHeightInit;
-            _canvasWidth = _uiHelper.CanvasWidthInit;
+            //_canvasWidth = _uiHelper.CanvasWidthInit;
 
             _uiInput = new List<UIInput>();
 
@@ -134,7 +134,10 @@ namespace Fusee.Examples.AdvancedUI.Core
             _aspectRatio = Width / (float)Height;
 
             //_scene = BuildScene();        
-            _scene = await AssetStorage.GetAsync<SceneContainer>("Monkey.fus");
+            _scene = await AssetStorage.GetAsync<SceneContainer>("Monkey_new.fus");
+            foreach(var c in _scene.Children[1].Components)
+                Diagnostics.Log($"{c}");
+
             var monkey = _scene.Children[1].GetComponent<Mesh>();
 
             var rnd = new Random();

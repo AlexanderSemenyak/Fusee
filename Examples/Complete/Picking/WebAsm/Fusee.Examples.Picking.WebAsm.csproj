@@ -1,10 +1,9 @@
 ﻿<Project Sdk="Mono.WebAssembly.Sdk">
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.0</TargetFramework>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <NoWarn>NU1701;NU1604</NoWarn>
-      <MonoWasmLinkMode>None</MonoWasmLinkMode>
+      <MonoWasmLinkMode>Full</MonoWasmLinkMode>
       <DefineConstants>PLATFORM_WASM</DefineConstants>
-
       <StartupObject />
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -33,20 +32,20 @@
   <ItemGroup>
     <None Include="$(FuseeEngineRoot)\ext\Uno.SkiaSharp\SkiaSharp.Wasm.dll" Link="Natives\SkiaSharp.Wasm.dll" />
   </ItemGroup>
-
-
   <ItemGroup>
    
-    <PackageReference Include="System.Drawing.Common" Version="4.6.0-preview8.19405.3" />
-   
-    <PackageReference Include="System.IO.Packaging" Version="4.0.4" />
-   
+    <PackageReference Include="System.Drawing.Common" Version="4.6.0-preview8.19405.3" />   
     <PackageReference Include="System.Memory" Version="4.5.3" />
 
-      <PackageReference Include="WebAssembly.Bindings" Version="0.2.0" />
-      <PackageReference Include="WebAssembly.Net.Http" Version="0.2.0" />
-      <PackageReference Include="WebAssembly.Net.WebSockets" Version="0.2.0" />
+    <Reference Include="protobuf-net" Version="3.0.0-alpha.125">
+        <HintPath>$(FuseeEngineRoot)\ext\protobuf\protobuf-net.dll</HintPath>
+    </Reference>
+      
+    <PackageReference Include="WebAssembly.Bindings" Version="0.2.0" />
+    <PackageReference Include="WebAssembly.Net.Http" Version="0.2.0" />
+    <PackageReference Include="WebAssembly.Net.WebSockets" Version="0.2.0" />
 
+    <PackageReference Include="System.Collections.Immutable" Version="*" />
 
   </ItemGroup>
   

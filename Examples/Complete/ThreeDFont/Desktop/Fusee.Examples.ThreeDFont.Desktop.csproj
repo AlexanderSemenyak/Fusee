@@ -32,10 +32,7 @@
         </Reference>
         <Reference Include="protobuf-net.Core">
             <HintPath>$(FuseeEngineRoot)\ext\protobuf\protobuf-net.Core.dll</HintPath>
-        </Reference>
-        <Reference Include="protobuf-net.Reflection">
-            <HintPath>$(FuseeEngineRoot)\ext\protobuf\protobuf-net.Reflection.dll</HintPath>
-        </Reference>
+        </Reference>       
     </ItemGroup>
 
   <ItemGroup>

@@ -1,4 +1,4 @@
-﻿<Project Sdk="Mono.WebAssembly.Sdk">
+﻿<Project Sdk="Mono.WebAssembly.Sdk" ToolsVersion="0.2.1"><!-- 0.2.0 is non debug, 0.2.1 is the debug version -->
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
       <MonoWasmLinkMode>None</MonoWasmLinkMode>   
@@ -41,10 +41,11 @@
       <Reference Include="protobuf-net">
           <HintPath>$(FuseeEngineRoot)\ext\protobuf\protobuf-net.dll</HintPath>
       </Reference>
-
-      <PackageReference Include="WebAssembly.Bindings" Version="0.2.0" />
+    <PackageReference Include="WebAssembly.Bindings" Version="0.2.0" />
     <PackageReference Include="WebAssembly.Net.Http" Version="0.2.0" />
     <PackageReference Include="WebAssembly.Net.WebSockets" Version="0.2.0" />
+
+      <PackageReference Include="System.Collections.Immutable" Version="*" />
   </ItemGroup>
   
   <ItemGroup>
