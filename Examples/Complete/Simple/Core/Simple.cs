@@ -40,7 +40,7 @@ namespace Fusee.Examples.Simple.Core
         // Init is called on startup. 
         public override async Task<bool> Init()
         {
-            _gui = CreateGui();
+            _gui = await CreateGui();
             Resize(new ResizeEventArgs(Width, Height));
             // Create the interaction handler
             _sih = new SceneInteractionHandler(_gui);
@@ -49,7 +49,7 @@ namespace Fusee.Examples.Simple.Core
             RC.ClearColor = new float4(1, 1, 1, 1);
 
             // Load the rocket model
-            _rocketScene = AssetStorage.Get<SceneContainer>("FUSEERocket.fus");
+            _rocketScene = await AssetStorage.GetAsync<SceneContainer>("FUSEERocket.fus");
 
             //Add resize delegate
             var projComp = _rocketScene.Children[0].GetComponent<ProjectionComponent>();
@@ -134,10 +134,10 @@ namespace Fusee.Examples.Simple.Core
             Present();
         }
 
-        private SceneContainer CreateGui()
+        private async Task<SceneContainer> CreateGui()
         {
-            var vsTex = AssetStorage.Get<string>("texture.vert");
-            var psTex = AssetStorage.Get<string>("texture.frag");
+            var vsTex = await AssetStorage.GetAsync<string>("texture.vert");
+            var psTex = await AssetStorage.GetAsync<string>("texture.frag");
 
             var canvasWidth = Width / 100f;
             var canvasHeight = Height / 100f;
@@ -150,7 +150,7 @@ namespace Fusee.Examples.Simple.Core
             btnFuseeLogo.OnMouseExit += BtnLogoExit;
             btnFuseeLogo.OnMouseDown += BtnLogoDown;
 
-            var guiFuseeLogo = new Texture(AssetStorage.Get<ImageData>("FuseeText.png"));
+            var guiFuseeLogo = new Texture(await AssetStorage.GetAsync<ImageData>("FuseeText.png"));
             var fuseeLogo = new TextureNodeContainer(
                 "fuseeLogo",
                 vsTex,
@@ -165,7 +165,7 @@ namespace Fusee.Examples.Simple.Core
                 );
             fuseeLogo.AddComponent(btnFuseeLogo);
 
-            var fontLato = AssetStorage.Get<Font>("Lato-Black.ttf");
+            var fontLato = await AssetStorage.GetAsync<Font>("Lato-Black.ttf");
             var guiLatoBlack = new FontMap(fontLato, 18);
 
             var text = new TextNodeContainer(
