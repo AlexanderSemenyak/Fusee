@@ -12,6 +12,11 @@ using System.Text.RegularExpressions;
 using System.Globalization;
 using System.Text;
 using System.Security;
+using Fusee.Base.Common;
+using Fusee.Math.Core;
+using Path = System.IO.Path;
+using Newtonsoft.Json;
+using FileMode = System.IO.FileMode;
 
 namespace Fusee.Tools.fuseeCmdLine
 {
@@ -28,6 +33,8 @@ namespace Fusee.Tools.fuseeCmdLine
         InternalError = -42,
     }
 
+
+
     class Program
     {
         private static FuseeHttpServer _httpServer;
@@ -41,12 +48,30 @@ namespace Fusee.Tools.fuseeCmdLine
             public string Output { get; set; }
         }
 
+        [Verb("convert", HelpText = "Take a .fus file format and convert it to another format.")]
+        public class Convert
+        {
+            [Option('i', "input", HelpText = "Path to .fus file")]
+            public string Input { get; set; }
+
+            [Option('o', "output", HelpText = "Path to the output file.")]
+            public string Output { get; set; }
+
+            [Option('f', "format", Default = ConversionFormat.JSON, HelpText = "Format to convert to. Currently supported values are: JSON, TXT")]
+            public ConversionFormat Format { get; set; }
+        }
 
         public enum Platform
         {
             Desktop,
             Web,
             Android,
+        }
+
+        public enum ConversionFormat
+        {
+            TEXT,
+            JSON
         }
 
         [Verb("publish", HelpText =
@@ -76,7 +101,7 @@ namespace Fusee.Tools.fuseeCmdLine
                 HelpText = "Port the server should start running on.")]
             public int Port { get; set; }
 
-            [Option('s', "serveronly", Default = false, HelpText ="Launches the server but does not start the default browser.")]
+            [Option('s', "serveronly", Default = false, HelpText = "Launches the server but does not start the default browser.")]
             public bool Serveronly { get; set; }
         }
 
@@ -163,7 +188,7 @@ namespace Fusee.Tools.fuseeCmdLine
         [STAThread]
         static void Main(string[] args)
         {
-            var result = Parser.Default.ParseArguments<Publish, Server, Install, ProtoSchema, WebViewer>(args)
+            var result = Parser.Default.ParseArguments<Publish, Server, Install, ProtoSchema, WebViewer, Convert>(args)
 
                 // Called with the PROTOSCHEMA verb
                 .WithParsed<ProtoSchema>(opts =>
@@ -203,326 +228,326 @@ namespace Fusee.Tools.fuseeCmdLine
                 // Called with the PUBLISH verb
                 .WithParsed<Publish>(opts =>
                 {
-                // INPUT
-                string input = opts.Input;
-                string appName = null;
-                string dllFilePath = null;
-                string dllDirPath = null;
-                string dir = null;
-                // See if anything is specified at all
-                if (string.IsNullOrEmpty(input) || Directory.Exists(input))
-                {
-                    dir = string.IsNullOrEmpty(input) ? Directory.GetCurrentDirectory() : Path.GetFullPath(input);
-                    // See if we are inside a .Net Core project (is there a .csproj file)?
-                    var csprojFile = Directory.EnumerateFiles(dir, "*.csproj").FirstOrDefault();
-                    if (!string.IsNullOrEmpty(csprojFile))
+                    // INPUT
+                    string input = opts.Input;
+                    string appName = null;
+                    string dllFilePath = null;
+                    string dllDirPath = null;
+                    string dir = null;
+                    // See if anything is specified at all
+                    if (string.IsNullOrEmpty(input) || Directory.Exists(input))
                     {
-                        // We are at the root of a DotNet project.
-                        appName = Path.GetFileNameWithoutExtension(csprojFile);
-                        try
+                        dir = string.IsNullOrEmpty(input) ? Directory.GetCurrentDirectory() : Path.GetFullPath(input);
+                        // See if we are inside a .Net Core project (is there a .csproj file)?
+                        var csprojFile = Directory.EnumerateFiles(dir, "*.csproj").FirstOrDefault();
+                        if (!string.IsNullOrEmpty(csprojFile))
                         {
-                            // Find dlls with the .csproj file's name below the bin subdir
-                            // Orderby.Reverse will make Release builds appear prior to Debug builds
-                            dllFilePath = Directory
-                                .EnumerateFiles(Path.Combine(dir, "bin"),
-                                    appName + ".dll", SearchOption.AllDirectories).OrderBy(s => s).Reverse().First();
+                            // We are at the root of a DotNet project.
+                            appName = Path.GetFileNameWithoutExtension(csprojFile);
+                            try
+                            {
+                                // Find dlls with the .csproj file's name below the bin subdir
+                                // Orderby.Reverse will make Release builds appear prior to Debug builds
+                                dllFilePath = Directory
+                                    .EnumerateFiles(Path.Combine(dir, "bin"),
+                                        appName + ".dll", SearchOption.AllDirectories).OrderBy(s => s).Reverse().First();
+                            }
+                            catch (Exception /* ex */)
+                            {
+                            }
                         }
-                        catch (Exception /* ex */)
+                        else
                         {
+                            Console.Error.WriteLine($"ERROR: {dir} does not contain any FUSEE App project (.csproj file).");
+                            Environment.Exit((int)ErrorCode.InputFile);
+                        }
+                        if (string.IsNullOrEmpty(dllFilePath))
+                        {
+                            Console.Error.WriteLine($"ERROR: {appName}.dll could not be found below bin subdirectory. Build {appName}.csproj before publishing.");
+                            Environment.Exit((int)ErrorCode.InputFile);
                         }
                     }
                     else
                     {
-                        Console.Error.WriteLine($"ERROR: {dir} does not contain any FUSEE App project (.csproj file).");
-                        Environment.Exit((int)ErrorCode.InputFile);
-                    }
-                    if (string.IsNullOrEmpty(dllFilePath))
-                    {
-                        Console.Error.WriteLine($"ERROR: {appName}.dll could not be found below bin subdirectory. Build {appName}.csproj before publishing.");
-                        Environment.Exit((int)ErrorCode.InputFile);
-                    }
-                }
-                else
-                {
-                    // A dll was explicitely mentioned. See if it exists
-                    if (File.Exists(input) && Path.GetExtension(input).ToLower() == ".dll")
-                    {
-                        try
+                        // A dll was explicitely mentioned. See if it exists
+                        if (File.Exists(input) && Path.GetExtension(input).ToLower() == ".dll")
                         {
-                            var fullPath = Path.GetFullPath(input);
-                            appName = Path.GetFileNameWithoutExtension(fullPath);
-                            dllFilePath = fullPath;
-                            dir = Path.Combine(Path.GetPathRoot(fullPath), Path.GetDirectoryName(fullPath));
+                            try
+                            {
+                                var fullPath = Path.GetFullPath(input);
+                                appName = Path.GetFileNameWithoutExtension(fullPath);
+                                dllFilePath = fullPath;
+                                dir = Path.Combine(Path.GetPathRoot(fullPath), Path.GetDirectoryName(fullPath));
+                            }
+                            catch (Exception /* ex */)
+                            {
+                            }
                         }
-                        catch (Exception /* ex */)
+                        if (string.IsNullOrEmpty(dllFilePath))
                         {
+                            Console.Error.WriteLine($"ERROR: {input} does not exist or is not a DLL file.");
+                            Environment.Exit((int)ErrorCode.InputFile);
                         }
                     }
-                    if (string.IsNullOrEmpty(dllFilePath))
-                    {
-                        Console.Error.WriteLine($"ERROR: {input} does not exist or is not a DLL file.");
-                        Environment.Exit((int)ErrorCode.InputFile);
-                    }
-                }
 
-                // Check if the specified infile really contains a FUSEE App
-                Type tApp = null;
-                try
-                {
-                    Assembly asm = Assembly.LoadFrom(dllFilePath);
-                    tApp = asm.GetTypes().FirstOrDefault(t => typeof(RenderCanvas).IsAssignableFrom(t));
-                    if (tApp == null)
-                    {
-                        Console.Error.WriteLine($"ERROR: {input} does not contain a FUSEE app (a class derived from RenderCanvas).");
-                        Environment.Exit((int)ErrorCode.InputFile);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.Error.WriteLine($"ERROR: Cannot read contents of {dllFilePath}: {ex}");
-                    Environment.Exit((int)ErrorCode.InternalError);
-                }
-                dllDirPath = Path.Combine(Path.GetPathRoot(dllFilePath), Path.GetDirectoryName(dllFilePath));
-                // End of Input handling
-
-                // OUTPUT
-                string output = opts.Output;
-                string outPath = null;
-                if (string.IsNullOrEmpty(output))
-                {
-                    outPath = Path.Combine(dir, "pub", opts.Platform.ToString());
-                }
-                else
-                {
-                    outPath = output;
-                }
-                // End of output handling.
-
-                // Empty the given directory (if present)
-                if (Directory.Exists(outPath))
-                {
+                    // Check if the specified infile really contains a FUSEE App
+                    Type tApp = null;
                     try
                     {
-                        Directory.Delete(outPath, true);
+                        Assembly asm = Assembly.LoadFrom(dllFilePath);
+                        tApp = asm.GetTypes().FirstOrDefault(t => typeof(RenderCanvas).IsAssignableFrom(t));
+                        if (tApp == null)
+                        {
+                            Console.Error.WriteLine($"ERROR: {input} does not contain a FUSEE app (a class derived from RenderCanvas).");
+                            Environment.Exit((int)ErrorCode.InputFile);
+                        }
                     }
                     catch (Exception ex)
                     {
-                        Console.Error.WriteLine($"ERROR: deleting {outPath}. Make sure that fusee can delete its contents or remove it before publishing.\n{ex}");
-                        Environment.Exit((int)ErrorCode.OutputFile);
+                        Console.Error.WriteLine($"ERROR: Cannot read contents of {dllFilePath}: {ex}");
+                        Environment.Exit((int)ErrorCode.InternalError);
                     }
-                }
+                    dllDirPath = Path.Combine(Path.GetPathRoot(dllFilePath), Path.GetDirectoryName(dllFilePath));
+                    // End of Input handling
 
+                    // OUTPUT
+                    string output = opts.Output;
+                    string outPath = null;
+                    if (string.IsNullOrEmpty(output))
+                    {
+                        outPath = Path.Combine(dir, "pub", opts.Platform.ToString());
+                    }
+                    else
+                    {
+                        outPath = output;
+                    }
+                    // End of output handling.
 
-                InitFuseeDirectories();
-
-                string playerFile = null;
-                string desktopPlayerDir = Path.GetFullPath(Path.Combine(fuseeBuildRoot, "Player", "Desktop")); // need this in web build as well.
-                switch (opts.Platform)
-                {
-                    case Platform.Desktop:
-                        playerFile = Path.GetFullPath(Path.Combine(desktopPlayerDir, "Fusee.Engine.Player.Desktop.exe"));
-                        break;
-                    case Platform.Web:
-                        playerFile = Path.GetFullPath(Path.Combine(
-                            fuseeBuildRoot, "Player", "Web", "Fusee.Engine.Player.Web.html"));
-                        break;
-                    default:
-                        Console.Error.WriteLine($"ERROR: Platform {opts.Platform.ToString()} is currently not handled by fusee.");
-                        Environment.Exit((int)ErrorCode.PlatformNotHandled);
-                        break;
-                }
-                if (!File.Exists(playerFile))
-                {
-                    Console.Error.WriteLine($"ERROR: FUSEE Player {playerFile} is not present. Check your FUSEE installation.");
-                    Environment.Exit((int)ErrorCode.InternalError);
-                }
-                string playerDir = Path.Combine(Path.GetPathRoot(playerFile), Path.GetDirectoryName(playerFile));
-
-                // Copy the player
-                FileTools.DirectoryCopy(playerDir, outPath, true, true);
-
-                // Do platform dependent stuff to integrate the FUSEE app DLL into the player
-                switch (opts.Platform)
-                {
-                    case Platform.Desktop:
+                    // Empty the given directory (if present)
+                    if (Directory.Exists(outPath))
+                    {
                         try
                         {
-                            // Copy the FUSEE App on top of the player.
-                            FileTools.DirectoryCopy(dllDirPath, outPath, true, true);
-
-                            // Rename Player.exe to App Name
-                            File.Move(Path.Combine(outPath, "Fusee.Engine.Player.Desktop.exe"), Path.Combine(outPath, appName + ".exe"));
-
-                            // Rename App DLL to "Fusee.App.dll"
-                            File.Move(Path.Combine(outPath, appName + ".dll"), Path.Combine(outPath, "Fusee.App.dll"));
-
-                            // Delete all pdb and xml files
-                            var directory = new DirectoryInfo(outPath);
-                            foreach (var file in directory.EnumerateFiles("*.pdb"))
-                                file.Delete();
-                            foreach (var file in directory.EnumerateFiles("*.xml"))
-                                file.Delete();
+                            Directory.Delete(outPath, true);
                         }
                         catch (Exception ex)
                         {
-                            Console.Error.WriteLine("ERROR: internal error while publishing FUSEE Desktop App: " + ex);
-                            Environment.Exit((int)ErrorCode.InternalError);
+                            Console.Error.WriteLine($"ERROR: deleting {outPath}. Make sure that fusee can delete its contents or remove it before publishing.\n{ex}");
+                            Environment.Exit((int)ErrorCode.OutputFile);
                         }
-                        Console.Error.WriteLine($"SUCCESS: FUSEE Desktop App {appName}.exe generated at {outPath}.");
-                        Environment.Exit(0);
-                        break;
-                    // END Publish Desktop
+                    }
 
-                    case Platform.Web:
-                        try
-                        {
-                            // Steps taken for Web publishing
-                            // 1.Copy Original Compiled Web Player to Pub/Web
-                            // 2.cd %FuseeRoot%/bin/Debug/Player/Desktop   // to have reference assemblies at hand in JSILc
-                            // 3. > PathToExt\JSILc.exe --nd
-                            //        "CoreLibraryRoot>\bin\Debug\netstandard2.0\MyFuseeApp.dll"
-                            //        - o "<Assembled>Assets/Scripts"
-                            //
-                            //     ->Will generate "MyFuseeAppBlaBla.js" and MyFuseeApp.dll.manifest.js
-                            //
-                            //4.Match $asmNN variables in MyFuseeApp.manifest.js and Fusee.Engine.Player.Web.exe.manifest.js. If 
-                            //  $asmNN from MyFuseApp are not referenced in WebPlayer, assign new $asmMMs to them. This will automatically
-                            //  handle the next point
-                            //5.In Fusee.Engine.Player.Web.exe.manifest: 
-                            //	Add MyFuseeAppBlabla as last entry of $asmNN
-                            //    Add["Script", "MyFuseeApp, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null.js", { "sizeBytes": xxx }]
-                            //6.In the newly generated MyFuseeAppBlaBla.js, replace all asmNN with NNs in MyFuseeApp.dll.manifest.js
-                            //  with their respective MMs from Fusee.Engine.Player.Web.exe.manifest.
-                            //  then replace tututu to asm.
-                            //7.In Fusee.Engine.Player.Web...js, change 
-                            //    $T0A = JSIL.Memoize($asm06.Fusee.Engine.Player.Core.Player)   to
-                            //	$T0A = JSIL.Memoize($asm45.FuseeApp.MyFuseeApp)
-                            //8.Copy MyFuseeApp's assets to the Pub/Web and insert entries for each of them into.contentproj file (similar to fuConv...)
-                            //9.Rename the Player's main .html file to MyFuseeApp.html
 
-                            // Call JSILc on the App DLL with cwd set to %FuseeRoot%/bin/Debug/Player/Desktop to have reference assemblies at hand in JS
+                    InitFuseeDirectories();
 
-                            string jsilRoot = Path.GetFullPath(Path.Combine(fuseeRoot, "ext", "JSIL"));
-                            // Special JSIL configuration switching off Dead Code Elimination (optimizes too much away when combined with --nodeps)
-                            string distroWebbuildConfigFilePath = Path.Combine(jsilRoot, "distrowebbuild.jsilconfig");
-                            string jsilc = Path.Combine(jsilRoot, "Compiler", "JSILc.exe");
-                            string temp = Path.Combine(outPath, "tmp");
-                            Directory.CreateDirectory(temp);
+                    string playerFile = null;
+                    string desktopPlayerDir = Path.GetFullPath(Path.Combine(fuseeBuildRoot, "Player", "Desktop")); // need this in web build as well.
+                    switch (opts.Platform)
+                    {
+                        case Platform.Desktop:
+                            playerFile = Path.GetFullPath(Path.Combine(desktopPlayerDir, "Fusee.Engine.Player.Desktop.exe"));
+                            break;
+                        case Platform.Web:
+                            playerFile = Path.GetFullPath(Path.Combine(
+                                fuseeBuildRoot, "Player", "Web", "Fusee.Engine.Player.Web.html"));
+                            break;
+                        default:
+                            Console.Error.WriteLine($"ERROR: Platform {opts.Platform.ToString()} is currently not handled by fusee.");
+                            Environment.Exit((int)ErrorCode.PlatformNotHandled);
+                            break;
+                    }
+                    if (!File.Exists(playerFile))
+                    {
+                        Console.Error.WriteLine($"ERROR: FUSEE Player {playerFile} is not present. Check your FUSEE installation.");
+                        Environment.Exit((int)ErrorCode.InternalError);
+                    }
+                    string playerDir = Path.Combine(Path.GetPathRoot(playerFile), Path.GetDirectoryName(playerFile));
 
-                            using (Process cmd = Process.Start(new ProcessStartInfo
+                    // Copy the player
+                    FileTools.DirectoryCopy(playerDir, outPath, true, true);
+
+                    // Do platform dependent stuff to integrate the FUSEE app DLL into the player
+                    switch (opts.Platform)
+                    {
+                        case Platform.Desktop:
+                            try
                             {
-                                FileName = jsilc,
-                                Arguments = $"--nodeps \"{distroWebbuildConfigFilePath}\" \"{dllFilePath}\" -o \"{temp}\"",
-                                UseShellExecute = false,
-                                WorkingDirectory = desktopPlayerDir,
-                            }))
-                            {
-                                cmd.WaitForExit();
+                                // Copy the FUSEE App on top of the player.
+                                FileTools.DirectoryCopy(dllDirPath, outPath, true, true);
+
+                                // Rename Player.exe to App Name
+                                File.Move(Path.Combine(outPath, "Fusee.Engine.Player.Desktop.exe"), Path.Combine(outPath, appName + ".exe"));
+
+                                // Rename App DLL to "Fusee.App.dll"
+                                File.Move(Path.Combine(outPath, appName + ".dll"), Path.Combine(outPath, "Fusee.App.dll"));
+
+                                // Delete all pdb and xml files
+                                var directory = new DirectoryInfo(outPath);
+                                foreach (var file in directory.EnumerateFiles("*.pdb"))
+                                    file.Delete();
+                                foreach (var file in directory.EnumerateFiles("*.xml"))
+                                    file.Delete();
                             }
-
-                            // Open Fusee.Engine.Player.Web.exe.manifest.js and the manifest.js of the just compiled output (in tmp)
-                            string playerManifest = Path.Combine(outPath, "Assets", "Scripts", "Fusee.Engine.Player.Web.exe.manifest.js");
-                            string appManifest = Path.Combine(temp, $"{appName}.dll.manifest.js");
-
-                            string playerManifestContents = File.ReadAllText(playerManifest); 
-                            var playerDict = ReadAssemblyDict(playerManifestContents, out int maxPlayerRef);
-                            string appManifestContents = File.ReadAllText(appManifest);
-                            var appDict = ReadAssemblyDict(appManifestContents, out int maxAppRef);
-                            var appSizes = ReadAssemblySizes(appManifestContents);
-
-                            // Build XLation table: $asm<KEY> needs to be replaced by $asm<VALUE> in all js files below tmp
-                            var xlation = new Dictionary<int, int>();
-                            var newRefDict = new Dictionary<string, int>();
-                            int nextNewRef = maxPlayerRef + 1;
-                            int appRefNumber = -1;
-                            foreach (var refApp in appDict)
+                            catch (Exception ex)
                             {
-                                // See if the app's reference is already present in the original player's reference
-                                if (playerDict.TryGetValue(refApp.Key, out int asmRef))
-                                {
-                                    // Yes, the orignal player's references already contains the current app's reference
-                                    // Put an entry into the translation table
-                                    xlation.Add(refApp.Value, asmRef);
-                                }
-                                else
-                                {
-                                    // No, this $asm needs to be added to the original player manifest. Note that for later.
-                                    xlation.Add(refApp.Value, nextNewRef);
-                                    newRefDict[refApp.Key] = nextNewRef;
-
-                                    // See if this is the $asm reference to the main app module and store its asm number for later use
-                                    if (refApp.Key.Contains(appName))
-                                        appRefNumber = nextNewRef;
-
-                                    nextNewRef++;
-                                }
-                            }
-
-                            if (appRefNumber < 0)
-                            {
-                                Console.Error.WriteLine($"ERROR: Could not find {appName} generated java script file");
+                                Console.Error.WriteLine("ERROR: internal error while publishing FUSEE Desktop App: " + ex);
                                 Environment.Exit((int)ErrorCode.InternalError);
                             }
+                            Console.Error.WriteLine($"SUCCESS: FUSEE Desktop App {appName}.exe generated at {outPath}.");
+                            Environment.Exit(0);
+                            break;
+                        // END Publish Desktop
 
-                            // Do a GREP on the contents of tmp using the xlation table
-                            foreach (string filename in Directory.EnumerateFiles(temp, "*.js"))
+                        case Platform.Web:
+                            try
                             {
-                                string contents = File.ReadAllText(filename);
-                                string replacement = ReplaceAsmRefs(contents, xlation);
-                                File.WriteAllText(filename, replacement);
-                            }
+                                // Steps taken for Web publishing
+                                // 1.Copy Original Compiled Web Player to Pub/Web
+                                // 2.cd %FuseeRoot%/bin/Debug/Player/Desktop   // to have reference assemblies at hand in JSILc
+                                // 3. > PathToExt\JSILc.exe --nd
+                                //        "CoreLibraryRoot>\bin\Debug\netstandard2.0\MyFuseeApp.dll"
+                                //        - o "<Assembled>Assets/Scripts"
+                                //
+                                //     ->Will generate "MyFuseeAppBlaBla.js" and MyFuseeApp.dll.manifest.js
+                                //
+                                //4.Match $asmNN variables in MyFuseeApp.manifest.js and Fusee.Engine.Player.Web.exe.manifest.js. If 
+                                //  $asmNN from MyFuseApp are not referenced in WebPlayer, assign new $asmMMs to them. This will automatically
+                                //  handle the next point
+                                //5.In Fusee.Engine.Player.Web.exe.manifest: 
+                                //	Add MyFuseeAppBlabla as last entry of $asmNN
+                                //    Add["Script", "MyFuseeApp, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null.js", { "sizeBytes": xxx }]
+                                //6.In the newly generated MyFuseeAppBlaBla.js, replace all asmNN with NNs in MyFuseeApp.dll.manifest.js
+                                //  with their respective MMs from Fusee.Engine.Player.Web.exe.manifest.
+                                //  then replace tututu to asm.
+                                //7.In Fusee.Engine.Player.Web...js, change 
+                                //    $T0A = JSIL.Memoize($asm06.Fusee.Engine.Player.Core.Player)   to
+                                //	$T0A = JSIL.Memoize($asm45.FuseeApp.MyFuseeApp)
+                                //8.Copy MyFuseeApp's assets to the Pub/Web and insert entries for each of them into.contentproj file (similar to fuConv...)
+                                //9.Rename the Player's main .html file to MyFuseeApp.html
 
-                            // Add the missing references to the player's manifest
-                            StringBuilder missingAsmDecls = new StringBuilder();
-                            StringBuilder missingAsmRefs = new StringBuilder();
-                            foreach (var missingRef in newRefDict)
+                                // Call JSILc on the App DLL with cwd set to %FuseeRoot%/bin/Debug/Player/Desktop to have reference assemblies at hand in JS
+
+                                string jsilRoot = Path.GetFullPath(Path.Combine(fuseeRoot, "ext", "JSIL"));
+                                // Special JSIL configuration switching off Dead Code Elimination (optimizes too much away when combined with --nodeps)
+                                string distroWebbuildConfigFilePath = Path.Combine(jsilRoot, "distrowebbuild.jsilconfig");
+                                string jsilc = Path.Combine(jsilRoot, "Compiler", "JSILc.exe");
+                                string temp = Path.Combine(outPath, "tmp");
+                                Directory.CreateDirectory(temp);
+
+                                using (Process cmd = Process.Start(new ProcessStartInfo
+                                {
+                                    FileName = jsilc,
+                                    Arguments = $"--nodeps \"{distroWebbuildConfigFilePath}\" \"{dllFilePath}\" -o \"{temp}\"",
+                                    UseShellExecute = false,
+                                    WorkingDirectory = desktopPlayerDir,
+                                }))
+                                {
+                                    cmd.WaitForExit();
+                                }
+
+                                // Open Fusee.Engine.Player.Web.exe.manifest.js and the manifest.js of the just compiled output (in tmp)
+                                string playerManifest = Path.Combine(outPath, "Assets", "Scripts", "Fusee.Engine.Player.Web.exe.manifest.js");
+                                string appManifest = Path.Combine(temp, $"{appName}.dll.manifest.js");
+
+                                string playerManifestContents = File.ReadAllText(playerManifest);
+                                var playerDict = ReadAssemblyDict(playerManifestContents, out int maxPlayerRef);
+                                string appManifestContents = File.ReadAllText(appManifest);
+                                var appDict = ReadAssemblyDict(appManifestContents, out int maxAppRef);
+                                var appSizes = ReadAssemblySizes(appManifestContents);
+
+                                // Build XLation table: $asm<KEY> needs to be replaced by $asm<VALUE> in all js files below tmp
+                                var xlation = new Dictionary<int, int>();
+                                var newRefDict = new Dictionary<string, int>();
+                                int nextNewRef = maxPlayerRef + 1;
+                                int appRefNumber = -1;
+                                foreach (var refApp in appDict)
+                                {
+                                    // See if the app's reference is already present in the original player's reference
+                                    if (playerDict.TryGetValue(refApp.Key, out int asmRef))
+                                    {
+                                        // Yes, the orignal player's references already contains the current app's reference
+                                        // Put an entry into the translation table
+                                        xlation.Add(refApp.Value, asmRef);
+                                    }
+                                    else
+                                    {
+                                        // No, this $asm needs to be added to the original player manifest. Note that for later.
+                                        xlation.Add(refApp.Value, nextNewRef);
+                                        newRefDict[refApp.Key] = nextNewRef;
+
+                                        // See if this is the $asm reference to the main app module and store its asm number for later use
+                                        if (refApp.Key.Contains(appName))
+                                            appRefNumber = nextNewRef;
+
+                                        nextNewRef++;
+                                    }
+                                }
+
+                                if (appRefNumber < 0)
+                                {
+                                    Console.Error.WriteLine($"ERROR: Could not find {appName} generated java script file");
+                                    Environment.Exit((int)ErrorCode.InternalError);
+                                }
+
+                                // Do a GREP on the contents of tmp using the xlation table
+                                foreach (string filename in Directory.EnumerateFiles(temp, "*.js"))
+                                {
+                                    string contents = File.ReadAllText(filename);
+                                    string replacement = ReplaceAsmRefs(contents, xlation);
+                                    File.WriteAllText(filename, replacement);
+                                }
+
+                                // Add the missing references to the player's manifest
+                                StringBuilder missingAsmDecls = new StringBuilder();
+                                StringBuilder missingAsmRefs = new StringBuilder();
+                                foreach (var missingRef in newRefDict)
+                                {
+                                    missingAsmDecls.AppendLine($"var $asm{missingRef.Value.ToString("X2")} = JSIL.GetAssembly(\"{missingRef.Key}\");");
+                                    missingAsmRefs.AppendLine($"    [\"Script\", \"{missingRef.Key}.js\", {{ \"sizeBytes\": {appSizes[missingRef.Key]} }}],");
+                                }
+                                Match m = Regex.Match(playerManifestContents, @"if \(typeof \(contentManifest\)");
+                                playerManifestContents = playerManifestContents.Insert(m.Index - 1, missingAsmDecls.ToString());
+
+                                m = Regex.Match(playerManifestContents, @"    \[""Script""");
+                                playerManifestContents = playerManifestContents.Insert(m.Index - 1, missingAsmRefs.ToString());
+
+                                File.WriteAllText(playerManifest, playerManifestContents);
+
+                                string assetDstDir = Path.Combine(outPath, "Assets");
+                                string scriptsDstDir = Path.Combine(assetDstDir, "Scripts");
+
+                                // Fiddle in the instantiation of the app
+                                string mainExeJsFile = Directory.EnumerateFiles(scriptsDstDir, "Fusee.Engine.Player.Web, Version*.js").First();
+                                string mainExeJsContents = File.ReadAllText(mainExeJsFile);
+                                mainExeJsContents = Regex.Replace(mainExeJsContents, @"\$asm(..)\.Fusee\.Engine\.Player\.Core\.Player", $"$asm{appRefNumber.ToString("X2")}.{tApp.Namespace}.{tApp.Name}");
+                                File.WriteAllText(mainExeJsFile, mainExeJsContents);
+
+                                // Copy app.js from tmp to outdir
+                                FileTools.DirectoryCopy(temp, scriptsDstDir, true, true);
+
+                                // Copy the app's assets
+                                string assetSrcDir = Path.Combine(dllDirPath, "Assets");
+                                if (Directory.Exists(assetSrcDir))
+                                    FileTools.DirectoryCopy(assetSrcDir, assetDstDir, true, true);
+
+                                // add app's assets to the listing in player's contentproj.manifest
+                                AssetManifest.AdjustAssetManifest(dllDirPath, outPath, Path.Combine(scriptsDstDir, "Fusee.Engine.Player.Web.contentproj.manifest.js"));
+
+                                // Rename main HTML file to <app>.html
+                                File.Move(Path.Combine(outPath, "Fusee.Engine.Player.Web.html"), Path.Combine(outPath, $"{appName}.html"));
+
+                                // Remove tmp
+                                Directory.Delete(temp, true);
+                            }
+                            catch (Exception ex)
                             {
-                                missingAsmDecls.AppendLine($"var $asm{missingRef.Value.ToString("X2")} = JSIL.GetAssembly(\"{missingRef.Key}\");");
-                                missingAsmRefs.AppendLine($"    [\"Script\", \"{missingRef.Key}.js\", {{ \"sizeBytes\": {appSizes[missingRef.Key]} }}],");
+                                Console.Error.WriteLine("ERROR: internal error while publishing FUSEE Web App:\n" + ex);
+                                Environment.Exit((int)ErrorCode.InternalError);
                             }
-                            Match m = Regex.Match(playerManifestContents, @"if \(typeof \(contentManifest\)");
-                            playerManifestContents = playerManifestContents.Insert(m.Index - 1, missingAsmDecls.ToString());
-
-                            m = Regex.Match(playerManifestContents, @"    \[""Script""");
-                            playerManifestContents = playerManifestContents.Insert(m.Index - 1, missingAsmRefs.ToString());
-
-                            File.WriteAllText(playerManifest, playerManifestContents);
-
-                            string assetDstDir = Path.Combine(outPath, "Assets");
-                            string scriptsDstDir = Path.Combine(assetDstDir, "Scripts");
-
-                            // Fiddle in the instantiation of the app
-                            string mainExeJsFile = Directory.EnumerateFiles(scriptsDstDir, "Fusee.Engine.Player.Web, Version*.js").First();
-                            string mainExeJsContents = File.ReadAllText(mainExeJsFile);
-                            mainExeJsContents = Regex.Replace(mainExeJsContents, @"\$asm(..)\.Fusee\.Engine\.Player\.Core\.Player", $"$asm{appRefNumber.ToString("X2")}.{tApp.Namespace}.{tApp.Name}");
-                            File.WriteAllText(mainExeJsFile, mainExeJsContents);
-
-                            // Copy app.js from tmp to outdir
-                            FileTools.DirectoryCopy(temp, scriptsDstDir, true, true);
-
-                            // Copy the app's assets
-                            string assetSrcDir = Path.Combine(dllDirPath, "Assets");
-                            if (Directory.Exists(assetSrcDir))
-                                FileTools.DirectoryCopy(assetSrcDir, assetDstDir, true, true);
-
-                            // add app's assets to the listing in player's contentproj.manifest
-                            AssetManifest.AdjustAssetManifest(dllDirPath, outPath, Path.Combine(scriptsDstDir, "Fusee.Engine.Player.Web.contentproj.manifest.js"));
-
-                            // Rename main HTML file to <app>.html
-                            File.Move(Path.Combine(outPath, "Fusee.Engine.Player.Web.html"), Path.Combine(outPath, $"{appName}.html"));
-
-                            // Remove tmp
-                            Directory.Delete(temp, true);
-                        }
-                        catch (Exception ex)
-                        {
-                            Console.Error.WriteLine("ERROR: internal error while publishing FUSEE Web App:\n" + ex);
-                            Environment.Exit((int)ErrorCode.InternalError);
-                        }
-                        Console.Error.WriteLine($"SUCCESS: FUSEE Web App {appName}.html generated at {outPath}.");
-                        Environment.Exit(0);
-                        break;
-                        // END Publish Web
+                            Console.Error.WriteLine($"SUCCESS: FUSEE Web App {appName}.html generated at {outPath}.");
+                            Environment.Exit(0);
+                            break;
+                            // END Publish Web
 
                     }
                 })
@@ -593,7 +618,7 @@ namespace Fusee.Tools.fuseeCmdLine
 
                     if (!opts.Serveronly)
                         Process.Start($"http://localhost:{opts.Port}/" + Path.GetFileName(htmlFile));
-                    
+
                     // Environment.Exit(0);
                 })
 
@@ -603,7 +628,7 @@ namespace Fusee.Tools.fuseeCmdLine
                 {
                     // Find FuseeRoot from this assembly
                     InitFuseeDirectories();
-                    string templateDir = Path.Combine(fuseeRoot, "dis", "DnTemplate"); 
+                    string templateDir = Path.Combine(fuseeRoot, "dis", "DnTemplate");
 
                     // Set the individual installation steps (currently four). If NONE of them is set, select ALL OF THEM.
                     bool instFuseeRoot = opts.FuseeRoot;
@@ -730,7 +755,7 @@ namespace Fusee.Tools.fuseeCmdLine
                             {
                                 Console.Error.WriteLine($"ERROR: {ex.FileName} not found. Make sure .NET Core 2.0 or higher is installed.");
                             }
-                           catch (Exception ex)
+                            catch (Exception ex)
                             {
                                 Console.Error.WriteLine($"ERROR: Unable to install the dotnet new fusee template from {templateDir}.\n{ex}");
                                 exitCode = ErrorCode.InternalError;
@@ -766,7 +791,7 @@ namespace Fusee.Tools.fuseeCmdLine
                                     if (!string.IsNullOrEmpty(blenderAddOnDstDir) && !Directory.Exists(blenderAddOnDstDir))
                                         Directory.CreateDirectory(blenderAddOnDstDir);
                                 }
-                                
+
                                 if (!string.IsNullOrEmpty(blenderAddOnDstDir))
                                 {
                                     blenderAddOnSrcDir = Path.Combine(fuseeCmdLineRoot, "BlenderScripts", "addons");
@@ -1002,11 +1027,42 @@ namespace Fusee.Tools.fuseeCmdLine
                     else
                         Console.Error.WriteLine($"WARNING: One or more required FUSEE installation tasks failed. See error messages above.");
 
-                    Environment.Exit((int) exitCode);
+                    Environment.Exit((int)exitCode);
                 })
+                 //// CONVERT
+                 .WithParsed<Convert>(async opts =>
+                 {
+                     var file = opts.Input;
+                     var output = opts.Output;
+                     var format = opts.Format;
 
+                     using (var stream = File.OpenRead(file))
+                     {
+                         var fus = ProtoBuf.Serializer.Deserialize<SceneContainer>(stream);
+                         fus = CreateScene();
 
+                         switch (format)
+                         {
+                             case ConversionFormat.TEXT:
+                                 var convScene = new TextConverter().Convert(fus);
+                                 var data = SceneConverter<ASCIISceneComponent, ASCIISceneComponentContainer>.ToString(convScene);
+                                 await File.WriteAllTextAsync(output, data);
+                                 break;
+                             case ConversionFormat.JSON:
+                                 var convScenejson = new JSONConverter().Convert(fus);
+                                 var dataJSON = JsonConvert.SerializeObject(convScenejson, Formatting.Indented, new JsonSerializerSettings
+                                 {
+                                     //PreserveReferencesHandling = PreserveReferencesHandling.Objects
+                                     ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+                                 });
+                                 await File.WriteAllTextAsync(output, dataJSON);
+                                 break;
+                             default:
+                                 break;
+                         }
+                     }
 
+                 })
                 // ERROR on the command line
                 .WithNotParsed(errs =>
                 {
@@ -1021,14 +1077,14 @@ namespace Fusee.Tools.fuseeCmdLine
 
         private static IEnumerable<string> GetBlenderAddOnDir(Install opts)
         {
-             // Start with some possible start directories (e.g. "C:\Program Files\" and C:\Program Files (x86)\"
+            // Start with some possible start directories (e.g. "C:\Program Files\" and C:\Program Files (x86)\"
             List<string> baseDirs = new List<string>();
             baseDirs.Add(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles));
             baseDirs.Add(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86));
 
             // Find [B|b]lender sub-subdirectories
             List<string> blenderDirs = new List<string>();
-            foreach(var baseDir in baseDirs)
+            foreach (var baseDir in baseDirs)
             {
                 try
                 {
@@ -1097,7 +1153,7 @@ namespace Fusee.Tools.fuseeCmdLine
                     for (int iDigit = 0; iDigit < digitCount; iDigit++)
                     {
                         if (int.TryParse(digits[iDigit], out int digit))
-                            sortNumber += digit * (int) System.Math.Pow(1000, (3 - iDigit));
+                            sortNumber += digit * (int)System.Math.Pow(1000, (3 - iDigit));
                     }
                     if (sortNumber > 0)
                         break;
@@ -1164,6 +1220,225 @@ namespace Fusee.Tools.fuseeCmdLine
             }
 
             return dict;
+        }
+
+
+        private static SceneContainer CreateScene()
+        {
+            return /*new ConvertSceneGraph().Convert(*/new SceneContainer
+            {
+                Header = new SceneHeader
+                {
+                    CreationDate = "April 2017",
+                    CreatedBy = "mch@hs-furtwangen.de",
+                    Generator = "Handcoded with pride",
+                    Version = 42,
+                },
+                Children = new List<SceneNodeContainer>
+                {
+                    new SceneNodeContainer
+                    {
+                        Name = "Base",
+                        Components = new List<SceneComponentContainer>
+                        {
+                            new TransformComponent { Scale = float3.One },
+                           new MaterialComponent
+                           {
+                                Diffuse = new MatChannelContainer { Color = ColorUint.Tofloat4(ColorUint.Red) },
+                                Specular = new SpecularChannelContainer {Color = ColorUint.Tofloat4(ColorUint.White), Intensity = 1.0f, Shininess = 4.0f}
+                            },
+                            CreateCuboid(new float3(100, 20, 100))
+                        },
+                        Children = new ChildList
+                        {
+                            new SceneNodeContainer
+                            {
+                                Name = "Arm01",
+                                Components = new List<SceneComponentContainer>
+                                {
+                                    new TransformComponent {Translation=new float3(0, 60, 0),  Scale = float3.One },
+                                   new MaterialComponent
+                                    {
+                                        Diffuse = new MatChannelContainer { Color = ColorUint.Tofloat4(ColorUint.Green) },
+                                        Specular = new SpecularChannelContainer {Color = ColorUint.Tofloat4(ColorUint.White), Intensity = 1.0f, Shininess = 4.0f}
+                                    },
+                                    CreateCuboid(new float3(20, 100, 20))
+                                },
+                                Children = new ChildList
+                                {
+                                    new SceneNodeContainer
+                                    {
+                                        Name = "Arm02Rot",
+                                        Components = new List<SceneComponentContainer>
+                                        {
+                                            new TransformComponent {Translation=new float3(-20, 40, 0),  Rotation = new float3(0.35f, 0, 0), Scale = float3.One},
+                                        },
+                                        Children = new ChildList
+                                        {
+                                            new SceneNodeContainer
+                                            {
+                                                Name = "Arm02",
+                                                Components = new List<SceneComponentContainer>
+                                                {
+                                                    new TransformComponent {Translation=new float3(0, 40, 0),  Scale = float3.One },
+                                                    new MaterialComponent
+                                                    {
+                                                        Diffuse = new MatChannelContainer { Color = ColorUint.Tofloat4(ColorUint.Yellow) },
+                                                        Specular = new SpecularChannelContainer {Color =ColorUint.Tofloat4(ColorUint.White), Intensity = 1.0f, Shininess = 4.0f}
+                                                    },
+                                                    CreateCuboid(new float3(20, 100, 20))
+                                                },
+                                                Children = new ChildList
+                                                {
+                                                    new SceneNodeContainer
+                                                    {
+                                                        Name = "Arm03Rot",
+                                                        Components = new List<SceneComponentContainer>
+                                                        {
+                                                            new TransformComponent {Translation=new float3(20, 40, 0),  Rotation = new float3(0.25f, 0, 0), Scale = float3.One},
+                                                        },
+                                                        Children = new ChildList
+                                                        {
+                                                            new SceneNodeContainer
+                                                            {
+                                                                Name = "Arm03",
+                                                                Components = new List<SceneComponentContainer>
+                                                                {
+                                                                    new TransformComponent {Translation=new float3(0, 40, 0),  Scale = float3.One },
+                                                                    new MaterialComponent
+                                                                    {
+                                                                        Diffuse = new MatChannelContainer { Color = ColorUint.Tofloat4(ColorUint.Blue) },
+                                                                        Specular = new SpecularChannelContainer {Color = ColorUint.Tofloat4(ColorUint.White), Intensity = 1.0f, Shininess = 4.0f}
+                                                                    },
+                                                                    CreateCuboid(new float3(20, 100, 20))
+                                                                }
+                                                            },
+                                                        }
+                                                    }
+                                                }
+                                            },
+                                        }
+                                    }
+                                }
+                            },
+                        }
+                    },
+                }
+            }/*)*/;
+        }
+
+
+        public static Mesh CreateCuboid(float3 size)
+        {
+            return new Mesh
+            {
+                Vertices = new[]
+                {
+                    new float3 {x = +0.5f * size.x, y = -0.5f * size.y, z = +0.5f * size.z},
+                    new float3 {x = +0.5f * size.x, y = +0.5f * size.y, z = +0.5f * size.z},
+                    new float3 {x = -0.5f * size.x, y = +0.5f * size.y, z = +0.5f * size.z},
+                    new float3 {x = -0.5f * size.x, y = -0.5f * size.y, z = +0.5f * size.z},
+                    new float3 {x = +0.5f * size.x, y = -0.5f * size.y, z = -0.5f * size.z},
+                    new float3 {x = +0.5f * size.x, y = +0.5f * size.y, z = -0.5f * size.z},
+                    new float3 {x = +0.5f * size.x, y = +0.5f * size.y, z = +0.5f * size.z},
+                    new float3 {x = +0.5f * size.x, y = -0.5f * size.y, z = +0.5f * size.z},
+                    new float3 {x = -0.5f * size.x, y = -0.5f * size.y, z = -0.5f * size.z},
+                    new float3 {x = -0.5f * size.x, y = +0.5f * size.y, z = -0.5f * size.z},
+                    new float3 {x = +0.5f * size.x, y = +0.5f * size.y, z = -0.5f * size.z},
+                    new float3 {x = +0.5f * size.x, y = -0.5f * size.y, z = -0.5f * size.z},
+                    new float3 {x = -0.5f * size.x, y = -0.5f * size.y, z = +0.5f * size.z},
+                    new float3 {x = -0.5f * size.x, y = +0.5f * size.y, z = +0.5f * size.z},
+                    new float3 {x = -0.5f * size.x, y = +0.5f * size.y, z = -0.5f * size.z},
+                    new float3 {x = -0.5f * size.x, y = -0.5f * size.y, z = -0.5f * size.z},
+                    new float3 {x = +0.5f * size.x, y = +0.5f * size.y, z = +0.5f * size.z},
+                    new float3 {x = +0.5f * size.x, y = +0.5f * size.y, z = -0.5f * size.z},
+                    new float3 {x = -0.5f * size.x, y = +0.5f * size.y, z = -0.5f * size.z},
+                    new float3 {x = -0.5f * size.x, y = +0.5f * size.y, z = +0.5f * size.z},
+                    new float3 {x = +0.5f * size.x, y = -0.5f * size.y, z = -0.5f * size.z},
+                    new float3 {x = +0.5f * size.x, y = -0.5f * size.y, z = +0.5f * size.z},
+                    new float3 {x = -0.5f * size.x, y = -0.5f * size.y, z = +0.5f * size.z},
+                    new float3 {x = -0.5f * size.x, y = -0.5f * size.y, z = -0.5f * size.z}
+                },
+
+                Triangles = new ushort[]
+                {
+                    // front face
+                    0, 2, 1, 0, 3, 2,
+
+                    // right face
+                    4, 6, 5, 4, 7, 6,
+
+                    // back face
+                    8, 10, 9, 8, 11, 10,
+
+                    // left face
+                    12, 14, 13, 12, 15, 14,
+
+                    // top face
+                    16, 18, 17, 16, 19, 18,
+
+                    // bottom face
+                    20, 22, 21, 20, 23, 22
+
+                },
+
+                Normals = new[]
+                {
+                    new float3(0, 0, 1),
+                    new float3(0, 0, 1),
+                    new float3(0, 0, 1),
+                    new float3(0, 0, 1),
+                    new float3(1, 0, 0),
+                    new float3(1, 0, 0),
+                    new float3(1, 0, 0),
+                    new float3(1, 0, 0),
+                    new float3(0, 0, -1),
+                    new float3(0, 0, -1),
+                    new float3(0, 0, -1),
+                    new float3(0, 0, -1),
+                    new float3(-1, 0, 0),
+                    new float3(-1, 0, 0),
+                    new float3(-1, 0, 0),
+                    new float3(-1, 0, 0),
+                    new float3(0, 1, 0),
+                    new float3(0, 1, 0),
+                    new float3(0, 1, 0),
+                    new float3(0, 1, 0),
+                    new float3(0, -1, 0),
+                    new float3(0, -1, 0),
+                    new float3(0, -1, 0),
+                    new float3(0, -1, 0)
+                },
+
+                UVs = new[]
+                {
+                    new float2(1, 0),
+                    new float2(1, 1),
+                    new float2(0, 1),
+                    new float2(0, 0),
+                    new float2(1, 0),
+                    new float2(1, 1),
+                    new float2(0, 1),
+                    new float2(0, 0),
+                    new float2(1, 0),
+                    new float2(1, 1),
+                    new float2(0, 1),
+                    new float2(0, 0),
+                    new float2(1, 0),
+                    new float2(1, 1),
+                    new float2(0, 1),
+                    new float2(0, 0),
+                    new float2(1, 0),
+                    new float2(1, 1),
+                    new float2(0, 1),
+                    new float2(0, 0),
+                    new float2(1, 0),
+                    new float2(1, 1),
+                    new float2(0, 1),
+                    new float2(0, 0)
+                },
+                BoundingBox = new AABBf(-0.5f * size, 0.5f * size)
+            };
         }
     }
 }
