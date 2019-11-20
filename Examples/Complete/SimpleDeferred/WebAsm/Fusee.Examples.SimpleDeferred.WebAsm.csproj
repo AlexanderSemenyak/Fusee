@@ -28,9 +28,20 @@
     <ProjectReference Include="..\Core\Fusee.Examples.SimpleDeferred.Core.csproj" />
   </ItemGroup>
 
+    <ItemGroup>
+        <Reference Include="protobuf-net">
+            <HintPath>$(FuseeEngineRoot)\ext\protobuf\protobuf-net.dll</HintPath>
+        </Reference>
+
+        <Reference Include="protobuf-net.Core">
+            <HintPath>$(FuseeEngineRoot)\ext\protobuf\protobuf-net.Core.dll</HintPath>
+        </Reference>
+    </ItemGroup>
+    
   <ItemGroup>
       <None Include="$(FuseeEngineRoot)\ext\Uno.SkiaSharp\SkiaSharp.Wasm.dll" Link="Natives\SkiaSharp.Wasm.dll" />
   </ItemGroup>
+    
 
 
   <ItemGroup>   
@@ -39,8 +50,9 @@
           <HintPath>$(FuseeEngineRoot)\ext\SharpFont_mngd\Debug\SharpFont_mngd.dll</HintPath>
       </Reference>
 
+      <PackageReference Include="System.Collections.Immutable" />
 
-    <PackageReference Include="WebAssembly.Bindings" Version="3.0.2" />
+    <PackageReference Include="WebAssembly.Bindings" Version="0.2.0" />
     <PackageReference Include="WebAssembly.Net.Http" Version="0.2.0" />
     <PackageReference Include="WebAssembly.Net.WebSockets" Version="0.2.0" />
   </ItemGroup>

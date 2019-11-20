@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <RootNamespace>Fusee.Examples.UI.Desktop</RootNamespace>
     <PackageId>Fusee.Examples.UI.Desktop</PackageId>
@@ -25,7 +25,18 @@
     </ProjectReference>
   </ItemGroup>
 
-  <ItemGroup>
+    <ItemGroup>
+        <Reference Include="protobuf-net">
+            <HintPath>$(FuseeEngineRoot)\ext\protobuf\protobuf-net.dll</HintPath>
+        </Reference>
+
+        <Reference Include="protobuf-net.Core">
+            <HintPath>$(FuseeEngineRoot)\ext\protobuf\protobuf-net.Core.dll</HintPath>
+        </Reference>
+    </ItemGroup>
+
+
+    <ItemGroup>
     <Reference Include="Fusee.Base.Common">
       <HintPath>$(FuseeEngineRoot)\bin\$(Configuration)\Libraries\Fusee.Base.Common.dll</HintPath>
     </Reference>
