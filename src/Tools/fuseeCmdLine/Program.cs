@@ -15,7 +15,6 @@ using System.Security;
 using Fusee.Base.Common;
 using Fusee.Math.Core;
 using Path = System.IO.Path;
-using Newtonsoft.Json;
 using FileMode = System.IO.FileMode;
 
 namespace Fusee.Tools.fuseeCmdLine
@@ -46,19 +45,6 @@ namespace Fusee.Tools.fuseeCmdLine
             [Option('o', "output",
                 HelpText = "Path of .proto file to be written. \".proto\" extension will be added if not present.")]
             public string Output { get; set; }
-        }
-
-        [Verb("convert", HelpText = "Take a .fus file format and convert it to another format.")]
-        public class Convert
-        {
-            [Option('i', "input", HelpText = "Path to .fus file")]
-            public string Input { get; set; }
-
-            [Option('o', "output", HelpText = "Path to the output file.")]
-            public string Output { get; set; }
-
-            [Option('f', "format", Default = ConversionFormat.JSON, HelpText = "Format to convert to. Currently supported values are: JSON, TXT")]
-            public ConversionFormat Format { get; set; }
         }
 
         public enum Platform
@@ -188,7 +174,7 @@ namespace Fusee.Tools.fuseeCmdLine
         [STAThread]
         static void Main(string[] args)
         {
-            var result = Parser.Default.ParseArguments<Publish, Server, Install, ProtoSchema, WebViewer, Convert>(args)
+            var result = Parser.Default.ParseArguments<Publish, Server, Install, ProtoSchema, WebViewer>(args)
 
                 // Called with the PROTOSCHEMA verb
                 .WithParsed<ProtoSchema>(opts =>
@@ -1029,40 +1015,7 @@ namespace Fusee.Tools.fuseeCmdLine
 
                     Environment.Exit((int)exitCode);
                 })
-                 //// CONVERT
-                 .WithParsed<Convert>(async opts =>
-                 {
-                     var file = opts.Input;
-                     var output = opts.Output;
-                     var format = opts.Format;
 
-                     using (var stream = File.OpenRead(file))
-                     {
-                         var fus = ProtoBuf.Serializer.Deserialize<SceneContainer>(stream);
-                         fus = CreateScene();
-
-                         switch (format)
-                         {
-                             case ConversionFormat.TEXT:
-                                 var convScene = new TextConverter().Convert(fus);
-                                 var data = SceneConverter<ASCIISceneComponent, ASCIISceneComponentContainer>.ToString(convScene);
-                                 await File.WriteAllTextAsync(output, data);
-                                 break;
-                             case ConversionFormat.JSON:
-                                 var convScenejson = new JSONConverter().Convert(fus);
-                                 var dataJSON = JsonConvert.SerializeObject(convScenejson, Formatting.Indented, new JsonSerializerSettings
-                                 {
-                                     //PreserveReferencesHandling = PreserveReferencesHandling.Objects
-                                     ReferenceLoopHandling = ReferenceLoopHandling.Ignore
-                                 });
-                                 await File.WriteAllTextAsync(output, dataJSON);
-                                 break;
-                             default:
-                                 break;
-                         }
-                     }
-
-                 })
                 // ERROR on the command line
                 .WithNotParsed(errs =>
                 {
