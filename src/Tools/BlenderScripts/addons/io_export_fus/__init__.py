@@ -80,8 +80,8 @@ class ExportFUS(bpy.types.Operator, ExportHelper):
     filename_ext = ".fus"
     filter_glob : StringProperty(default="*.fus", options={'HIDDEN'})
     isOnlySelected : BoolProperty(
-            name="Only selected Objects",
-            description="Export only selected objects",
+            name="Selected objects only",
+            description="Export selected objects only. At least one mesh object must be within selection",
             default=False,
             )
     isWeb : BoolProperty(
@@ -90,42 +90,35 @@ class ExportFUS(bpy.types.Operator, ExportHelper):
         default=False,
     )
     isSaveFile : BoolProperty(
-        name="Save File",
-        description="Save this file before exporting it",
+        name="Save .blend file",
+        description="Save this blender file before exporting",
         default=True,
     )
     isExportTex : BoolProperty(
-        name="Export Textures",
+        name="Export textures",
         description="Export the textures used in this scene as well",
         default=True,
     )
+    doRecalcOutside : BoolProperty(
+        name="Recalculate outside",
+        description="Automatically try to flip each face normal towards the object's outside",
+        default=True,
+    )
+    doApplyModifiers : BoolProperty(
+        name="Apply modifiers",
+        description="Apply modifiers to the geometry",
+        default=True,
+    )
+    doApplyScale : BoolProperty(
+        name="Apply scale",
+        description="Apply all scale transformations to the respective object's geometry",
+        default=True,
+    )
     isLamps : BoolProperty(
-        name="Export Lamps",
+        name="Export lamps",
         description="Export lamps in the scene (not supported yet)",
         default=False,
     )
-
-    #Smoothing is not working correctly
-    isSmooth : BoolProperty(
-        name="Smooth Normals",
-        description="Smooth display of normals (not working correctly)",
-        default=False,
-    )
-    smoothingDist : FloatProperty(
-        name="Smoothing Distance",
-        description="Maximum distance between two points",
-        min=0.0,
-        max=100.0,
-        default=0.0,
-    )
-    smoothingAngle : FloatProperty(
-        name="Smoothing Angle",
-        description="Maximum angle between two normals",
-        min=0.0,
-        max=90.0,
-        default=0.0,
-    )
-
     #Operator Properties
     filepath : StringProperty(subtype='FILE_PATH')
 
@@ -139,15 +132,15 @@ class ExportFUS(bpy.types.Operator, ExportHelper):
     def draw(self, context):
         layout = self.layout
         layout.prop(self, 'isOnlySelected')
-        '''layout.prop(self, 'isSmooth')
-        layout.prop(self, 'smoothingDist')
-        layout.prop(self, 'smoothingAngle')
-        layout.prop(self, 'isLamps')'''
+        layout.prop(self, 'isWeb')
         layout.prop(self, 'isSaveFile')
         layout.prop(self, 'isExportTex')
-        layout.prop(self, 'isWeb')
+        layout.prop(self, 'doRecalcOutside')
+        layout.prop(self, 'doApplyModifiers')
+        layout.prop(self, 'doApplyScale')
+        #layout.prop(self, 'isLamps')
         
-        
+     
 
 
     def execute(self, context):
@@ -204,7 +197,8 @@ class ExportFUS(bpy.types.Operator, ExportHelper):
             bpy.ops.wm.console_toggle()
             if geoObj:
                 #set blender to object mode (prevents problems)
-                bpy.ops.object.mode_set(mode="OBJECT")
+                if bpy.ops.object.mode_set.poll():
+                    bpy.ops.object.mode_set(mode="OBJECT")
 
                 #WEB Viewer
                 if self.isWeb:
@@ -212,11 +206,16 @@ class ExportFUS(bpy.types.Operator, ExportHelper):
                     process = subprocess.run(['taskkill', '/im', 'fusee.exe', '/f'])
                     print('Server Killed: ' + str(process.returncode))
                     try:
-                        serializedData = SerializeData(objects=obj, isWeb=True,
-                                                       isOnlySelected=self.isOnlySelected,
-                                                       smoothing=self.isSmooth, lamps=self.isLamps,
-                                                       smoothingDist=self.smoothingDist,
-                                                       smoothingAngle=self.smoothingAngle)
+                        serializedData = SerializeData(objects=obj, export_props = {
+                                                                        "isWeb"             : True,
+                                                                        "isOnlySelected"    : self.isOnlySelected,
+                                                                        "isSaveFile"        : self.isSaveFile,
+                                                                        "isExportTex"       : self.isExportTex,
+                                                                        "doRecalcOutside"   : self.doRecalcOutside,
+                                                                        "doApplyModifiers"  : self.doApplyModifiers,
+                                                                        "doApplyScale"      : self.doApplyScale,
+                                                                        "isLamps"           : self.isLamps
+                                                                    })
                         print('writing to file: ' + self.filepath + '----')
                         with open(self.filepath,'wb') as file:
                             file.write(serializedData.obj)
@@ -246,11 +245,16 @@ class ExportFUS(bpy.types.Operator, ExportHelper):
                 #Normal export   
                 else:
                     try:
-                        serializedData = SerializeData(objects=obj, isWeb=False,
-                                                       isOnlySelected=self.isOnlySelected,
-                                                       smoothing=self.isSmooth, lamps=self.isLamps,
-                                                       smoothingDist=self.smoothingDist,
-                                                       smoothingAngle=self.smoothingAngle)
+                        serializedData = SerializeData(obj, export_props = {
+                                                                        "isWeb"             : False,
+                                                                        "isOnlySelected"    : self.isOnlySelected,
+                                                                        "isSaveFile"        : self.isSaveFile,
+                                                                        "isExportTex"       : self.isExportTex,
+                                                                        "doRecalcOutside"   : self.doRecalcOutside,
+                                                                        "doApplyModifiers"  : self.doApplyModifiers,
+                                                                        "doApplyScale"      : self.doApplyScale,
+                                                                        "isLamps"           : self.isLamps
+                                                                    })
                         #write .fus file
                         print('writing to file: ' + self.filepath + '----')
                         with open(self.filepath,'wb') as file:
