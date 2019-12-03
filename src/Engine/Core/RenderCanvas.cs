@@ -167,6 +167,7 @@ namespace Fusee.Engine.Core
                 // pre-rendering
                 Network.Instance.OnUpdateFrame();
                 Input.Instance.PreRender();
+                AssetManager.Instance.OnUpdateFrame();
                 Time.Instance.DeltaTimeIncrement = CanvasImplementor.DeltaTime;
 
                 // rendering

@@ -1,14 +1,14 @@
-﻿using System;
+﻿using Fusee.Base.Common;
+using System;
 using System.Collections.Generic;
 using System.Net.Http;
-using System.Text;
 
 namespace Fusee.Base.Core
 {
     /// <summary>
     /// Class to load data over HTTP asynchronously and process it according to AsyncAssetHandlers.
     /// </summary>
-    public class AsyncHttpAsset
+    public class AsyncHttpAsset<T> : IAssetProviderAsync
     {
         private static readonly Dictionary<Type, AsyncAssetDecoder> _assetHandlers = new Dictionary<Type, AsyncAssetDecoder>()
         {
@@ -54,14 +54,9 @@ namespace Fusee.Base.Core
         public string Id { get; private set; }
 
         /// <summary>
-        /// Type of the asset.
-        /// </summary>
-        public Type Type { get; private set; }
-
-        /// <summary>
         /// Content of the asset.
         /// </summary>
-        public object Content { get; private set; }
+        public T Content { get; private set; }
 
         /// <summary>
         /// State of the asset.
@@ -84,21 +79,16 @@ namespace Fusee.Base.Core
         /// <param name="id"></param>
         /// <param name="type"></param>
         /// <param name="startLoad">If true, starts loading immediately, otherwise call StartGet() to start loading the asset.</param>
-        public AsyncHttpAsset(string id, Type type = null, bool startLoad = true)
+        public AsyncHttpAsset(string id, bool startLoad = true)
         {
-            if (type == null)
-                type = typeof(byte[]);
-
             Id = id;
-            Type = type;
 
             onDone += AsyncHttpAsset_onDone;
             onFail += AsyncHttpAsset_onFail;
 
-            if (!_assetHandlers.ContainsKey(Type))
+            if (!_assetHandlers.ContainsKey(typeof(T)))
             {
-                Diagnostics.Warn(this.GetType() + " does not contain an AssetHandler for type " + Type + " returning data as " + typeof(byte[]));
-                Type = typeof(byte[]);
+                Diagnostics.Log(this.GetType() + " does not contain an AssetHandler for type " + typeof(T));
             }
 
             State = AsyncAssetState.None;
@@ -115,7 +105,7 @@ namespace Fusee.Base.Core
         /// <param name="onDone"></param>
         /// <param name="onFail"></param>
         /// <param name="startLoad">If true, starts loading immediately, otherwise call StartGet() to start loading the asset.</param>
-        public AsyncHttpAsset(string id, Type type, EventHandler onDone, EventHandler onFail, bool startLoad = true) : this(id, type, startLoad)
+        public AsyncHttpAsset(string id, EventHandler onDone, EventHandler onFail, bool startLoad = true) : this(id, startLoad)
         {
             this.onDone += onDone;
             this.onFail += onFail;
@@ -128,7 +118,7 @@ namespace Fusee.Base.Core
 
         private void AsyncHttpAsset_onFail(object sender, EventArgs e)
         {
-            Diagnostics.Debug("Download " + ((AsyncHttpAsset)sender).Id + " Failed");
+            Diagnostics.Log("Download " + ((AsyncHttpAsset)sender).Id + " Failed");
         }
 
         /// <summary>
@@ -170,15 +160,15 @@ namespace Fusee.Base.Core
         {
             State = AsyncAssetState.Processing;
 
-            if (_assetHandlers.ContainsKey(Type))
+            if (_assetHandlers.ContainsKey(typeof(T)))
             {
-                _assetHandlers[Type](Id, data, this.DoneCallback);
+                _assetHandlers[typeof(T)](Id, data, this.DoneCallback);
             }
         }
 
         private void DoneCallback(object content)
         {
-            Content = content;
+            Content = (T)content;
             this.State = AsyncAssetState.Done;
             onDone?.Invoke(this, EventArgs.Empty);
         }
