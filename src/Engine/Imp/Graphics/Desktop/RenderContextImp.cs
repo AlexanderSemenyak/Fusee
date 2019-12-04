@@ -706,7 +706,7 @@ namespace Fusee.Engine.Imp.Graphics.Desktop
         /// <param name="flags">The flags.</param>
         public void Clear(ClearFlags flags)
         {
-            GL.Clear((ClearBufferMask)flags);
+            GL.Clear((ClearBufferMask)flags); 
         }
 
         /// <summary>
