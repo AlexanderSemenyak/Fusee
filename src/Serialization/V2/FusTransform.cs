@@ -27,6 +27,6 @@ namespace Fusee.Serialization.V2
         public float3 Scale = float3.One;
         #endregion
 
-
+        internal override void Accept(FusVisitor fusVisitor) => fusVisitor.Visit(this);
     }
 }

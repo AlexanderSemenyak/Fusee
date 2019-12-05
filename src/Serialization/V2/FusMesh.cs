@@ -98,6 +98,8 @@ namespace Fusee.Serialization.V2
         [ProtoMember(11)]
         public int MeshType = 0;
         #endregion
+
+        internal override void Accept(FusVisitor fusVisitor) => fusVisitor.Visit(this);
     }
 
 }

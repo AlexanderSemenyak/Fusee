@@ -1,4 +1,5 @@
 ﻿using ProtoBuf;
+using System;
 using System.Collections.Generic;
 
 namespace Fusee.Serialization.V2
@@ -40,8 +41,30 @@ namespace Fusee.Serialization.V2
         /// </summary>
         [ProtoMember(5)]
         public List<FusNode> Children;
-        #region Payload
+        #endregion Payload
 
-        
+
+        internal int GetComponentIndex(FusComponent component)
+        {
+            if (ComponentList == null)
+                ComponentList = new List<FusComponent>();
+            int inx = ComponentList.FindIndex(comp => comp == component);
+            if (inx < 0)
+                inx = ComponentList.Count;
+            ComponentList.Add(component);
+            switch (component)
+            {
+                case FusMesh mesh:
+                    MeshList.Add(inx);
+                    break;
+                case FusTransform xform:
+                    TransformList.Add(inx);
+                    break;
+                case FusMaterial mat:
+                    MaterialList.Add(inx);
+                    break;
+            }
+            return inx;
+        }
     }
 }

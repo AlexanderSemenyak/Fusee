@@ -62,8 +62,8 @@ namespace Fusee.Serialization
         public FusHeader Header;
 
         /// <summary>
-        /// The file contents. Check and cast to the concrete type to access it, e. g. using a C# 7.0 pattern matching in switch expression.
-        /// <seealso cref="https://docs.microsoft.com/en-us/dotnet/csharp/pattern-matching"/>.
+        /// The file contents. Check and cast to the concrete type to access it, e. g. using a C# 7.0 
+        /// <a href="https://docs.microsoft.com/en-us/dotnet/csharp/pattern-matching">pattern matching in switch expression</a>.
         /// </summary>
         [ProtoMember(2)]
         public FusContents Contents;

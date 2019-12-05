@@ -142,6 +142,8 @@ namespace Fusee.Serialization.V2
         [ProtoMember(4)]
         public BumpChannelContainer Bump;
         #endregion
+
+        internal override void Accept(FusVisitor fusVisitor) => fusVisitor.Visit(this);
     }
 
 }
