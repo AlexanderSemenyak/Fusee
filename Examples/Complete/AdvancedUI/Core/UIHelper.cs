@@ -32,31 +32,31 @@ namespace Fusee.Examples.AdvancedUI.Core
         internal static float2 AnnotationDim = new float2(3f, 0.5f);
         internal static float4 AnnotationBorderThickness = new float4(6, 0.5f, 0.5f, 0.5f);
 
-        internal static string VsTex = AssetStorage.Get<string>("texture.vert");
-        internal static string PsTex = AssetStorage.Get<string>("texture.frag");
-        internal static string VsNineSlice = AssetStorage.Get<string>("nineSlice.vert");
-        internal static string PsNineSlice = AssetStorage.Get<string>("nineSliceTile.frag");
+        internal static string VsTex;
+        internal static string PsTex;
+        internal static string VsNineSlice;
+        internal static string PsNineSlice;
 
-        internal static Font FontRaleway = AssetStorage.Get<Font>("Raleway-Regular.ttf");
-        internal static FontMap RalewayFontMap = new FontMap(FontRaleway, 12);
+        internal static Font FontRaleway;
+        internal static FontMap RalewayFontMap;
 
         internal static float alphaInv = 0.5f;
         internal static float alphaVis = 1f;
 
-        internal static readonly float4 Green = new float4(0.14117f, 0.76078f, 0.48627f, alphaVis);
-        internal static readonly float4 Yellow = new float4(0.89411f, 0.63137f, 0.31372f, alphaVis);
-        internal static readonly float4 Gray = new float4(0.47843f, 0.52549f, 0.54901f, alphaVis);
+        internal static float4 Green = new float4(0.14117f, 0.76078f, 0.48627f, alphaVis);
+        internal static float4 Yellow = new float4(0.89411f, 0.63137f, 0.31372f, alphaVis);
+        internal static float4 Gray = new float4(0.47843f, 0.52549f, 0.54901f, alphaVis);
 
-        internal static readonly float4 White = new float4(1, 1, 1, 1);
+        internal static float4 White = new float4(1, 1, 1, 1);
 
-        private static readonly Texture _frameToCheck = new Texture(AssetStorage.Get<ImageData>("frame_yellow.png"));
-        private static readonly Texture _frameDiscarded = new Texture(AssetStorage.Get<ImageData>("frame_gray.png"));
-        private static readonly Texture _frameRecognizedMLOrConfirmed = new Texture(AssetStorage.Get<ImageData>("frame_green.png"));
+        private static Texture _frameToCheck;
+        private static Texture _frameDiscarded;
+        private static Texture _frameRecognizedMLOrConfirmed;
 
-        private static readonly Texture _iconToCheck = new Texture(AssetStorage.Get<ImageData>("lightbulb.png"));
-        private static readonly Texture _iconDiscarded = new Texture(AssetStorage.Get<ImageData>("minus-oktagon.png"));
-        private static readonly Texture _iconRecognizedML = new Texture(AssetStorage.Get<ImageData>("check-circle.png"));
-        private static readonly Texture _iconConfirmed = new Texture(AssetStorage.Get<ImageData>("check-circle_filled.png"));
+        private static Texture _iconToCheck;
+        private static Texture _iconDiscarded;
+        private static Texture _iconRecognizedML;
+        private static Texture _iconConfirmed;
 
         internal static ShaderEffect GreenEffect;
         internal static ShaderEffect YellowEffect;
@@ -71,6 +71,23 @@ namespace Fusee.Examples.AdvancedUI.Core
 
         private static async void CreateAsyncs()
         {
+            VsTex = await AssetStorage.GetAsync<string>("texture.vert");
+            PsTex = await AssetStorage.GetAsync<string>("texture.frag");
+            VsNineSlice = await AssetStorage.GetAsync<string>("nineSlice.vert");
+            PsNineSlice = await AssetStorage.GetAsync<string>("nineSliceTile.frag");
+
+            FontRaleway = await AssetStorage.GetAsync<Font>("Raleway-Regular.ttf");
+            RalewayFontMap = new FontMap(FontRaleway, 12);
+
+            _frameToCheck = new Texture(await AssetStorage.GetAsync<ImageData>("frame_yellow.png"));
+            _frameDiscarded = new Texture(await AssetStorage.GetAsync<ImageData>("frame_gray.png"));
+            _frameRecognizedMLOrConfirmed = new Texture(await AssetStorage.GetAsync<ImageData>("frame_green.png"));
+
+            _iconToCheck = new Texture(await AssetStorage.GetAsync<ImageData>("lightbulb.png"));
+            _iconDiscarded = new Texture(await AssetStorage.GetAsync<ImageData>("minus-oktagon.png"));
+            _iconRecognizedML = new Texture(await AssetStorage.GetAsync<ImageData>("check-circle.png"));
+            _iconConfirmed = new Texture(await AssetStorage.GetAsync<ImageData>("check-circle_filled.png"));
+
             GreenEffect = await ShaderCodeBuilder.MakeShaderEffect(Green, new float4(1, 1, 1, 1), 20, 0);
             YellowEffect = await ShaderCodeBuilder.MakeShaderEffect(Yellow, new float4(1, 1, 1, 1), 20, 0);
             GrayEffect = await ShaderCodeBuilder.MakeShaderEffect(Gray, new float4(1, 1, 1, 1), 20, 0);
