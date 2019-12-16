@@ -66,7 +66,7 @@ namespace Fusee.Base.Imp.WebAsm
                 Checker = id => true // If it's there, we can handle it...
             });
 
-          
+
         }
 
         /// <summary>
@@ -84,7 +84,7 @@ namespace Fusee.Base.Imp.WebAsm
             {
                 var response = httpClient.GetAsync(id);
                 return response.Result.Content.ReadAsStreamAsync().Result;
-            }            
+            }
         }
 
         /// <summary>
