@@ -55,7 +55,7 @@ namespace Fusee.Examples.SimpleDeferred.Core
         public override async Task<bool> Init()
         {
             _cameraPos = new float3(0, 20, -10);
-            _gui = CreateGui();
+            _gui = await CreateGui();
 
             // Create the interaction handler
             _sih = new SceneInteractionHandler(_gui);
@@ -65,9 +65,9 @@ namespace Fusee.Examples.SimpleDeferred.Core
             _backgroundColorNight = new float4(0, 0, 0.05f, 1);
 
             // Load the rocket model
-            //_rocketScene = AssetStorage.Get<SceneContainer>("sponza.fus");
-            _rocketScene = AssetStorage.Get<SceneContainer>("sponza_wo_textures.fus");
-            //_rocketScene = AssetStorage.Get<SceneContainer>("shadowTest.fus");
+            //_rocketScene = await AssetStorage.GetAsync<SceneContainer>("sponza.fus");
+            _rocketScene = await AssetStorage.GetAsync<SceneContainer>("sponza_wo_textures.fus");
+            //_rocketScene = await AssetStorage.GetAsync<SceneContainer>("shadowTest.fus");
 
             //Add resize delegate
             var perspectiveProjComp = _rocketScene.Children[0].GetComponent<ProjectionComponent>();
@@ -312,10 +312,10 @@ namespace Fusee.Examples.SimpleDeferred.Core
             return viewMatrix;
         }
 
-        private SceneContainer CreateGui()
+        private async Task<SceneContainer> CreateGui()
         {
-            var vsTex = AssetStorage.Get<string>("texture.vert");
-            var psTex = AssetStorage.Get<string>("texture.frag");
+            var vsTex = await AssetStorage.GetAsync<string>("texture.vert");
+            var psTex = await AssetStorage.GetAsync<string>("texture.frag");
 
             var canvasWidth = Width / 100f;
             var canvasHeight = Height / 100f;
@@ -328,7 +328,7 @@ namespace Fusee.Examples.SimpleDeferred.Core
             btnFuseeLogo.OnMouseExit += BtnLogoExit;
             btnFuseeLogo.OnMouseDown += BtnLogoDown;
 
-            var guiFuseeLogo = new Texture(AssetStorage.Get<ImageData>("FuseeText.png"));
+            var guiFuseeLogo = new Texture(await AssetStorage.GetAsync<ImageData>("FuseeText.png"));
             var fuseeLogo = new TextureNodeContainer(
                 "fuseeLogo",
                 vsTex,
@@ -343,7 +343,7 @@ namespace Fusee.Examples.SimpleDeferred.Core
                 );
             fuseeLogo.AddComponent(btnFuseeLogo);
 
-            var fontLato = AssetStorage.Get<Font>("Lato-Black.ttf");
+            var fontLato = await AssetStorage.GetAsync<Font>("Lato-Black.ttf");
             var guiLatoBlack = new FontMap(fontLato, 18);
 
             var text = new TextNodeContainer(
