@@ -16,12 +16,15 @@ namespace Fusee.Engine.Core
     /// Use a Scene Renderer to traverse a scene hierarchy (made out of scene nodes and components) in order
     /// to have each visited element contribute to the result rendered against a given render context.
     /// </summary>
-    public partial class SceneRendererForward : SceneVisitor
+    public class SceneRendererForward : SceneVisitor<SceneNodeContainer, SceneComponentContainer>
     {
         private int _numberOfLights;
 
         ///Is set to true if a light was added or removed from the scene.
         protected bool HasNumberOfLightsChanged;
+
+        SceneNodeContainer CurrentSceneNode => (SceneNodeContainer) CurrentNode;
+        SceneComponentContainer CurrentSceneComponent => (SceneComponentContainer) CurrentComponent;
 
         /// <summary>
         /// Light results, collected from the scene in the Viserator.
@@ -109,7 +112,7 @@ namespace Fusee.Engine.Core
                 };
             }
             // if there is no light in scene then add one (legacyMode)
-            _lightResults.Add(new Tuple<SceneNodeContainer, LightResult>((CurrentNode == null ? new SceneNodeContainer() : CurrentNode), new LightResult(_legacyLight)
+            _lightResults.Add(new Tuple<SceneNodeContainer, LightResult>((CurrentSceneNode == null ? new SceneNodeContainer() : CurrentSceneNode), new LightResult(_legacyLight)
             {
 
                 Rotation = float4x4.Identity,
@@ -139,7 +142,7 @@ namespace Fusee.Engine.Core
         {
             _animation = new Animation();
 
-            foreach (AnimationComponent ac in sc.Children.FindComponents<AnimationComponent>(c => true))
+            foreach (AnimationComponent ac in sc.Children.FindComponents<SceneNodeContainer, AnimationComponent>(c => true))
             {
                 if (ac.AnimationTracks != null)
                 {
@@ -311,7 +314,7 @@ namespace Fusee.Engine.Core
         [VisitMethod]
         public void RenderBone(BoneComponent bone)
         {
-            SceneNodeContainer boneContainer = CurrentNode;
+            SceneNodeContainer boneContainer = CurrentSceneNode;
 
             var trans = boneContainer.GetGlobalTranslation();
             var rot = boneContainer.GetGlobalRotation();
@@ -536,7 +539,7 @@ namespace Fusee.Engine.Core
         {
             if (!mesh.Active) return;
 
-            WeightComponent wc = CurrentNode.GetWeights();
+            WeightComponent wc = CurrentSceneNode.GetWeights();
             if (wc != null)
                 AddWeightComponentToMesh(mesh, wc);
 
@@ -548,7 +551,7 @@ namespace Fusee.Engine.Core
         /// </summary>
         protected void AccumulateLight()
         {
-           LightViseratorResults = _sc.Children.Viserate<LightViserator, Tuple<SceneNodeContainer, LightResult>>().ToList();
+           LightViseratorResults = _sc.Children.Viserate<LightViserator, Tuple<SceneNodeContainer, LightResult>, SceneNodeContainer, SceneComponentContainer>().ToList();
             
             if (LightViseratorResults.Count == 0)
                 SetDefaultLight();

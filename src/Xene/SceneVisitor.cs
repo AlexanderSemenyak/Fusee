@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
-using Fusee.Serialization;
 
 namespace Fusee.Xene
 {
@@ -16,8 +15,8 @@ namespace Fusee.Xene
     {
     }
 
-    internal delegate void VisitNodeMethod(SceneVisitor visitor, SceneNodeContainer node);
-    internal delegate void VisitComponentMethod(SceneVisitor visitor, SceneComponentContainer component);
+    internal delegate void VisitNodeMethod<TNode, TComponent>(SceneVisitor<TNode, TComponent> visitor, TNode node) where TNode : class, INode where TComponent : class, IComponent;
+    internal delegate void VisitComponentMethod<TNode, TComponent>(SceneVisitor<TNode, TComponent> visitor, TComponent component) where TNode : class, INode where TComponent : class, IComponent;
 
     /// <summary>
     /// Static class containing helper methods around the SceneVisitor
@@ -31,7 +30,7 @@ namespace Fusee.Xene
         /// </summary>
         /// <param name="root">The root to enumerate.</param>
         /// <returns>An enumerator yielding only one element: the node passed as root.</returns>
-        public static IEnumerator<SceneNodeContainer> SingleRootEnumerator(SceneNodeContainer root)
+        public static IEnumerator<TNode> SingleRootEnumerator<TNode>(TNode root)
         {
             yield return root;
         }
@@ -43,7 +42,7 @@ namespace Fusee.Xene
         /// </summary>
         /// <param name="root">The root to enumerate.</param>
         /// <returns>An enumerable yielding only one element: the node passed as root.</returns>
-        public static IEnumerable<SceneNodeContainer> SingleRootEnumerable(SceneNodeContainer root)
+        public static IEnumerable<TNode> SingleRootEnumerable<TNode>(TNode root)
         {
             yield return root;
         }
@@ -52,14 +51,14 @@ namespace Fusee.Xene
 
     internal class VisitorCallerFactory
     {
-        public static VisitComponentMethod MakeComponentVisitor(MethodInfo info)
+        public static VisitComponentMethod<TNode, TComponent> MakeComponentVisitor<TNode, TComponent>(MethodInfo info) where TNode : class, INode where TComponent : class, IComponent
         {
-            return delegate (SceneVisitor visitor, SceneComponentContainer component) { info.Invoke(visitor, new object[] { component }); };
+            return delegate (SceneVisitor<TNode, TComponent> visitor, TComponent component) { info.Invoke(visitor, new object[] { component }); };
         }
 
-        public static VisitNodeMethod MakeNodeVistor(MethodInfo info)
+        public static VisitNodeMethod<TNode, TComponent> MakeNodeVistor<TNode, TComponent>(MethodInfo info) where TNode : class, INode where TComponent : class, IComponent
         {
-            return delegate (SceneVisitor visitor, SceneNodeContainer node) { info.Invoke(visitor, new object[] { node }); };
+            return delegate (SceneVisitor<TNode, TComponent> visitor, TNode node) { info.Invoke(visitor, new object[] { node }); };
         }
 
     }
@@ -76,17 +75,17 @@ namespace Fusee.Xene
     /// Visitors derived from this class may implement
     /// their own Visit methods for all kinds of scene graph elements. Visitor methods can be defined for scene nodes (although many implementations
     /// will most likely NOT have a very big inheritance tree for nodes) as well as for scene components.
-    /// A Visitor method can be any instance method (not static) taking one parameter either derived from <see cref="SceneNodeContainer"/> or derived from
-    /// <see cref="SceneComponentContainer"/>. To mark such a method as a Visitor method it needs to be decorated with the <see cref="VisitMethodAttribute"/> 
+    /// A Visitor method can be any instance method (not static) taking one parameter either derived from <see cref="INode"/> or derived from
+    /// <see cref="IComponent"/>. To mark such a method as a Visitor method it needs to be decorated with the <see cref="VisitMethodAttribute"/> 
     /// attribute. Visitor methods can have arbitrary names and don't necessarily need to be virtual. 
     /// </summary>
-    public class SceneVisitor
+    public class SceneVisitor<TNode, TComponent> where TNode : class, INode where TComponent : class, IComponent
     {
         #region Declarative stuff
         internal class VisitorSet
         {
-            public Dictionary<Type, VisitNodeMethod> Nodes = new Dictionary<Type, VisitNodeMethod>();
-            public Dictionary<Type, VisitComponentMethod> Components = new Dictionary<Type, VisitComponentMethod>();
+            public Dictionary<Type, VisitNodeMethod<TNode, TComponent>> Nodes = new Dictionary<Type, VisitNodeMethod<TNode, TComponent>>();
+            public Dictionary<Type, VisitComponentMethod<TNode, TComponent>> Components = new Dictionary<Type, VisitComponentMethod<TNode, TComponent>>();
         }
 
 
@@ -104,7 +103,7 @@ namespace Fusee.Xene
         /// traversal from the specified root.
         /// </summary>
         /// <param name="rootNode">The root node where to start the traversal.</param>
-        public void Traverse(SceneNodeContainer rootNode)
+        public void Traverse(TNode rootNode)
         {
             if (rootNode == null)
                 return;
@@ -123,7 +122,7 @@ namespace Fusee.Xene
         /// over the list starting with the first node in the list.
         /// </summary>
         /// <param name="children">The list of nodes to traverse over.</param>
-        public void Traverse(IEnumerable<SceneNodeContainer> children)
+        public void Traverse(IEnumerable<TNode> children)
         {
             if (children == null)
                 return;
@@ -189,7 +188,7 @@ namespace Fusee.Xene
         /// <value>
         /// The current node.
         /// </value>
-        protected SceneNodeContainer CurrentNode { get; private set; }
+        protected TNode CurrentNode { get; private set; }
 
         /// <summary>
         /// Returns the currently visited component during a traversal.
@@ -197,7 +196,7 @@ namespace Fusee.Xene
         /// <value>
         /// The current component.
         /// </value>
-        protected SceneComponentContainer CurrentComponent { get; private set; }
+        protected TComponent CurrentComponent { get; private set; }
         #endregion
 
         #region Enumeration Building Blocks
@@ -222,9 +221,9 @@ namespace Fusee.Xene
         ///   <c>true</c> if the current enumeration should yield; otherwise, <c>false</c>.
         /// </value>
         protected bool YieldEnumeration { get { return YieldOnCurrentComponent || YieldOnCurrentNode; } }
-        private Stack<IEnumerator<SceneNodeContainer>> _nodeEnumeratorStack;
-        private IEnumerator<SceneNodeContainer> _curNodeEnumerator;
-        private IEnumerator<SceneComponentContainer> _curCompEnumerator;
+        private Stack<IEnumerator<INode>> _nodeEnumeratorStack;
+        private IEnumerator<INode> _curNodeEnumerator;
+        private IEnumerator<IComponent> _curCompEnumerator;
 
 
         /// <summary>
@@ -232,7 +231,7 @@ namespace Fusee.Xene
         /// initialize the traversing enumeration on a list of (root) nodes.
         /// </summary>
         /// <param name="nodes">The list of nodes.</param>
-        protected void EnumInit(IEnumerator<SceneNodeContainer> nodes)
+        protected void EnumInit(IEnumerator<TNode> nodes)
         {
             if (nodes == null)
                 return;
@@ -243,17 +242,20 @@ namespace Fusee.Xene
             YieldOnCurrentComponent = false;
 
             if (_nodeEnumeratorStack == null)
-                _nodeEnumeratorStack = new Stack<IEnumerator<SceneNodeContainer>>();
+                _nodeEnumeratorStack = new Stack<IEnumerator<INode>>();
             _nodeEnumeratorStack.Clear();
 
             InitState();
-            nodes.Reset();
+            // no need to Reset() IEnumerators on start. In Fact, compiler-generated enumerators using yield
+            // will throw a NotSupportedException."
+            // See https://docs.microsoft.com/en-us/dotnet/api/system.collections.ienumerator.reset?view=netcore-3.1:
+            // nodes.Reset();
             _curNodeEnumerator = nodes;
         }
 
         /// <summary>
         /// This method implements a re-entrant (in terms of yield, not multi-threading) non-recursive traversal over combined node and component trees.
-        /// Call this method in derived classes implementing enumerators, like in the various find extension methods or the <see cref="Viserator{TItem, TState}"/>
+        /// Call this method in derived classes implementing enumerators, like in the various find extension methods or the <see cref="Viserator{TItem, TState,TNode,TComponent}"/>
         /// </summary>
         /// <returns><c>true</c> if the enumerator was successfully advanced to the next element; <c>false</c> if the enumerator has passed the end of node-component-tree.</returns>
         protected bool EnumMoveNext()
@@ -274,12 +276,12 @@ namespace Fusee.Xene
 
                         // At the end of a Component List: If this node hasn't any children, PopState right now. 
                         // Otherwise PopState will be called after traversing the children list (see below).
-                        if (CurrentNode.Children == null)
+                        if (CurrentNode.EnumChildren == null)
                             PopState();
                     }
                     else
                     {
-                        CurrentComponent = _curCompEnumerator.Current;
+                        CurrentComponent = (TComponent) _curCompEnumerator.Current;
                         DoVisitComponent(CurrentComponent);
 
                         if (YieldEnumeration)
@@ -308,21 +310,21 @@ namespace Fusee.Xene
                             return false;
                         }
                     }
-                    CurrentNode = _curNodeEnumerator.Current;
+                    CurrentNode = (TNode) _curNodeEnumerator.Current;
                     PushState();
 
                     // Prepare to traverse children
-                    if (CurrentNode.Children != null)
+                    if (CurrentNode.EnumChildren != null)
                     {
-                        var childEnumerator = CurrentNode.Children.GetEnumerator();
+                        var childEnumerator = CurrentNode.EnumChildren.GetEnumerator();
                         _nodeEnumeratorStack.Push(_curNodeEnumerator);
                         _curNodeEnumerator = childEnumerator;
                     }
 
                     // Prepare to traverse components
-                    if (CurrentNode.Components != null)
+                    if (CurrentNode.EnumComponents != null)
                     {
-                        _curCompEnumerator = CurrentNode.Components.GetEnumerator();
+                        _curCompEnumerator = CurrentNode.EnumComponents.GetEnumerator();
                     }
 
                     // Traverse nodes
@@ -368,13 +370,13 @@ namespace Fusee.Xene
                         return false;
                     }
                 }
-                CurrentNode = _curNodeEnumerator.Current;
+                CurrentNode = (TNode) _curNodeEnumerator.Current;
                 PushState();
 
                 // Prepare to traverse children
-                if (CurrentNode.Children != null)
+                if (CurrentNode.EnumChildren != null)
                 {
-                    var childEnumerator = CurrentNode.Children.GetEnumerator();
+                    var childEnumerator = CurrentNode.EnumChildren.GetEnumerator();
                     _nodeEnumeratorStack.Push(_curNodeEnumerator);
                     _curNodeEnumerator = childEnumerator;
                 }
@@ -384,7 +386,7 @@ namespace Fusee.Xene
 
                 // If this node hasn't any children, PopState right now. 
                 // Otherwise PopState will be called after traversing the children list (see while statement above).
-                if (CurrentNode.Children == null)
+                if (CurrentNode.EnumChildren == null)
                     PopState();
 
                 if (YieldOnCurrentNode)
@@ -420,15 +422,15 @@ namespace Fusee.Xene
                     continue;
 
                 Type paramType = parameters[0].ParameterType;
-                if (typeof(SceneComponentContainer).IsAssignableFrom(paramType))
+                if (typeof(IComponent).IsAssignableFrom(paramType))
                 {
                     if (_visitors.Components.ContainsKey(paramType)) continue;
-                    _visitors.Components.Add(paramType, VisitorCallerFactory.MakeComponentVisitor(methodInfo));
+                    _visitors.Components.Add(paramType, VisitorCallerFactory.MakeComponentVisitor<TNode, TComponent>(methodInfo));
                 }
-                else if (typeof(SceneNodeContainer).IsAssignableFrom(paramType))
+                else if (typeof(TNode).IsAssignableFrom(paramType))
                 {
                     if (_visitors.Nodes.ContainsKey(paramType)) continue;
-                    _visitors.Nodes.Add(paramType, VisitorCallerFactory.MakeNodeVistor(methodInfo));
+                    _visitors.Nodes.Add(paramType, VisitorCallerFactory.MakeNodeVistor<TNode, TComponent>(methodInfo));
                 }
             }
             _visitorMap.Add(myType, _visitors);
@@ -467,7 +469,7 @@ namespace Fusee.Xene
         }
 
 
-        private void DoTraverseNoComponents(SceneNodeContainer node)
+        private void DoTraverseNoComponents(TNode node)
         {
             CurrentNode = node;
             PushState();
@@ -476,18 +478,18 @@ namespace Fusee.Xene
 
             // DO NOT visit components
 
-            if (node.Children != null)
+            if (node.EnumChildren != null)
             {
-                foreach (var child in node.Children)
+                foreach (var child in node.EnumChildren)
                 {
-                    DoTraverseNoComponents(child);
+                    DoTraverseNoComponents((TNode) child);
                 }
             }
             PopState();
             CurrentNode = null;
         }
 
-        private void DoTraverse(SceneNodeContainer node)
+        private void DoTraverse(TNode node)
         {
             CurrentNode = node;
             PushState();
@@ -496,24 +498,24 @@ namespace Fusee.Xene
 
             DoVisitComponents(node);
 
-            if (node.Children != null)
+            if (node.EnumChildren != null)
             {
-                foreach (var child in node.Children)
+                foreach (var child in node.EnumChildren)
                 {
-                    DoTraverse(child);
+                    DoTraverse((TNode) child);
                 }
             }
             PopState();
             CurrentNode = null;
         }
 
-        private void DoVisitComponents(SceneNodeContainer node)
+        private void DoVisitComponents(TNode node)
         {
             // Are there any components at all?
-            if (node.Components == null)
+            if (node.EnumComponents == null)
                 return;
             // Visit each component
-            foreach (var component in node.Components)
+            foreach (TComponent component in node.EnumComponents)
             {
                 CurrentComponent = component;
                 DoVisitComponent(component);
@@ -521,9 +523,9 @@ namespace Fusee.Xene
             }
         }
 
-        private void DoVisitComponent(SceneComponentContainer component)
+        private void DoVisitComponent(TComponent component)
         {
-            VisitComponentMethod visitComponent;
+            VisitComponentMethod<TNode, TComponent> visitComponent;
             var compType = component.GetType();
 
             if (_visitors.Components.TryGetValue(compType, out visitComponent))
@@ -552,9 +554,9 @@ namespace Fusee.Xene
             }
         }
 
-        private void DoVisitNode(SceneNodeContainer node)
+        private void DoVisitNode(TNode node)
         {
-            VisitNodeMethod visitNode;
+            VisitNodeMethod<TNode, TComponent> visitNode;
             var nodeType = node.GetType();
 
             if (_visitors.Nodes.TryGetValue(nodeType, out visitNode))

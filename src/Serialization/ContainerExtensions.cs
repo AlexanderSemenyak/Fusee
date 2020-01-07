@@ -2,10 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using Fusee.Math.Core;
-using Fusee.Serialization;
 
 
-namespace Fusee.Xene
+namespace Fusee.Serialization
 {
     /// <summary>
     /// Static quick-hack helpers to access components within nodes and get local and global transformation matrices.

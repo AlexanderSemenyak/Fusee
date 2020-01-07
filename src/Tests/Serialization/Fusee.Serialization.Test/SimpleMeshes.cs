@@ -1,6 +1,6 @@
 ﻿using System;
-using Fusee.Engine.Core;
 using Fusee.Math.Core;
+
 
 namespace Fusee.Serialization.Test
 {

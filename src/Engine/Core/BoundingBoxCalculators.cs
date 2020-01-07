@@ -12,7 +12,7 @@ namespace Fusee.Engine.Core
     /// on scenes, list of scene nodes or individual scene nodes. Calculations always include any child nodes.
     /// </summary>
     // ReSharper disable once InconsistentNaming
-    public class OBBCalculator : SceneVisitor
+    public class OBBCalculator : SceneVisitor<SceneNodeContainer, SceneComponentContainer>
     {
         /// <summary>
         /// Contains the model view state while traversing the scene to generate the OBB.
@@ -68,7 +68,7 @@ namespace Fusee.Engine.Core
         /// <param name="snc">A single scene node to calculate an axis-aligned bounding box for.</param>
         public OBBCalculator(SceneNodeContainer snc)
         {
-            _sncList = SceneVisitorHelpers.SingleRootEnumerable(snc);
+            _sncList = (IEnumerable<SceneNodeContainer>) SceneVisitorHelpers.SingleRootEnumerable(snc);
         }
 
         /// <summary>
@@ -134,7 +134,7 @@ namespace Fusee.Engine.Core
     /// on scenes, list of scene nodes or individual scene nodes. Calculations always include any child nodes.
     /// </summary>
     // ReSharper disable once InconsistentNaming
-    public class AABBCalculator : SceneVisitor
+    public class AABBCalculator : SceneVisitor<SceneNodeContainer, SceneComponentContainer>
     {
         /// <summary>
         /// Contains the model view state while traversing the scene to generate the ABB.
@@ -191,7 +191,7 @@ namespace Fusee.Engine.Core
         /// <param name="snc">A single scene node to calculate an axis-aligned bounding box for.</param>
         public AABBCalculator(SceneNodeContainer snc)
         {
-            _sncList = SceneVisitorHelpers.SingleRootEnumerable(snc);
+            _sncList = (IEnumerable<SceneNodeContainer>) SceneVisitorHelpers.SingleRootEnumerable(snc);
         }
 
         /// <summary>

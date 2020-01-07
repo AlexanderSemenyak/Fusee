@@ -29,7 +29,7 @@ namespace Fusee.Engine.Core
         }
     }
 
-    internal class ProjectionViserator : Viserator<ProjectionComponent, LightViseratorState>
+    internal class ProjectionViserator : Viserator<ProjectionComponent, LightViseratorState, SceneNodeContainer, SceneComponentContainer>
     {
         protected override void InitState()
         {

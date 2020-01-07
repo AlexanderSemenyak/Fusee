@@ -154,7 +154,7 @@ namespace Fusee.Engine.Core
     /// <summary>
     /// Implements the scene picker.
     /// </summary>
-    public class ScenePicker : Viserator<PickResult, ScenePicker.PickerState>
+    public class ScenePicker : Viserator<PickResult, ScenePicker.PickerState, SceneNodeContainer, SceneComponentContainer>
     {
         private CanvasTransformComponent _ctc;
 
@@ -360,7 +360,7 @@ namespace Fusee.Engine.Core
                     YieldItem(new PickResult
                     {
                         Mesh = mesh,
-                        Node = CurrentNode,
+                        Node = (SceneNodeContainer) CurrentNode,
                         Triangle = i,
                         Model = State.Model,
                         View = this.View,

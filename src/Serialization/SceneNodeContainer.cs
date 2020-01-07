@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using Fusee.Math.Core;
+using Fusee.Xene;
 using ProtoBuf;
 
 namespace Fusee.Serialization
@@ -24,7 +25,7 @@ namespace Fusee.Serialization
     /// </summary>
     [ProtoContract]
     [DebuggerDisplay("{Name,nq}, {(Components==null)? \"No\" : Components.Count.ToString(),nq} components, {(Children==null)? \"No\" : Children.Count.ToString(),nq} children")]
-    public class SceneNodeContainer
+    public class SceneNodeContainer : INode
     {
         /// <summary>
         /// The name.
@@ -53,6 +54,10 @@ namespace Fusee.Serialization
                 }
             }
         }
+
+        public IEnumerable<INode> EnumChildren => Children;
+
+        public IEnumerable<IComponent> EnumComponents => Components;
 
         private ChildList _children;
 

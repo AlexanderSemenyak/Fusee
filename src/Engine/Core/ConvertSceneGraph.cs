@@ -13,7 +13,7 @@ namespace Fusee.Engine.Core
     /// Use ConVSceneToHighLevel to create new high level graph from a low level graph (made out of scene nodes and components) in order
     /// to have each visited element converted and/or split into its high level, render-ready components.
     /// </summary>
-    public class ConvertSceneGraph : SceneVisitor
+    public class ConvertSceneGraph : SceneVisitor<SceneNodeContainer, SceneComponentContainer>
     {
         private SceneContainer _convertedScene;        
         private Stack<SceneNodeContainer> _predecessors;
@@ -50,11 +50,11 @@ namespace Fusee.Engine.Core
         public SceneContainer Convert(SceneContainer sc)
         {
             // check if the scene contains at least on light
-            _lightViseratorResults = sc.Children.Viserate<LightViserator, Tuple<SceneNodeContainer, LightResult>>().ToList();
+            _lightViseratorResults = sc.Children.Viserate<LightViserator, Tuple<SceneNodeContainer, LightResult>, SceneNodeContainer, SceneComponentContainer>().ToList();
             _numberOfLights = _lightViseratorResults.Count == 0 ? 1 : _lightViseratorResults.Count(); //Needed because the ShaderEffect is built here (when visiting a MaterialComponent).
 
             //TODO: if Projection Component has evolved to Camera Component - remove _projection and change the blender addon to translate a blender camera to a fusee camera if there is one in the blender scene.
-            var projectionComponents = sc.Children.Viserate<ProjectionViserator, ProjectionComponent>().ToList();
+            var projectionComponents = sc.Children.Viserate<ProjectionViserator, ProjectionComponent, SceneNodeContainer, SceneComponentContainer>().ToList();
             if (projectionComponents.Count == 0)
             {
                 var pc = new ProjectionComponent(ProjectionMethod.PERSPECTIVE, 1, 5000, M.PiOver4);
@@ -94,7 +94,7 @@ namespace Fusee.Engine.Core
             }
             else //Add first node to SceneContainer
             {
-                _predecessors.Push(new SceneNodeContainer { Name = CurrentNode.Name });
+                _predecessors.Push(new SceneNodeContainer { Name = ((SceneNodeContainer) CurrentNode).Name });
                 _currentNode = _predecessors.Peek();
                 if(_convertedScene.Children != null)
                     _convertedScene.Children.Add(_currentNode);

@@ -1,4 +1,5 @@
-﻿using ProtoBuf;
+﻿using Fusee.Xene;
+using ProtoBuf;
 
 namespace Fusee.Serialization
 {
@@ -33,7 +34,7 @@ namespace Fusee.Serialization
     [ProtoInclude(105, typeof(AnimationComponent))]
     [ProtoInclude(106, typeof(BoneComponent))]
     
-    public class SceneComponentContainer
+    public class SceneComponentContainer : IComponent
     {
         /// <summary>
         /// The name of this component.

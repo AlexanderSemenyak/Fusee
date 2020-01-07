@@ -7,7 +7,7 @@
     /// <see cref="N:Fusee.Serialization"/>. 
     /// </para>
     /// <para>
-    /// The core of this module is the <see cref="SceneVisitor"/> class implementing
+    /// The core of this module is the <see cref="SceneVisitor{TNode,TComponent}"/> class implementing
     /// a visitor pattern to traverse scene graphs for various use cases such as
     /// <list type="bullet">
     ///   <item>Rendering</item>

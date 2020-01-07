@@ -3,15 +3,16 @@ using Xunit;
 using Fusee.Math.Core;
 using Fusee.Serialization;
 using System.Collections.Generic;
-using Fusee.Engine.Core;
 using System.IO;
+using System.Linq;
+using Fusee.Xene;
 
 namespace Fusee.Serialization.Test
 {
     public class SimpleSerialization
     {
         [Fact]
-        public void SimpleScene()
+        public void V1_SimpleScene()
         {
             SceneContainer scene = new SceneContainer
             {
@@ -67,4 +68,6 @@ namespace Fusee.Serialization.Test
             Assert.Equal(streamOrig.GetBuffer(), streamCopy.GetBuffer());
         }
     }
+
 }
+

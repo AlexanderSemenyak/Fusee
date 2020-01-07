@@ -20,5 +20,6 @@
   <ItemGroup>
     <ProjectReference Include="$(FuseeEngineRoot)\src\Math\Core\Fusee.Math.Core.csproj" />
     <ProjectReference Include="$(FuseeEngineRoot)\src\Base\Common\Fusee.Base.Common.csproj" />
+    <ProjectReference Include="..\Xene\Fusee.Xene.csproj" />
   </ItemGroup>
 </Project>

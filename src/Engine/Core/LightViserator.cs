@@ -135,7 +135,7 @@ namespace Fusee.Engine.Core
         }
     }
 
-    internal class LightViserator : Viserator<Tuple<SceneNodeContainer, LightResult>, LightViseratorState>
+    internal class LightViserator : Viserator<Tuple<SceneNodeContainer, LightResult>, LightViseratorState, SceneNodeContainer, SceneComponentContainer>
     {         
         protected override void InitState()
         {
@@ -158,7 +158,7 @@ namespace Fusee.Engine.Core
                 WorldSpacePos = new float3(State.Model.M14, State.Model.M24, State.Model.M34)
             };
 
-            YieldItem(new Tuple<SceneNodeContainer, LightResult>(CurrentNode, lightResult));
+            YieldItem(new Tuple<SceneNodeContainer, LightResult>((SceneNodeContainer) CurrentNode, lightResult));
         }
     }
    
