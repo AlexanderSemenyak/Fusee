@@ -11,6 +11,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Net;
 using System.Reflection;
+using System.Threading.Tasks;
 using Path = System.IO.Path;
 
 namespace Fusee.Tools.fuseeCmdLine
@@ -179,24 +180,33 @@ namespace Fusee.Tools.fuseeCmdLine
                 new AssetHandler
                 {
                     ReturnedType = typeof(Font),
-                    Decoder = delegate (string id, object storage)
+                    Decoder = (string id, object storage) =>
                     {
-                        if (!Path.GetExtension(id).ToLower().Contains("ttf")) return null;
+                        if (!Path.GetExtension(id).Contains("ttf", StringComparison.OrdinalIgnoreCase)) return null;
                         return new Font { _fontImp = new FontImp((Stream)storage) };
                     },
-                    Checker = id => Path.GetExtension(id).ToLower().Contains("ttf")
+                    DecoderAsync = async (string id, object storage) =>
+                    {
+                        if (!Path.GetExtension(id).Contains("ttf", StringComparison.OrdinalIgnoreCase)) return null;
+                        return await Task.Factory.StartNew(() => new Font { _fontImp = new FontImp((Stream)storage) });
+                    },
+                    Checker = id => Path.GetExtension(id).Contains("ttf", StringComparison.OrdinalIgnoreCase)
                 });
             fap.RegisterTypeHandler(
                 new AssetHandler
                 {
                     ReturnedType = typeof(SceneContainer),
-                    Decoder = delegate (string id, object storage)
+                    Decoder = (string id, object storage) =>
                     {
-                        if (!Path.GetExtension(id).ToLower().Contains("fus")) return null;
-
+                        if (!Path.GetExtension(id).Contains("fus", StringComparison.OrdinalIgnoreCase)) return null;
                         return Serializer.DeserializeSceneContainer((Stream)storage);
                     },
-                    Checker = id => Path.GetExtension(id).ToLower().Contains("fus")
+                    DecoderAsync = async (string id, object storage) =>
+                    {
+                        if (!Path.GetExtension(id).Contains("fus", StringComparison.OrdinalIgnoreCase)) return null;
+                        return await Task.Factory.StartNew(() => Serializer.DeserializeSceneContainer((Stream)storage));
+                    },
+                    Checker = id => Path.GetExtension(id).Contains("fus", StringComparison.OrdinalIgnoreCase)
                 });
 
             AssetStorage.RegisterProvider(fap);
