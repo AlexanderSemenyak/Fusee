@@ -35,7 +35,7 @@ namespace FuseeApp
         private bool _keys;
 
         // Init is called on startup. 
-        public override void Init()
+        public override async Task<bool> Init()
         {
             // Set the clear color for the backbuffer to white (100% intensity in all color channels R, G, B, A).
             RC.ClearColor = new float4(1, 1, 1, 1);
@@ -45,6 +45,8 @@ namespace FuseeApp
             
             // Wrap a SceneRenderer around the model.
             _sceneRenderer = new SceneRendererForward(_rocketScene);
+
+            return true;
         }
 
         // RenderAFrame is called once a frame
