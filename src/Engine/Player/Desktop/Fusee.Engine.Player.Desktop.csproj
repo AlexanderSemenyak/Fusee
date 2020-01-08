@@ -1,23 +1,17 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <RootNamespace>Fusee.Engine.Player.Desktop</RootNamespace>
-    <PackageId>Fusee.Engine.Player.Desktop</PackageId>
     <TargetFramework>netcoreapp3.0</TargetFramework>
-    <OutputType>Exe</OutputType>
-    <ApplicationIcon>FuseeLogo.ico</ApplicationIcon>
+    <OutputType>WinExe</OutputType>
     <IsPackable>false</IsPackable>
     <PublishSingleFile>true</PublishSingleFile>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <OutputPath>$(BaseOutputPath)\Player\Desktop\</OutputPath>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
     <PublishTrimmed>true</PublishTrimmed>
   </PropertyGroup>
   
-  <PropertyGroup>
-    <OutputPath>$(BaseOutputPath)\Player\Desktop\</OutputPath>
-  </PropertyGroup>
-    
   <ItemGroup>
     <ProjectReference Include="$(FuseeEngineRoot)\src\Base\Imp\Desktop\Fusee.Base.Imp.Desktop.csproj">
       <PrivateAssets>analyzers</PrivateAssets>

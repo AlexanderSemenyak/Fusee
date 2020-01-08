@@ -1,19 +1,15 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp3.0</TargetFramework>
-    <AssemblyName>fusee</AssemblyName>
     <PackageId>Fusee.Tools.CmdLine</PackageId>
-    <RootNamespace>Fusee.Tools.fuseeCmdLine</RootNamespace>
+    <AssemblyName>fusee</AssemblyName>
+    <TargetFramework>netcoreapp3.0</TargetFramework>
+    <OutputType>Exe</OutputType>
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>fusee</ToolCommandName>
     <PackageTags>dotnet;tools;fusee</PackageTags>
-  </PropertyGroup>
-  
-  <PropertyGroup>
     <OutputPath>$(BaseOutputPath)\Tools\CmdLine</OutputPath>
   </PropertyGroup>
-
+  
   <ItemGroup>
     <Content Include="$(FuseeEngineRoot)\bin\$(Configuration)\Player\Desktop\win-x64\publish\Fusee.Engine.Player.Desktop.exe" Link="NuGet\Player.exe" PackagePath="tools\netcoreapp3.0\any\Player.exe" />
   </ItemGroup>
@@ -43,14 +39,12 @@
     <ProjectReference Include="$(FuseeEngineRoot)\src\Engine\Player\Core\Fusee.Engine.Player.Core.csproj">
       <PrivateAssets>analyzers</PrivateAssets>
     </ProjectReference>
+    <PackageReference Include="CommandLineParser" Version="2.7.82" />
+    <PackageReference Include="Google.Protobuf.Tools" Version="3.9.1" />
+    <PackageReference Include="Microsoft.Win32.Registry" Version="4.7.0" />
+    <PackageReference Include="System.Drawing.Common" Version="4.7.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="CommandLineParser" Version="2.6.0" />
-    <PackageReference Include="Google.Protobuf.Tools" Version="3.9.1" />
-    <PackageReference Include="Microsoft.Win32.Registry" Version="4.6.0" />
-  </ItemGroup>  
-  
   <!-- BUILD THE BLENDER ADDON (Re-Generate Python .fus Serialization code and build zip file)
 	 This code should be part of the respective .pyproj project file. Unforntunately .pyprojects
 	 don't do anything during "Build". Thus Post-Build steps are non functional. -->
@@ -59,7 +53,6 @@
     <BlenderAddOnProjectName>io_export_fus</BlenderAddOnProjectName>
     <BlenderAddonSourcePath>$(FuseeEngineRoot)\src\Tools\BlenderScripts\addons\$(BlenderAddOnProjectName)</BlenderAddonSourcePath>
     <BlenderAddonOutputPath>$(OutputPath)\BlenderScripts\addons</BlenderAddonOutputPath>
-    <ApplicationIcon>FuseeLogo.ico</ApplicationIcon>
   </PropertyGroup>
 
   <Target Name="BlenderAddonPostBuildStep" AfterTargets="Build">
