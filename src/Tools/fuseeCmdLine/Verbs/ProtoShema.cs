@@ -3,7 +3,7 @@ using Fusee.Serialization;
 using System;
 using System.IO;
 
-namespace Fusee.Tools.fuseeCmdLine
+namespace Fusee.Tools.CmdLine.Verbs
 {
     [Verb("protoschema", HelpText = "Output the protobuf schema for the .fus file format.")]
     internal class ProtoSchema
