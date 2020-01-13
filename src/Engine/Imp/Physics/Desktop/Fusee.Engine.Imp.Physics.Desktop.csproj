@@ -8,6 +8,8 @@
 
   <ItemGroup>
     <ProjectReference Include="$(FuseeEngineRoot)\src\Math\Core\Fusee.Math.Core.csproj" />
+    <ProjectReference Include="$(FuseeEngineRoot)\src\Engine\Imp\Physics\Common\Fusee.Engine.Imp.Physics.Common.csproj" />
+    <ProjectReference Include="$(FuseeEngineRoot)\src\Math\Core\Fusee.Math.Core.csproj" />
     <ProjectReference Include="$(FuseeEngineRoot)\src\Engine\Common\Fusee.Engine.Common.csproj" />
     <Reference Include="BulletSharp">
       <HintPath>$(FuseeEngineRoot)\ext\BulletSharp.dll</HintPath>
