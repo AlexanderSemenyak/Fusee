@@ -11,6 +11,7 @@ using static Fusee.Engine.Core.Time;
 using Fusee.Engine.GUI;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace FuseeApp
 {
