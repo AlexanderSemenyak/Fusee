@@ -100,7 +100,7 @@
       <Name>Fusee.Engine.Imp.Graphics.Android</Name>
     </ProjectReference>
     <ProjectReference Include="..\Core\Fusee.Examples.Camera.Core.csproj">
-      <Project>{e23994a2-8da9-408a-877a-71e7168fe25d}</Project>
+      <Project>{cab4a097-9cbc-4d31-8938-4a7b4a82750b}</Project>
       <Name>Fusee.Examples.Camera.Core</Name>
     </ProjectReference>
   </ItemGroup>

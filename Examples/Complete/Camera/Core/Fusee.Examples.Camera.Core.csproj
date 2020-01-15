@@ -1,11 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <RootNamespace>Fusee.Examples.Camera.Core</RootNamespace>
-    <PackageId>Fusee.Examples.Camera.Core</PackageId>
     <TargetFramework>netstandard2.0</TargetFramework>
-  </PropertyGroup>
-
-  <PropertyGroup>
     <OutputPath>$(BaseOutputPath)\Examples\Camera\Core\</OutputPath>
   </PropertyGroup>
 
@@ -19,6 +14,7 @@
     <ProjectReference Include="$(FuseeEngineRoot)\src\Engine\Common\Fusee.Engine.Common.csproj" />
     <ProjectReference Include="$(FuseeEngineRoot)\src\Engine\Core\Fusee.Engine.Core.csproj" />
     <ProjectReference Include="$(FuseeEngineRoot)\src\Engine\GUI\Fusee.Engine.GUI.csproj" />
+    <ProjectReference Include="$(FuseeEngineRoot)\src\Jometri\Fusee.Jometri.csproj" />
     <ProjectReference Include="$(FuseeEngineRoot)\src\Math\Core\Fusee.Math.Core.csproj" />
     <ProjectReference Include="$(FuseeEngineRoot)\src\Serialization\Fusee.Serialization.csproj" />
     <ProjectReference Include="$(FuseeEngineRoot)\src\Xene\Fusee.Xene.csproj" />
