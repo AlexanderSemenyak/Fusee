@@ -14,9 +14,10 @@
     <OutputPath>$(FuseeEngineRoot)\bin\$(Configuration)\Tools\BlenderScripts\addons</OutputPath>
     <ProjectTypeGuids>{888888a0-9f3d-457c-b088-3a5042f75d52}</ProjectTypeGuids>
     <LaunchProvider>Standard Python launcher</LaunchProvider>
-    <InterpreterId>Global|PythonCore|3.5-32</InterpreterId>
+    <InterpreterId>Global|PythonCore|3.7</InterpreterId>
     <UseIISExpress>true</UseIISExpress>
     <SuppressEnvironmentCreationPrompt>True</SuppressEnvironmentCreationPrompt>
+    <IsWindowsApplication>False</IsWindowsApplication>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'" />
   <PropertyGroup Condition="'$(Configuration)' == 'Release'" />
@@ -35,6 +36,9 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="proto\" />
+  </ItemGroup>
+  <ItemGroup>
+    <InterpreterReference Include="Global|PythonCore|3.7" />
   </ItemGroup>
   <!-- Import Project="$(MSBuildExtensionsPath32)\MSBuildCommunityTasks\MSBuild.Community.Tasks.Targets" /-->
   <!-- RE-GENERATING THE PROTBUF SERIALIZATION PYTHON CODE AND ZIPPING THE BLENDER ADDON DOES NOT WORK. PYTHON PROJECTS JUST DONT INVOKE THE BUILD TARGET. 
