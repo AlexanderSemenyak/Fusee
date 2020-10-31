@@ -54,6 +54,7 @@
     <None Remove="Assets\vase_plant.png" />
     <None Remove="Assets\vase_round.png" />
     <None Remove="Assets\vase_round_ddn.png" />
+    <None Remove="Assets\RocketFus.fus" />
   </ItemGroup>
 
   <ItemGroup>
