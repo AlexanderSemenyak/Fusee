@@ -7,11 +7,14 @@ using Fusee.Engine.Core.Scene;
 using Fusee.Engine.Core.ShaderShards;
 using Fusee.Engine.GUI;
 using Fusee.Math.Core;
+using Fusee.Serialization.V1;
 using Fusee.Xene;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using static Fusee.Engine.Core.Input;
 using static Fusee.Engine.Core.Time;
+using CanvasRenderMode = Fusee.Engine.Core.Scene.CanvasRenderMode;
 
 namespace Fusee.Examples.Simple.Core
 {
@@ -55,11 +58,117 @@ namespace Fusee.Examples.Simple.Core
             _rocketScene = AssetStorage.Get<SceneContainer>("RocketFus.fus");
             _monkeyScene = AssetStorage.Get<SceneContainer>("Monkey.fus");
 
+            //делаем едлиную модель из двух моделей
+            var sc =new SceneContainer();
+            sc.Children.AddRange(_rocketScene.Children);
+
+            //ищем максимальный Z у _rocketScene - обезьянку прямо точно перед ракетов поставим
+            float maxRocketZ = FindMaxZ(_rocketScene, out var minRocketZ);
+            float maxMonkeyZ = FindMaxZ(_monkeyScene, out var minMonkeyZ);
+            
+
+            //пробуем сместить координаты обезьяны
+            //1._monkeyScene содержит один child у себя, но цикл все равно прогоняем, вдруг будет больше одного
+            foreach (SceneNode node in _monkeyScene.Children)
+            {
+                foreach (SceneNode child in node.Children)
+                {
+                   //   чилдов нет у обезьянки, но могут быть в других моделях. пока оставляем для отладки
+                }
+                //проходимся по компонентам каждого чилда
+                //пока заметили три вида:
+                //1.Transform - перенос, вращение, масштабирование
+                //2.DefaultSurfaceEffect - ХЗ
+                //3.Mesh - набор полигонов, составляющих объект
+                foreach (var component in node.EnumComponents)
+                {
+                    if (component is Transform t)
+                    {
+                        //переместим обезьянку
+                        //t.Translation = new float3(0, 0, -maxRocketZ-minMonkeyZ);
+                        t.Translation = new float3(0, 0, (maxMonkeyZ - minMonkeyZ)/2/*половинка обезьяны по Z*/ -(maxRocketZ-minRocketZ)/2/*половинка ракеты по Z*/);
+                        continue;
+                    }
+
+                    if (component is DefaultSurfaceEffect в)
+                    {
+                        //DefaultSurfaceEffect - ХЗ
+                        continue;
+                    }
+
+                    if (component is Mesh m)
+                    {
+                        //Mesh - набор полигонов, составляющих объект
+                        continue;
+                    }
+
+                    throw new NotSupportedException();
+                }
+            }
+
+            sc.Children.AddRange(_monkeyScene.Children); //обезьяне надеваем на голову ракету 
+
+            sc.Header = _rocketScene.Header;
+            
+            _rocketScene = sc;
+
             // Wrap a SceneRenderer around the model.
             _sceneRendererRocket = new SceneRendererForward(_rocketScene);
-            _sceneRendererMonkey = new SceneRendererForward(_monkeyScene);
-
+            //_sceneRendererMonkey = new SceneRendererForward(_monkeyScene);
             _guiRenderer = new SceneRendererForward(_gui);
+        }
+
+        private float  FindMaxZ(SceneContainer model, out float minZ)
+        {
+            float MaxZ(SceneComponent component, float oldMax)
+            {
+                if (component is Mesh m)
+                {
+                    foreach (var point in m.Vertices)
+                    {
+                        oldMax = System.Math.Max(point.z, oldMax); //ищем максимальный Z среди всех точек
+                    }
+                }
+
+                return oldMax;
+            }
+
+            float MinZ(SceneComponent component, float oldMin)
+            {
+                if (component is Mesh m)
+                {
+                    foreach (var point in m.Vertices)
+                    {
+                        oldMin = System.Math.Min(point.z, oldMin); //ищем максимальный Z среди всех точек
+                    }
+                }
+
+                return oldMin;
+            }
+
+            float maxZ = float.MinValue;
+            minZ = float.MaxValue;
+            foreach (SceneNode node in model.Children)
+            {
+                //три набора элементов разного цвета для ракеты (серый, зеленый, белый,....) - по каждому проходимся и ищем максимальную координату Z - она в мэшах
+                foreach (SceneNode child in node.Children)
+                {
+                    //у каждого чилда есть Mesh и DefaultSurfaceEffect - нас интересуют меши - там точки, среди них и ищем максимальную координату z
+                    foreach (SceneComponent component in child.Components)
+                    {
+                        maxZ = MaxZ(component, maxZ);
+                        minZ = MinZ(component, minZ);
+                    }
+                }
+
+                foreach (SceneComponent component in node.Components)
+                {
+                    maxZ = MaxZ(component, maxZ);
+                    minZ = MinZ(component, minZ);
+                }
+            }
+
+            return maxZ;
         }
 
         // RenderAFrame is called once a frame
@@ -119,7 +228,17 @@ namespace Fusee.Examples.Simple.Core
             RC.View = view;
             RC.Projection = perspective;
             _sceneRendererRocket.Render(RC);
-            _sceneRendererMonkey.Render(RC);
+            
+            //переместим и смасштабируем головоу обезьянки
+            //_sceneRendererMonkey.RenderTransform(new Transform()
+            //{
+            //    Translation = new float3(20,20,20),
+            //    Scale = new float3(1.2f,2,4),
+            //});
+
+            //float4x4 mtxOffset = float4x4.CreateTranslation(0, 0, -0.3f); //трансофрмация - перемещение по 20 точек по x,y,z
+            //RC.Projection = mtxOffset * RC.Projection; //сместим проекцию перед отрисовкой нового объекта
+            //_sceneRendererMonkey.Render(RC);
 
             //Constantly check for interactive objects.
 
