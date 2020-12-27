@@ -25,7 +25,9 @@ namespace Fusee.Examples.Simple.Core
         private const float Damping = 0.8f;
 
         private SceneContainer _rocketScene;
-        private SceneRendererForward _sceneRenderer;
+        private SceneContainer _monkeyScene;
+        private SceneRendererForward _sceneRendererRocket;
+        private SceneRendererForward _sceneRendererMonkey;
 
         private const float ZNear = 1f;
         private const float ZFar = 1000;
@@ -51,9 +53,12 @@ namespace Fusee.Examples.Simple.Core
 
             // Load the rocket model
             _rocketScene = AssetStorage.Get<SceneContainer>("RocketFus.fus");
+            _monkeyScene = AssetStorage.Get<SceneContainer>("Monkey.fus");
 
             // Wrap a SceneRenderer around the model.
-            _sceneRenderer = new SceneRendererForward(_rocketScene);
+            _sceneRendererRocket = new SceneRendererForward(_rocketScene);
+            _sceneRendererMonkey = new SceneRendererForward(_monkeyScene);
+
             _guiRenderer = new SceneRendererForward(_gui);
         }
 
@@ -113,7 +118,8 @@ namespace Fusee.Examples.Simple.Core
             // Render the scene loaded in Init()
             RC.View = view;
             RC.Projection = perspective;
-            _sceneRenderer.Render(RC);
+            _sceneRendererRocket.Render(RC);
+            _sceneRendererMonkey.Render(RC);
 
             //Constantly check for interactive objects.
 
