@@ -58,47 +58,47 @@ namespace Fusee.Examples.Simple.Core
             _rocketScene = AssetStorage.Get<SceneContainer>("RocketFus.fus");
             _monkeyScene = AssetStorage.Get<SceneContainer>("Monkey.fus");
 
-            //делаем едлиную модель из двух моделей
-            var sc =new SceneContainer();
+            //пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+            var sc = new SceneContainer();
             sc.Children.AddRange(_rocketScene.Children);
 
-            //ищем максимальный Z у _rocketScene - обезьянку прямо точно перед ракетов поставим
+            //пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ Z пїЅ _rocketScene - пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
             float maxRocketZ = FindMaxZ(_rocketScene, out var minRocketZ);
             float maxMonkeyZ = FindMaxZ(_monkeyScene, out var minMonkeyZ);
-            
 
-            //пробуем сместить координаты обезьяны
-            //1._monkeyScene содержит один child у себя, но цикл все равно прогоняем, вдруг будет больше одного
+
+            //пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+            //1._monkeyScene пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ child пїЅ пїЅпїЅпїЅпїЅ, пїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
             foreach (SceneNode node in _monkeyScene.Children)
             {
                 foreach (SceneNode child in node.Children)
                 {
-                   //   чилдов нет у обезьянки, но могут быть в других моделях. пока оставляем для отладки
+                    //   пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ. пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
                 }
-                //проходимся по компонентам каждого чилда
-                //пока заметили три вида:
-                //1.Transform - перенос, вращение, масштабирование
-                //2.DefaultSurfaceEffect - ХЗ
-                //3.Mesh - набор полигонов, составляющих объект
+                //пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
+                //пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅ:
+                //1.Transform - пїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+                //2.DefaultSurfaceEffect - пїЅпїЅ
+                //3.Mesh - пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
                 foreach (var component in node.EnumComponents)
                 {
                     if (component is Transform t)
                     {
-                        //переместим обезьянку
+                        //пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
                         //t.Translation = new float3(0, 0, -maxRocketZ-minMonkeyZ);
-                        t.Translation = new float3(0, 0, (maxMonkeyZ - minMonkeyZ)/2/*половинка обезьяны по Z*/ -(maxRocketZ-minRocketZ)/2/*половинка ракеты по Z*/);
+                        t.Translation = new float3(0, 0, (maxMonkeyZ - minMonkeyZ) / 2/*пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ Z*/ - (maxRocketZ - minRocketZ) / 2/*пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ Z*/);
                         continue;
                     }
 
-                    if (component is DefaultSurfaceEffect в)
+                    if (component is DefaultSurfaceEffect пїЅ)
                     {
-                        //DefaultSurfaceEffect - ХЗ
+                        //DefaultSurfaceEffect - пїЅпїЅ
                         continue;
                     }
 
                     if (component is Mesh m)
                     {
-                        //Mesh - набор полигонов, составляющих объект
+                        //Mesh - пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
                         continue;
                     }
 
@@ -106,10 +106,10 @@ namespace Fusee.Examples.Simple.Core
                 }
             }
 
-            sc.Children.AddRange(_monkeyScene.Children); //обезьяне надеваем на голову ракету 
+            sc.Children.AddRange(_monkeyScene.Children); //пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ 
 
             sc.Header = _rocketScene.Header;
-            
+
             _rocketScene = sc;
 
             // Wrap a SceneRenderer around the model.
@@ -118,7 +118,7 @@ namespace Fusee.Examples.Simple.Core
             _guiRenderer = new SceneRendererForward(_gui);
         }
 
-        private float  FindMaxZ(SceneContainer model, out float minZ)
+        private float FindMaxZ(SceneContainer model, out float minZ)
         {
             float MaxZ(SceneComponent component, float oldMax)
             {
@@ -126,7 +126,7 @@ namespace Fusee.Examples.Simple.Core
                 {
                     foreach (var point in m.Vertices)
                     {
-                        oldMax = System.Math.Max(point.z, oldMax); //ищем максимальный Z среди всех точек
+                        oldMax = System.Math.Max(point.z, oldMax); //пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ Z пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
                     }
                 }
 
@@ -139,7 +139,7 @@ namespace Fusee.Examples.Simple.Core
                 {
                     foreach (var point in m.Vertices)
                     {
-                        oldMin = System.Math.Min(point.z, oldMin); //ищем максимальный Z среди всех точек
+                        oldMin = System.Math.Min(point.z, oldMin); //пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ Z пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
                     }
                 }
 
@@ -150,10 +150,10 @@ namespace Fusee.Examples.Simple.Core
             minZ = float.MaxValue;
             foreach (SceneNode node in model.Children)
             {
-                //три набора элементов разного цвета для ракеты (серый, зеленый, белый,....) - по каждому проходимся и ищем максимальную координату Z - она в мэшах
+                //пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ (пїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅ,....) - пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ Z - пїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ
                 foreach (SceneNode child in node.Children)
                 {
-                    //у каждого чилда есть Mesh и DefaultSurfaceEffect - нас интересуют меши - там точки, среди них и ищем максимальную координату z
+                    //пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ Mesh пїЅ DefaultSurfaceEffect - пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ - пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ z
                     foreach (SceneComponent component in child.Components)
                     {
                         maxZ = MaxZ(component, maxZ);
@@ -228,16 +228,16 @@ namespace Fusee.Examples.Simple.Core
             RC.View = view;
             RC.Projection = perspective;
             _sceneRendererRocket.Render(RC);
-            
-            //переместим и смасштабируем головоу обезьянки
+
+            //пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
             //_sceneRendererMonkey.RenderTransform(new Transform()
             //{
             //    Translation = new float3(20,20,20),
             //    Scale = new float3(1.2f,2,4),
             //});
 
-            //float4x4 mtxOffset = float4x4.CreateTranslation(0, 0, -0.3f); //трансофрмация - перемещение по 20 точек по x,y,z
-            //RC.Projection = mtxOffset * RC.Projection; //сместим проекцию перед отрисовкой нового объекта
+            //float4x4 mtxOffset = float4x4.CreateTranslation(0, 0, -0.3f); //пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ - пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ 20 пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ x,y,z
+            //RC.Projection = mtxOffset * RC.Projection; //пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
             //_sceneRendererMonkey.Render(RC);
 
             //Constantly check for interactive objects.
