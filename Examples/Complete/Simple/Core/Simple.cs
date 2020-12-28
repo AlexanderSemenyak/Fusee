@@ -59,7 +59,7 @@ namespace Fusee.Examples.Simple.Core
             _monkeyScene = AssetStorage.Get<SceneContainer>("Monkey.fus");
 
             //делаем едлиную модель из двух моделей
-            var sc =new SceneContainer();
+            var sc = new SceneContainer();
             sc.Children.AddRange(_rocketScene.Children);
 
             //ищем максимальный Z у _rocketScene - обезьянку прямо точно перед ракетов поставим
@@ -72,7 +72,7 @@ namespace Fusee.Examples.Simple.Core
             {
                 foreach (SceneNode child in node.Children)
                 {
-                   //   чилдов нет у обезьянки, но могут быть в других моделях. пока оставляем для отладки
+                    //   чилдов нет у обезьянки, но могут быть в других моделях. пока оставляем для отладки
                 }
                 //проходимся по компонентам каждого чилда
                 //пока заметили три вида:
@@ -85,7 +85,7 @@ namespace Fusee.Examples.Simple.Core
                     {
                         //переместим обезьянку
                         //t.Translation = new float3(0, 0, -maxRocketZ-minMonkeyZ);
-                        t.Translation = new float3(0, 0, (maxMonkeyZ - minMonkeyZ)/2/*половинка обезьяны по Z*/ -(maxRocketZ-minRocketZ)/2/*половинка ракеты по Z*/);
+                        t.Translation = new float3(0, 0, (maxMonkeyZ - minMonkeyZ) / 2/*половинка обезьяны по Z*/ - (maxRocketZ - minRocketZ) / 2/*половинка ракеты по Z*/);
                         continue;
                     }
 
@@ -117,7 +117,7 @@ namespace Fusee.Examples.Simple.Core
             _guiRenderer = new SceneRendererForward(_gui);
         }
 
-        private float  FindMaxZ(SceneContainer model, out float minZ)
+        private float FindMaxZ(SceneContainer model, out float minZ)
         {
             float MaxZ(SceneComponent component, float oldMax)
             {
@@ -227,7 +227,7 @@ namespace Fusee.Examples.Simple.Core
             RC.View = view;
             RC.Projection = perspective;
             _sceneRendererRocket.Render(RC);
-            
+
             //переместим и смасштабируем головоу обезьянки
             //_sceneRendererMonkey.RenderTransform(new Transform()
             //{
