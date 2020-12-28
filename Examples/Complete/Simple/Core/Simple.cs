@@ -1,4 +1,4 @@
-﻿using Fusee.Base.Common;
+using Fusee.Base.Common;
 using Fusee.Base.Core;
 using Fusee.Engine.Common;
 using Fusee.Engine.Core;
@@ -65,7 +65,6 @@ namespace Fusee.Examples.Simple.Core
             //ищем максимальный Z у _rocketScene - обезьянку прямо точно перед ракетов поставим
             float maxRocketZ = FindMaxZ(_rocketScene, out var minRocketZ);
             float maxMonkeyZ = FindMaxZ(_monkeyScene, out var minMonkeyZ);
-            
 
             //пробуем сместить координаты обезьяны
             //1._monkeyScene содержит один child у себя, но цикл все равно прогоняем, вдруг будет больше одного
@@ -109,7 +108,7 @@ namespace Fusee.Examples.Simple.Core
             sc.Children.AddRange(_monkeyScene.Children); //обезьяне надеваем на голову ракету 
 
             sc.Header = _rocketScene.Header;
-            
+
             _rocketScene = sc;
 
             // Wrap a SceneRenderer around the model.
