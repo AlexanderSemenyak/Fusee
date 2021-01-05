@@ -1,8 +1,8 @@
-using Fusee.Engine.Core.Scene;
 using Fusee.Engine.Core.Effects;
-using Fusee.Math.Core;
-using Fusee.Engine.Core.ShaderShards.Vertex;
+using Fusee.Engine.Core.Scene;
 using Fusee.Engine.Core.ShaderShards.Fragment;
+using Fusee.Engine.Core.ShaderShards.Vertex;
+using Fusee.Math.Core;
 
 
 namespace Fusee.Engine.Core.Primitives
