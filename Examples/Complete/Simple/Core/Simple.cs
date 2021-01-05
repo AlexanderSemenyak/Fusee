@@ -81,7 +81,7 @@ namespace Fusee.Examples.Simple.Core
             string namekub = "Plane";
             float3 pointkub = GetZForPointName(_kubScene, namekub);
 
-            var delta = pointkub- pointSphere;
+            var delta = pointkub - pointSphere;
 
             foreach (SceneNode node in _speraScene.Children)
             {
@@ -101,9 +101,9 @@ namespace Fusee.Examples.Simple.Core
 
                     if (component is Transform t)
                     {
-                        t.Translation+=delta;
+                        t.Translation += delta;
                         //переместим обезьянку
-                      //  t.Translation = new float3(0, 0, pointSphere.z + 7);
+                        //  t.Translation = new float3(0, 0, pointSphere.z + 7);
                         //  t.Translation = new float3(0, 0, (maxMonkeyZ - minMonkeyZ) / 2/*половинка обезьяны по Z*/ - (maxRocketZ - minRocketZ) / 2/*половинка ракеты по Z*/);
                         // t.Translation = new float3(0, 0, pointSphere.z);
                         continue;
@@ -151,7 +151,7 @@ namespace Fusee.Examples.Simple.Core
                     var matrix = transform.Matrix();
                     var v0 = mesh.Vertices[0];
                     var v0Transformed = matrix * v0;
-                    
+
                     var v0ВернулиНазад = v0Transformed * matrix.Invert();
 
                     var чистыйСкейл = matrix.ScaleComponent();
