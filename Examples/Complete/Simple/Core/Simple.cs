@@ -59,8 +59,8 @@ namespace Fusee.Examples.Simple.Core
             RC.ClearColor = new float4(1, 1, 1, 1);
 
             // Load the rocket model
-            _kubScene = AssetStorage.Get<SceneContainer>("PAker.fus");
-            _speraScene = AssetStorage.Get<SceneContainer>("МРГ.fus");
+            _kubScene = AssetStorage.Get<SceneContainer>("test.fus");
+            _speraScene = AssetStorage.Get<SceneContainer>("test2.fus");
 
             //делаем едлиную модель из двух моделей
             var sc = new SceneContainer();
@@ -81,9 +81,11 @@ namespace Fusee.Examples.Simple.Core
             string namekub = "Plane";
             float3 pointkub = GetZForPointName(_kubScene, namekub);
 
+            var delta = pointkub- pointSphere;
+
             foreach (SceneNode node in _speraScene.Children)
             {
-                //   if (node.Name == namesphera) continue;
+                if (node.Name == namesphera) continue;
                 //foreach (SceneNode child in node.Children)
                 // {
                 //   чилдов нет у обезьянки, но могут быть в других моделях. пока оставляем для отладки
@@ -99,8 +101,9 @@ namespace Fusee.Examples.Simple.Core
 
                     if (component is Transform t)
                     {
+                        t.Translation+=delta;
                         //переместим обезьянку
-                        t.Translation = new float3(0, 0, pointSphere.z + 7);
+                      //  t.Translation = new float3(0, 0, pointSphere.z + 7);
                         //  t.Translation = new float3(0, 0, (maxMonkeyZ - minMonkeyZ) / 2/*половинка обезьяны по Z*/ - (maxRocketZ - minRocketZ) / 2/*половинка ракеты по Z*/);
                         // t.Translation = new float3(0, 0, pointSphere.z);
                         continue;
@@ -138,30 +141,49 @@ namespace Fusee.Examples.Simple.Core
 
         private float3 GetZForPointName(SceneContainer sceneContainer, string name)
         {
-            float x = 0;
-            float y = 0;
-            float z = 0;
             foreach (SceneNode node in sceneContainer.Children)
             {
                 if (node.Name == name)
                 {
+                    var mesh = node.GetComponent<Mesh>();
+                    var transform = node.GetComponent<Transform>();
+
+                    var matrix = transform.Matrix();
+                    var v0 = mesh.Vertices[0];
+                    var v0Transformed = matrix * v0;
+                    
+                    var v0ВернулиНазад = v0Transformed * matrix.Invert();
+
+                    var чистыйСкейл = matrix.ScaleComponent();
+                    var чистыйТранслэйт = matrix.TranslationComponent();
+                    var чистыйРотэйт = matrix.RotationComponent();
+
+
+                    return v0Transformed;
+
                     //у каждого чилда есть Mesh и DefaultSurfaceEffect - нас интересуют меши - там точки, среди них и ищем максимальную координату z
-                    foreach (SceneComponent component in node.Components)
-                    {
-                        if (component is Mesh m)
-                        {
-                            foreach (var point in m.Vertices)
-                            {
-                                x = point.x;
-                                y = point.y;
-                                z = point.z;
-                            }
-                        }
-                    }
+                    //foreach (SceneComponent component in node.Components)
+                    //{
+
+                    //    if (component is Transform t)
+                    //    {
+
+                    //    }
+
+                    //    if (component is Mesh m)
+                    //    {
+                    //        foreach (var point in m.Vertices)
+                    //        {
+                    //            x = point.x;
+                    //            y = point.y;
+                    //            z = point.z;
+                    //        }
+                    //    }
+                    //}
                 }
             }
 
-            return new float3(x, y, z);
+            return new float3(0, 0, 0);
         }
 
         private float FindMaxY(SceneContainer model, out float minY)
