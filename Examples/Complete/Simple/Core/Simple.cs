@@ -29,6 +29,10 @@ namespace Fusee.Examples.Simple.Core
 
         private SceneContainer _rocketScene;
         private SceneContainer _monkeyScene;
+
+        private SceneContainer _speraScene;
+        private SceneContainer _kubScene;
+
         private SceneRendererForward _sceneRendererRocket;
         private SceneRendererForward _sceneRendererMonkey;
 
@@ -55,38 +59,52 @@ namespace Fusee.Examples.Simple.Core
             RC.ClearColor = new float4(1, 1, 1, 1);
 
             // Load the rocket model
-            _rocketScene = AssetStorage.Get<SceneContainer>("RocketFus.fus");
-            _monkeyScene = AssetStorage.Get<SceneContainer>("Monkey.fus");
+            _kubScene = AssetStorage.Get<SceneContainer>("PAker.fus");
+            _speraScene = AssetStorage.Get<SceneContainer>("МРГ.fus");
 
             //делаем едлиную модель из двух моделей
             var sc = new SceneContainer();
-            sc.Children.AddRange(_rocketScene.Children);
+            sc.Children.AddRange(_kubScene.Children);
 
             //ищем максимальный Z у _rocketScene - обезьянку прямо точно перед ракетов поставим
-            float maxRocketZ = FindMaxZ(_rocketScene, out var minRocketZ);
-            float maxMonkeyZ = FindMaxZ(_monkeyScene, out var minMonkeyZ);
+            // float maxRocketZ = FindMaxZ(_rocketScene, out var minRocketZ);
+            //  float maxMonkeyZ = FindMaxZ(_monkeyScene, out var minMonkeyZ);
 
+            //  float maxRocketY = FindMaxY(_rocketScene, out var minRocketY);
+            //   float maxMonkeyY = FindMaxY(_monkeyScene, out var minMonkeyY);
             //пробуем сместить координаты обезьяны
             //1._monkeyScene содержит один child у себя, но цикл все равно прогоняем, вдруг будет больше одного
-            foreach (SceneNode node in _monkeyScene.Children)
+
+            string namesphera = "PlaneXXX";
+            float3 pointSphere = GetZForPointName(_speraScene, namesphera);
+
+            string namekub = "Plane";
+            float3 pointkub= GetZForPointName(_kubScene, namekub);
+
+            foreach (SceneNode node in _speraScene.Children)
             {
-                foreach (SceneNode child in node.Children)
-                {
+             //   if (node.Name == namesphera) continue;
+                //foreach (SceneNode child in node.Children)
+               // {
                     //   чилдов нет у обезьянки, но могут быть в других моделях. пока оставляем для отладки
-                }
+               // }
                 //проходимся по компонентам каждого чилда
                 //пока заметили три вида:
                 //1.Transform - перенос, вращение, масштабирование
                 //2.DefaultSurfaceEffect - ХЗ
                 //3.Mesh - набор полигонов, составляющих объект
+
                 foreach (var component in node.EnumComponents)
                 {
+                   
                     if (component is Transform t)
                     {
                         //переместим обезьянку
-                        //t.Translation = new float3(0, 0, -maxRocketZ-minMonkeyZ);
-                        t.Translation = new float3(0, 0, (maxMonkeyZ - minMonkeyZ) / 2/*половинка обезьяны по Z*/ - (maxRocketZ - minRocketZ) / 2/*половинка ракеты по Z*/);
+                        t.Translation = new float3(0, 0, pointSphere.z +7);
+                        //  t.Translation = new float3(0, 0, (maxMonkeyZ - minMonkeyZ) / 2/*половинка обезьяны по Z*/ - (maxRocketZ - minRocketZ) / 2/*половинка ракеты по Z*/);
+                       // t.Translation = new float3(0, 0, pointSphere.z);
                         continue;
+                      
                     }
 
                     if (component is DefaultSurfaceEffect в)
@@ -104,17 +122,102 @@ namespace Fusee.Examples.Simple.Core
                     throw new NotSupportedException();
                 }
             }
+         
+            sc.Children.AddRange(_speraScene.Children); //обезьяне надеваем на голову ракету 
 
-            sc.Children.AddRange(_monkeyScene.Children); //обезьяне надеваем на голову ракету 
+            sc.Header = _kubScene.Header;
 
-            sc.Header = _rocketScene.Header;
-
-            _rocketScene = sc;
+            _kubScene = sc;
 
             // Wrap a SceneRenderer around the model.
-            _sceneRendererRocket = new SceneRendererForward(_rocketScene);
+            _sceneRendererRocket = new SceneRendererForward(_kubScene);
             //_sceneRendererMonkey = new SceneRendererForward(_monkeyScene);
             _guiRenderer = new SceneRendererForward(_gui);
+        }
+
+  
+        private float3 GetZForPointName(SceneContainer sceneContainer, string name)
+        {
+            float x = 0;
+            float y = 0;
+            float z = 0;
+            foreach (SceneNode node in sceneContainer.Children)
+            {
+                if (node.Name == name)
+                {
+                        //у каждого чилда есть Mesh и DefaultSurfaceEffect - нас интересуют меши - там точки, среди них и ищем максимальную координату z
+                        foreach (SceneComponent component in node.Components)
+                        {
+                            if (component is Mesh m)
+                            {
+                                foreach (var point in m.Vertices)
+                                {
+                                 x = point.x;
+                                 y = point.y;
+                                  z = point.z;
+                                }
+                            }
+                        }
+                }
+            }
+
+            return new float3(x, y, z);
+        }
+
+        private float FindMaxY(SceneContainer model, out float minY)
+        {
+            float MaxY(SceneComponent component, float oldMax)
+            {
+                if (component is Mesh m)
+                {
+                    foreach (var point in m.Vertices)
+                    {
+                        oldMax = System.Math.Max(point.y, oldMax); //ищем максимальный Z среди всех точек
+                    }
+                }
+
+                return oldMax;
+            }
+
+
+
+            float MinY(SceneComponent component, float oldMin)
+            {
+                if (component is Mesh m)
+                {
+                    foreach (var point in m.Vertices)
+                    {
+                        oldMin = System.Math.Min(point.y, oldMin); //ищем максимальный Z среди всех точек
+                    }
+                }
+
+                return oldMin;
+            }
+
+            float maxY = float.MinValue;
+            minY = float.MaxValue;
+            foreach (SceneNode node in model.Children)
+            {
+                //три набора элементов разного цвета для ракеты (серый, зеленый, белый,....) - по каждому проходимся и ищем максимальную координату Z - она в мэшах
+                foreach (SceneNode child in node.Children)
+                {
+                    //у каждого чилда есть Mesh и DefaultSurfaceEffect - нас интересуют меши - там точки, среди них и ищем максимальную координату z
+                    foreach (SceneComponent component in child.Components)
+                    {
+                        maxY = MaxY(component, maxY);
+                        minY = MinY(component, minY);
+                    }
+                }
+
+                foreach (SceneComponent component in node.Components)
+                {
+                    maxY = MaxY(component, maxY);
+                    minY = MinY(component, minY);
+                }
+            }
+
+            return maxY;
+
         }
 
         private float FindMaxZ(SceneContainer model, out float minZ)
@@ -132,42 +235,45 @@ namespace Fusee.Examples.Simple.Core
                 return oldMax;
             }
 
-            float MinZ(SceneComponent component, float oldMin)
-            {
-                if (component is Mesh m)
+            
+
+                float MinZ(SceneComponent component, float oldMin)
                 {
-                    foreach (var point in m.Vertices)
+                    if (component is Mesh m)
                     {
-                        oldMin = System.Math.Min(point.z, oldMin); //ищем максимальный Z среди всех точек
+                        foreach (var point in m.Vertices)
+                        {
+                            oldMin = System.Math.Min(point.z, oldMin); //ищем максимальный Z среди всех точек
+                        }
                     }
+
+                    return oldMin;
                 }
 
-                return oldMin;
-            }
-
-            float maxZ = float.MinValue;
-            minZ = float.MaxValue;
-            foreach (SceneNode node in model.Children)
-            {
-                //три набора элементов разного цвета для ракеты (серый, зеленый, белый,....) - по каждому проходимся и ищем максимальную координату Z - она в мэшах
-                foreach (SceneNode child in node.Children)
+                float maxZ = float.MinValue;
+                minZ = float.MaxValue;
+                foreach (SceneNode node in model.Children)
                 {
-                    //у каждого чилда есть Mesh и DefaultSurfaceEffect - нас интересуют меши - там точки, среди них и ищем максимальную координату z
-                    foreach (SceneComponent component in child.Components)
+                    //три набора элементов разного цвета для ракеты (серый, зеленый, белый,....) - по каждому проходимся и ищем максимальную координату Z - она в мэшах
+                    foreach (SceneNode child in node.Children)
+                    {
+                        //у каждого чилда есть Mesh и DefaultSurfaceEffect - нас интересуют меши - там точки, среди них и ищем максимальную координату z
+                        foreach (SceneComponent component in child.Components)
+                        {
+                            maxZ = MaxZ(component, maxZ);
+                            minZ = MinZ(component, minZ);
+                        }
+                    }
+
+                    foreach (SceneComponent component in node.Components)
                     {
                         maxZ = MaxZ(component, maxZ);
                         minZ = MinZ(component, minZ);
                     }
                 }
 
-                foreach (SceneComponent component in node.Components)
-                {
-                    maxZ = MaxZ(component, maxZ);
-                    minZ = MinZ(component, minZ);
-                }
-            }
-
-            return maxZ;
+                return maxZ;
+            
         }
 
         // RenderAFrame is called once a frame
