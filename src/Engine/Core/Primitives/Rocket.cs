@@ -19,22 +19,28 @@ namespace Fusee.Engine.Core.Primitives
         public static SceneContainer Build()
         {
             //White
-            var _white = new SceneNode();
-            _white.Name = "FUSEE Rocket.White";
+            var _white = new SceneNode
+            {
+                Name = "FUSEE Rocket.White"
+            };
             _white.AddComponent(TransformWhite());
             _white.AddComponent(ShaderWhite());
             _white.AddComponent(MeshWhite());
 
             //Green
-            var _green = new SceneNode();
-            _green.Name = "FUSEE Rocket.Green";
+            var _green = new SceneNode
+            {
+                Name = "FUSEE Rocket.Green"
+            };
             _green.AddComponent(TransformGreen());
             _green.AddComponent(ShaderGreen());
             _green.AddComponent(MeshGreen());
 
             //Grey
-            var _grey = new SceneNode();
-            _grey.Name = "FUSEE Rocket.Grey";
+            var _grey = new SceneNode
+            {
+                Name = "FUSEE Rocket.Grey"
+            };
             _grey.AddComponent(TransformGrey());
             _grey.AddComponent(ShaderGrey());
             _grey.AddComponent(MeshGrey());
@@ -54,7 +60,7 @@ namespace Fusee.Engine.Core.Primitives
         /// Returns the ShaderEffect for the white part of the FUSEE rocket
         /// </summary>
         /// <returns></returns>
-        public static DefaultSurfaceEffect ShaderWhite()
+        public static SurfaceEffect ShaderWhite()
         {
             var specularIn = new SpecularInput()
             {
@@ -63,14 +69,14 @@ namespace Fusee.Engine.Core.Primitives
                 SpecularStrength = 0.483772248f
             };
 
-            return new DefaultSurfaceEffect(ShaderShards.LightingSetupFlags.DiffuseSpecular, specularIn, FragShards.SurfOutBody_DiffSpecular, VertShards.SufOutBody_PosNorm);
+            return new SurfaceEffect(specularIn);
         }
 
         /// <summary>
         /// Returns the ShaderEffect for the green part of the FUSEE rocket
         /// </summary>
         /// <returns></returns>
-        public static DefaultSurfaceEffect ShaderGreen()
+        public static SurfaceEffect ShaderGreen()
         {
             var specularIn = new SpecularInput()
             {
@@ -79,14 +85,14 @@ namespace Fusee.Engine.Core.Primitives
                 SpecularStrength = 0.5f
             };
 
-            return new DefaultSurfaceEffect(ShaderShards.LightingSetupFlags.DiffuseSpecular, specularIn, ShaderShards.Fragment.FragShards.SurfOutBody_DiffSpecular, VertShards.SufOutBody_PosNorm);
+            return new SurfaceEffect(specularIn);
         }
 
         /// <summary>
         /// Returns the ShaderEffect for the grey part of the FUSEE rocket
         /// </summary>
         /// <returns></returns>
-        public static DefaultSurfaceEffect ShaderGrey()
+        public static SurfaceEffect ShaderGrey()
         {
             var specularIn = new SpecularInput()
             {
@@ -95,7 +101,7 @@ namespace Fusee.Engine.Core.Primitives
                 SpecularStrength = 0.5f
             };
 
-            return new DefaultSurfaceEffect(ShaderShards.LightingSetupFlags.DiffuseSpecular, specularIn, FragShards.SurfOutBody_DiffSpecular, VertShards.SufOutBody_PosNorm);
+            return new SurfaceEffect(specularIn);
         }
 
         #endregion
@@ -108,10 +114,12 @@ namespace Fusee.Engine.Core.Primitives
         /// <returns></returns>
         public static Transform TransformWhite()
         {
-            var whiteTrans = new Transform();
-            whiteTrans.Rotation = float3.Zero;
-            whiteTrans.Scale = float3.One;
-            whiteTrans.Translation = new float3(0, 0.99370795f, -0.000000043436355f);
+            var whiteTrans = new Transform
+            {
+                Rotation = float3.Zero,
+                Scale = float3.One,
+                Translation = new float3(0, 0.99370795f, -0.000000043436355f)
+            };
             return whiteTrans;
         }
 
@@ -121,10 +129,12 @@ namespace Fusee.Engine.Core.Primitives
         /// <returns></returns>
         public static Transform TransformGreen()
         {
-            var greenTrans = new Transform();
-            greenTrans.Rotation = float3.Zero;
-            greenTrans.Scale = float3.One;
-            greenTrans.Translation = new float3(0f, 0.99370795f, -0.000000043436355f);
+            var greenTrans = new Transform
+            {
+                Rotation = float3.Zero,
+                Scale = float3.One,
+                Translation = new float3(0f, 0.99370795f, -0.000000043436355f)
+            };
             return greenTrans;
         }
 
@@ -134,10 +144,12 @@ namespace Fusee.Engine.Core.Primitives
         /// <returns></returns>
         public static Transform TransformGrey()
         {
-            var greyTrans = new Transform();
-            greyTrans.Rotation = float3.Zero;
-            greyTrans.Scale = float3.One;
-            greyTrans.Translation = new float3(0f, 0.99370795f, -0.000000043436355f);
+            var greyTrans = new Transform
+            {
+                Rotation = float3.Zero,
+                Scale = float3.One,
+                Translation = new float3(0f, 0.99370795f, -0.000000043436355f)
+            };
             return greyTrans;
         }
 
