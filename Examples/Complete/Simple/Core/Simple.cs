@@ -10,7 +10,6 @@ using Fusee.Xene;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System;
 using System.Threading.Tasks;
 using static Fusee.Engine.Core.Input;
 using static Fusee.Engine.Core.Time;
@@ -57,20 +56,20 @@ namespace Fusee.Examples.Simple.Core
 
             // Load the rocket model
             _rocketScene = await AssetStorage.GetAsync<SceneContainer>("RocketFus.fus");
-            _kubScene = await AssetStorage.GetAsync<SceneContainer>("РК.fus");
+            _kubScene = await AssetStorage.GetAsync<SceneContainer>("Р Рљ.fus");
 
-            //делаем едлиную модель из двух моделей
+            //РґРµР»Р°РµРј РµРґР»РёРЅСѓСЋ РјРѕРґРµР»СЊ РёР· РґРІСѓС… РјРѕРґРµР»РµР№
             var sc = new SceneContainer();
             sc.Children.AddRange(_kubScene.Children);
 
-            //ищем максимальный Z у _rocketScene - обезьянку прямо точно перед ракетов поставим
+            //РёС‰РµРј РјР°РєСЃРёРјР°Р»СЊРЅС‹Р№ Z Сѓ _rocketScene - РѕР±РµР·СЊСЏРЅРєСѓ РїСЂСЏРјРѕ С‚РѕС‡РЅРѕ РїРµСЂРµРґ СЂР°РєРµС‚РѕРІ РїРѕСЃС‚Р°РІРёРј
             // float maxRocketZ = FindMaxZ(_rocketScene, out var minRocketZ);
             //  float maxMonkeyZ = FindMaxZ(_monkeyScene, out var minMonkeyZ);
 
             //  float maxRocketY = FindMaxY(_rocketScene, out var minRocketY);
             //   float maxMonkeyY = FindMaxY(_monkeyScene, out var minMonkeyY);
-            //пробуем сместить координаты обезьяны
-            //1._monkeyScene содержит один child у себя, но цикл все равно прогоняем, вдруг будет больше одного
+            //РїСЂРѕР±СѓРµРј СЃРјРµСЃС‚РёС‚СЊ РєРѕРѕСЂРґРёРЅР°С‚С‹ РѕР±РµР·СЊСЏРЅС‹
+            //1._monkeyScene СЃРѕРґРµСЂР¶РёС‚ РѕРґРёРЅ child Сѓ СЃРµР±СЏ, РЅРѕ С†РёРєР» РІСЃРµ СЂР°РІРЅРѕ РїСЂРѕРіРѕРЅСЏРµРј, РІРґСЂСѓРі Р±СѓРґРµС‚ Р±РѕР»СЊС€Рµ РѕРґРЅРѕРіРѕ
 
             string namesphera = "PlaneXXX";
             float3 pointSphere = GetZForPointName(_speraScene, namesphera);
@@ -85,13 +84,13 @@ namespace Fusee.Examples.Simple.Core
                 if (node.Name == namesphera) continue;
                 //foreach (SceneNode child in node.Children)
                 // {
-                //   чилдов нет у обезьянки, но могут быть в других моделях. пока оставляем для отладки
+                //   С‡РёР»РґРѕРІ РЅРµС‚ Сѓ РѕР±РµР·СЊСЏРЅРєРё, РЅРѕ РјРѕРіСѓС‚ Р±С‹С‚СЊ РІ РґСЂСѓРіРёС… РјРѕРґРµР»СЏС…. РїРѕРєР° РѕСЃС‚Р°РІР»СЏРµРј РґР»СЏ РѕС‚Р»Р°РґРєРё
                 // }
-                //проходимся по компонентам каждого чилда
-                //пока заметили три вида:
-                //1.Transform - перенос, вращение, масштабирование
-                //2.DefaultSurfaceEffect - ХЗ
-                //3.Mesh - набор полигонов, составляющих объект
+                //РїСЂРѕС…РѕРґРёРјСЃСЏ РїРѕ РєРѕРјРїРѕРЅРµРЅС‚Р°Рј РєР°Р¶РґРѕРіРѕ С‡РёР»РґР°
+                //РїРѕРєР° Р·Р°РјРµС‚РёР»Рё С‚СЂРё РІРёРґР°:
+                //1.Transform - РїРµСЂРµРЅРѕСЃ, РІСЂР°С‰РµРЅРёРµ, РјР°СЃС€С‚Р°Р±РёСЂРѕРІР°РЅРёРµ
+                //2.DefaultSurfaceEffect - РҐР—
+                //3.Mesh - РЅР°Р±РѕСЂ РїРѕР»РёРіРѕРЅРѕРІ, СЃРѕСЃС‚Р°РІР»СЏСЋС‰РёС… РѕР±СЉРµРєС‚
 
                 foreach (var component in node.EnumComponents)
                 {
@@ -99,9 +98,9 @@ namespace Fusee.Examples.Simple.Core
                     if (component is Transform t)
                     {
                         t.Translation += delta;
-                        //переместим обезьянку
+                        //РїРµСЂРµРјРµСЃС‚РёРј РѕР±РµР·СЊСЏРЅРєСѓ
                         //  t.Translation = new float3(0, 0, pointSphere.z + 7);
-                        //  t.Translation = new float3(0, 0, (maxMonkeyZ - minMonkeyZ) / 2/*половинка обезьяны по Z*/ - (maxRocketZ - minRocketZ) / 2/*половинка ракеты по Z*/);
+                        //  t.Translation = new float3(0, 0, (maxMonkeyZ - minMonkeyZ) / 2/*РїРѕР»РѕРІРёРЅРєР° РѕР±РµР·СЊСЏРЅС‹ РїРѕ Z*/ - (maxRocketZ - minRocketZ) / 2/*РїРѕР»РѕРІРёРЅРєР° СЂР°РєРµС‚С‹ РїРѕ Z*/);
                         // t.Translation = new float3(0, 0, pointSphere.z);
                         continue;
 
@@ -109,13 +108,13 @@ namespace Fusee.Examples.Simple.Core
 
                     if (component is SurfaceEffect d)
                     {
-                        //DefaultSurfaceEffect - ХЗ
+                        //DefaultSurfaceEffect - РҐР—
                         continue;
                     }
 
                     if (component is Mesh m)
                     {
-                        //Mesh - набор полигонов, составляющих объект
+                        //Mesh - РЅР°Р±РѕСЂ РїРѕР»РёРіРѕРЅРѕРІ, СЃРѕСЃС‚Р°РІР»СЏСЋС‰РёС… РѕР±СЉРµРєС‚
                         continue;
                     }
 
@@ -123,7 +122,7 @@ namespace Fusee.Examples.Simple.Core
                 }
             }
 
-            sc.Children.AddRange(_speraScene.Children); //обезьяне надеваем на голову ракету 
+            sc.Children.AddRange(_speraScene.Children); //РѕР±РµР·СЊСЏРЅРµ РЅР°РґРµРІР°РµРј РЅР° РіРѕР»РѕРІСѓ СЂР°РєРµС‚Сѓ 
 
             sc.Header = _kubScene.Header;
 
@@ -149,16 +148,16 @@ namespace Fusee.Examples.Simple.Core
                     var v0 = mesh.Vertices[0];
                     var v0Transformed = matrix * v0;
 
-                    var v0ВернулиНазад = v0Transformed * matrix.Invert();
+                    var v0Р’РµСЂРЅСѓР»РёРќР°Р·Р°Рґ = v0Transformed * matrix.Invert();
 
-                    var чистыйСкейл = matrix.ScaleComponent();
-                    var чистыйТранслэйт = matrix.TranslationComponent();
-                    var чистыйРотэйт = matrix.RotationComponent();
+                    var С‡РёСЃС‚С‹Р№РЎРєРµР№Р» = matrix.ScaleComponent();
+                    var С‡РёСЃС‚С‹Р№РўСЂР°РЅСЃР»СЌР№С‚ = matrix.TranslationComponent();
+                    var С‡РёСЃС‚С‹Р№Р РѕС‚СЌР№С‚ = matrix.RotationComponent();
 
 
                     return v0Transformed;
 
-                    //у каждого чилда есть Mesh и DefaultSurfaceEffect - нас интересуют меши - там точки, среди них и ищем максимальную координату z
+                    //Сѓ РєР°Р¶РґРѕРіРѕ С‡РёР»РґР° РµСЃС‚СЊ Mesh Рё DefaultSurfaceEffect - РЅР°СЃ РёРЅС‚РµСЂРµСЃСѓСЋС‚ РјРµС€Рё - С‚Р°Рј С‚РѕС‡РєРё, СЃСЂРµРґРё РЅРёС… Рё РёС‰РµРј РјР°РєСЃРёРјР°Р»СЊРЅСѓСЋ РєРѕРѕСЂРґРёРЅР°С‚Сѓ z
                     //foreach (SceneComponent component in node.Components)
                     //{
 
@@ -191,7 +190,7 @@ namespace Fusee.Examples.Simple.Core
                 {
                     foreach (var point in m.Vertices)
                     {
-                        oldMax = System.Math.Max(point.y, oldMax); //ищем максимальный Z среди всех точек
+                        oldMax = System.Math.Max(point.y, oldMax); //РёС‰РµРј РјР°РєСЃРёРјР°Р»СЊРЅС‹Р№ Z СЃСЂРµРґРё РІСЃРµС… С‚РѕС‡РµРє
                     }
                 }
 
@@ -206,7 +205,7 @@ namespace Fusee.Examples.Simple.Core
                 {
                     foreach (var point in m.Vertices)
                     {
-                        oldMin = System.Math.Min(point.y, oldMin); //ищем максимальный Z среди всех точек
+                        oldMin = System.Math.Min(point.y, oldMin); //РёС‰РµРј РјР°РєСЃРёРјР°Р»СЊРЅС‹Р№ Z СЃСЂРµРґРё РІСЃРµС… С‚РѕС‡РµРє
                     }
                 }
 
@@ -217,10 +216,10 @@ namespace Fusee.Examples.Simple.Core
             minY = float.MaxValue;
             foreach (SceneNode node in model.Children)
             {
-                //три набора элементов разного цвета для ракеты (серый, зеленый, белый,....) - по каждому проходимся и ищем максимальную координату Z - она в мэшах
+                //С‚СЂРё РЅР°Р±РѕСЂР° СЌР»РµРјРµРЅС‚РѕРІ СЂР°Р·РЅРѕРіРѕ С†РІРµС‚Р° РґР»СЏ СЂР°РєРµС‚С‹ (СЃРµСЂС‹Р№, Р·РµР»РµРЅС‹Р№, Р±РµР»С‹Р№,....) - РїРѕ РєР°Р¶РґРѕРјСѓ РїСЂРѕС…РѕРґРёРјСЃСЏ Рё РёС‰РµРј РјР°РєСЃРёРјР°Р»СЊРЅСѓСЋ РєРѕРѕСЂРґРёРЅР°С‚Сѓ Z - РѕРЅР° РІ РјСЌС€Р°С…
                 foreach (SceneNode child in node.Children)
                 {
-                    //у каждого чилда есть Mesh и DefaultSurfaceEffect - нас интересуют меши - там точки, среди них и ищем максимальную координату z
+                    //Сѓ РєР°Р¶РґРѕРіРѕ С‡РёР»РґР° РµСЃС‚СЊ Mesh Рё DefaultSurfaceEffect - РЅР°СЃ РёРЅС‚РµСЂРµСЃСѓСЋС‚ РјРµС€Рё - С‚Р°Рј С‚РѕС‡РєРё, СЃСЂРµРґРё РЅРёС… Рё РёС‰РµРј РјР°РєСЃРёРјР°Р»СЊРЅСѓСЋ РєРѕРѕСЂРґРёРЅР°С‚Сѓ z
                     foreach (SceneComponent component in child.Components)
                     {
                         maxY = MaxY(component, maxY);
@@ -247,7 +246,7 @@ namespace Fusee.Examples.Simple.Core
                 {
                     foreach (var point in m.Vertices)
                     {
-                        oldMax = System.Math.Max(point.z, oldMax); //ищем максимальный Z среди всех точек
+                        oldMax = System.Math.Max(point.z, oldMax); //РёС‰РµРј РјР°РєСЃРёРјР°Р»СЊРЅС‹Р№ Z СЃСЂРµРґРё РІСЃРµС… С‚РѕС‡РµРє
                     }
                 }
 
@@ -262,7 +261,7 @@ namespace Fusee.Examples.Simple.Core
                 {
                     foreach (var point in m.Vertices)
                     {
-                        oldMin = System.Math.Min(point.z, oldMin); //ищем максимальный Z среди всех точек
+                        oldMin = System.Math.Min(point.z, oldMin); //РёС‰РµРј РјР°РєСЃРёРјР°Р»СЊРЅС‹Р№ Z СЃСЂРµРґРё РІСЃРµС… С‚РѕС‡РµРє
                     }
                 }
 
@@ -273,10 +272,10 @@ namespace Fusee.Examples.Simple.Core
             minZ = float.MaxValue;
             foreach (SceneNode node in model.Children)
             {
-                //три набора элементов разного цвета для ракеты (серый, зеленый, белый,....) - по каждому проходимся и ищем максимальную координату Z - она в мэшах
+                //С‚СЂРё РЅР°Р±РѕСЂР° СЌР»РµРјРµРЅС‚РѕРІ СЂР°Р·РЅРѕРіРѕ С†РІРµС‚Р° РґР»СЏ СЂР°РєРµС‚С‹ (СЃРµСЂС‹Р№, Р·РµР»РµРЅС‹Р№, Р±РµР»С‹Р№,....) - РїРѕ РєР°Р¶РґРѕРјСѓ РїСЂРѕС…РѕРґРёРјСЃСЏ Рё РёС‰РµРј РјР°РєСЃРёРјР°Р»СЊРЅСѓСЋ РєРѕРѕСЂРґРёРЅР°С‚Сѓ Z - РѕРЅР° РІ РјСЌС€Р°С…
                 foreach (SceneNode child in node.Children)
                 {
-                    //у каждого чилда есть Mesh и DefaultSurfaceEffect - нас интересуют меши - там точки, среди них и ищем максимальную координату z
+                    //Сѓ РєР°Р¶РґРѕРіРѕ С‡РёР»РґР° РµСЃС‚СЊ Mesh Рё DefaultSurfaceEffect - РЅР°СЃ РёРЅС‚РµСЂРµСЃСѓСЋС‚ РјРµС€Рё - С‚Р°Рј С‚РѕС‡РєРё, СЃСЂРµРґРё РЅРёС… Рё РёС‰РµРј РјР°РєСЃРёРјР°Р»СЊРЅСѓСЋ РєРѕРѕСЂРґРёРЅР°С‚Сѓ z
                     foreach (SceneComponent component in child.Components)
                     {
                         maxZ = MaxZ(component, maxZ);
@@ -370,15 +369,15 @@ namespace Fusee.Examples.Simple.Core
             RC.Projection = perspective;
             _sceneRendererRocket.Render(RC);
 
-            //переместим и смасштабируем головоу обезьянки
+            //РїРµСЂРµРјРµСЃС‚РёРј Рё СЃРјР°СЃС€С‚Р°Р±РёСЂСѓРµРј РіРѕР»РѕРІРѕСѓ РѕР±РµР·СЊСЏРЅРєРё
             //_sceneRendererMonkey.RenderTransform(new Transform()
             //{
             //    Translation = new float3(20,20,20),
             //    Scale = new float3(1.2f,2,4),
             //});
 
-            //float4x4 mtxOffset = float4x4.CreateTranslation(0, 0, -0.3f); //трансофрмация - перемещение по 20 точек по x,y,z
-            //RC.Projection = mtxOffset * RC.Projection; //сместим проекцию перед отрисовкой нового объекта
+            //float4x4 mtxOffset = float4x4.CreateTranslation(0, 0, -0.3f); //С‚СЂР°РЅСЃРѕС„СЂРјР°С†РёСЏ - РїРµСЂРµРјРµС‰РµРЅРёРµ РїРѕ 20 С‚РѕС‡РµРє РїРѕ x,y,z
+            //RC.Projection = mtxOffset * RC.Projection; //СЃРјРµСЃС‚РёРј РїСЂРѕРµРєС†РёСЋ РїРµСЂРµРґ РѕС‚СЂРёСЃРѕРІРєРѕР№ РЅРѕРІРѕРіРѕ РѕР±СЉРµРєС‚Р°
             //_sceneRendererMonkey.Render(RC);
 
             //Constantly check for interactive objects.
