@@ -1,6 +1,7 @@
 using Fusee.Base.Core;
 using Fusee.Engine.Common;
 using Fusee.Engine.Core;
+using Fusee.Engine.Core.Effects;
 using Fusee.Engine.Core.Scene;
 using Fusee.Engine.Gui;
 using Fusee.Math.Core;
@@ -56,6 +57,7 @@ namespace Fusee.Examples.Simple.Core
 
             // Load the rocket model
             _rocketScene = await AssetStorage.GetAsync<SceneContainer>("RocketFus.fus");
+            _kubScene = await AssetStorage.GetAsync<SceneContainer>("РК.fus");
 
             //делаем едлиную модель из двух моделей
             var sc = new SceneContainer();
@@ -105,7 +107,7 @@ namespace Fusee.Examples.Simple.Core
 
                     }
 
-                    if (component is DefaultSurfaceEffect в)
+                    if (component is SurfaceEffect d)
                     {
                         //DefaultSurfaceEffect - ХЗ
                         continue;
@@ -143,7 +145,7 @@ namespace Fusee.Examples.Simple.Core
                     var mesh = node.GetComponent<Mesh>();
                     var transform = node.GetComponent<Transform>();
 
-                    var matrix = transform.Matrix();
+                    var matrix = transform.Matrix;
                     var v0 = mesh.Vertices[0];
                     var v0Transformed = matrix * v0;
 
