@@ -21,7 +21,7 @@ namespace Fusee.Examples.Simple.Core
     public class Simple : RenderCanvas
     {
         // angle variables
-        private static float _angleHorz = M.PiOver3, _angleVert = -M.PiOver6 * 0.5f, _angleVelHorz, _angleVelVert;
+        private static float _angleHorz, _angleVert, _angleVelHorz, _angleVelVert;
 
         private const float RotationSpeed = 7;
         private const float Damping = 0.8f;
@@ -43,6 +43,8 @@ namespace Fusee.Examples.Simple.Core
         private SceneContainer _gui;
         private SceneInteractionHandler _sih;
 
+        private Transform _camPivotTransform;
+
         private bool _keys;
 
         private async Task Load()
@@ -56,20 +58,42 @@ namespace Fusee.Examples.Simple.Core
 
             // Load the rocket model
             _rocketScene = await AssetStorage.GetAsync<SceneContainer>("RocketFus.fus");
-            _kubScene = await AssetStorage.GetAsync<SceneContainer>("Р Рљ.fus");
+            _camPivotTransform = new Transform();
+            var camNode = new SceneNode()
+            {
+                Name = "CamPivoteNode",
+                Children = new ChildList()
+                {
+                    new SceneNode()
+                    {
+                        Name = "MainCam",
+                        Components = new System.Collections.Generic.List<SceneComponent>()
+                        {
+                            new Transform() { Translation = new float3(0, 2, -10) },
+                            new Camera(ProjectionMethod.Perspective, ZNear, ZFar, _fovy) { BackgroundColor = float4.One }
+                        }
+                    }
+                },
+                Components = new System.Collections.Generic.List<SceneComponent>()
+                {
+                    _camPivotTransform
+                }
+            };
+            _rocketScene.Children.Add(camNode);
+            _kubScene = await AssetStorage.GetAsync<SceneContainer>("РК.fus");
 
-            //РґРµР»Р°РµРј РµРґР»РёРЅСѓСЋ РјРѕРґРµР»СЊ РёР· РґРІСѓС… РјРѕРґРµР»РµР№
+            //делаем едлиную модель из двух моделей
             var sc = new SceneContainer();
             sc.Children.AddRange(_kubScene.Children);
 
-            //РёС‰РµРј РјР°РєСЃРёРјР°Р»СЊРЅС‹Р№ Z Сѓ _rocketScene - РѕР±РµР·СЊСЏРЅРєСѓ РїСЂСЏРјРѕ С‚РѕС‡РЅРѕ РїРµСЂРµРґ СЂР°РєРµС‚РѕРІ РїРѕСЃС‚Р°РІРёРј
+            //ищем максимальный Z у _rocketScene - обезьянку прямо точно перед ракетов поставим
             // float maxRocketZ = FindMaxZ(_rocketScene, out var minRocketZ);
             //  float maxMonkeyZ = FindMaxZ(_monkeyScene, out var minMonkeyZ);
 
             //  float maxRocketY = FindMaxY(_rocketScene, out var minRocketY);
             //   float maxMonkeyY = FindMaxY(_monkeyScene, out var minMonkeyY);
-            //РїСЂРѕР±СѓРµРј СЃРјРµСЃС‚РёС‚СЊ РєРѕРѕСЂРґРёРЅР°С‚С‹ РѕР±РµР·СЊСЏРЅС‹
-            //1._monkeyScene СЃРѕРґРµСЂР¶РёС‚ РѕРґРёРЅ child Сѓ СЃРµР±СЏ, РЅРѕ С†РёРєР» РІСЃРµ СЂР°РІРЅРѕ РїСЂРѕРіРѕРЅСЏРµРј, РІРґСЂСѓРі Р±СѓРґРµС‚ Р±РѕР»СЊС€Рµ РѕРґРЅРѕРіРѕ
+            //пробуем сместить координаты обезьяны
+            //1._monkeyScene содержит один child у себя, но цикл все равно прогоняем, вдруг будет больше одного
 
             string namesphera = "PlaneXXX";
             float3 pointSphere = GetZForPointName(_speraScene, namesphera);
@@ -84,13 +108,13 @@ namespace Fusee.Examples.Simple.Core
                 if (node.Name == namesphera) continue;
                 //foreach (SceneNode child in node.Children)
                 // {
-                //   С‡РёР»РґРѕРІ РЅРµС‚ Сѓ РѕР±РµР·СЊСЏРЅРєРё, РЅРѕ РјРѕРіСѓС‚ Р±С‹С‚СЊ РІ РґСЂСѓРіРёС… РјРѕРґРµР»СЏС…. РїРѕРєР° РѕСЃС‚Р°РІР»СЏРµРј РґР»СЏ РѕС‚Р»Р°РґРєРё
+                //   чилдов нет у обезьянки, но могут быть в других моделях. пока оставляем для отладки
                 // }
-                //РїСЂРѕС…РѕРґРёРјСЃСЏ РїРѕ РєРѕРјРїРѕРЅРµРЅС‚Р°Рј РєР°Р¶РґРѕРіРѕ С‡РёР»РґР°
-                //РїРѕРєР° Р·Р°РјРµС‚РёР»Рё С‚СЂРё РІРёРґР°:
-                //1.Transform - РїРµСЂРµРЅРѕСЃ, РІСЂР°С‰РµРЅРёРµ, РјР°СЃС€С‚Р°Р±РёСЂРѕРІР°РЅРёРµ
-                //2.DefaultSurfaceEffect - РҐР—
-                //3.Mesh - РЅР°Р±РѕСЂ РїРѕР»РёРіРѕРЅРѕРІ, СЃРѕСЃС‚Р°РІР»СЏСЋС‰РёС… РѕР±СЉРµРєС‚
+                //проходимся по компонентам каждого чилда
+                //пока заметили три вида:
+                //1.Transform - перенос, вращение, масштабирование
+                //2.DefaultSurfaceEffect - ХЗ
+                //3.Mesh - набор полигонов, составляющих объект
 
                 foreach (var component in node.EnumComponents)
                 {
@@ -98,9 +122,9 @@ namespace Fusee.Examples.Simple.Core
                     if (component is Transform t)
                     {
                         t.Translation += delta;
-                        //РїРµСЂРµРјРµСЃС‚РёРј РѕР±РµР·СЊСЏРЅРєСѓ
+                        //переместим обезьянку
                         //  t.Translation = new float3(0, 0, pointSphere.z + 7);
-                        //  t.Translation = new float3(0, 0, (maxMonkeyZ - minMonkeyZ) / 2/*РїРѕР»РѕРІРёРЅРєР° РѕР±РµР·СЊСЏРЅС‹ РїРѕ Z*/ - (maxRocketZ - minRocketZ) / 2/*РїРѕР»РѕРІРёРЅРєР° СЂР°РєРµС‚С‹ РїРѕ Z*/);
+                        //  t.Translation = new float3(0, 0, (maxMonkeyZ - minMonkeyZ) / 2/*половинка обезьяны по Z*/ - (maxRocketZ - minRocketZ) / 2/*половинка ракеты по Z*/);
                         // t.Translation = new float3(0, 0, pointSphere.z);
                         continue;
 
@@ -108,13 +132,13 @@ namespace Fusee.Examples.Simple.Core
 
                     if (component is SurfaceEffect d)
                     {
-                        //DefaultSurfaceEffect - РҐР—
+                        //DefaultSurfaceEffect - ХЗ
                         continue;
                     }
 
                     if (component is Mesh m)
                     {
-                        //Mesh - РЅР°Р±РѕСЂ РїРѕР»РёРіРѕРЅРѕРІ, СЃРѕСЃС‚Р°РІР»СЏСЋС‰РёС… РѕР±СЉРµРєС‚
+                        //Mesh - набор полигонов, составляющих объект
                         continue;
                     }
 
@@ -122,7 +146,7 @@ namespace Fusee.Examples.Simple.Core
                 }
             }
 
-            sc.Children.AddRange(_speraScene.Children); //РѕР±РµР·СЊСЏРЅРµ РЅР°РґРµРІР°РµРј РЅР° РіРѕР»РѕРІСѓ СЂР°РєРµС‚Сѓ 
+            sc.Children.AddRange(_speraScene.Children); //обезьяне надеваем на голову ракету 
 
             sc.Header = _kubScene.Header;
 
@@ -148,16 +172,16 @@ namespace Fusee.Examples.Simple.Core
                     var v0 = mesh.Vertices[0];
                     var v0Transformed = matrix * v0;
 
-                    var v0Р’РµСЂРЅСѓР»РёРќР°Р·Р°Рґ = v0Transformed * matrix.Invert();
+                    var v0ВернулиНазад = v0Transformed * matrix.Invert();
 
-                    var С‡РёСЃС‚С‹Р№РЎРєРµР№Р» = matrix.ScaleComponent();
-                    var С‡РёСЃС‚С‹Р№РўСЂР°РЅСЃР»СЌР№С‚ = matrix.TranslationComponent();
-                    var С‡РёСЃС‚С‹Р№Р РѕС‚СЌР№С‚ = matrix.RotationComponent();
+                    var чистыйСкейл = matrix.ScaleComponent();
+                    var чистыйТранслэйт = matrix.TranslationComponent();
+                    var чистыйРотэйт = matrix.RotationComponent();
 
 
                     return v0Transformed;
 
-                    //Сѓ РєР°Р¶РґРѕРіРѕ С‡РёР»РґР° РµСЃС‚СЊ Mesh Рё DefaultSurfaceEffect - РЅР°СЃ РёРЅС‚РµСЂРµСЃСѓСЋС‚ РјРµС€Рё - С‚Р°Рј С‚РѕС‡РєРё, СЃСЂРµРґРё РЅРёС… Рё РёС‰РµРј РјР°РєСЃРёРјР°Р»СЊРЅСѓСЋ РєРѕРѕСЂРґРёРЅР°С‚Сѓ z
+                    //у каждого чилда есть Mesh и DefaultSurfaceEffect - нас интересуют меши - там точки, среди них и ищем максимальную координату z
                     //foreach (SceneComponent component in node.Components)
                     //{
 
@@ -190,7 +214,7 @@ namespace Fusee.Examples.Simple.Core
                 {
                     foreach (var point in m.Vertices)
                     {
-                        oldMax = System.Math.Max(point.y, oldMax); //РёС‰РµРј РјР°РєСЃРёРјР°Р»СЊРЅС‹Р№ Z СЃСЂРµРґРё РІСЃРµС… С‚РѕС‡РµРє
+                        oldMax = System.Math.Max(point.y, oldMax); //ищем максимальный Z среди всех точек
                     }
                 }
 
@@ -205,7 +229,7 @@ namespace Fusee.Examples.Simple.Core
                 {
                     foreach (var point in m.Vertices)
                     {
-                        oldMin = System.Math.Min(point.y, oldMin); //РёС‰РµРј РјР°РєСЃРёРјР°Р»СЊРЅС‹Р№ Z СЃСЂРµРґРё РІСЃРµС… С‚РѕС‡РµРє
+                        oldMin = System.Math.Min(point.y, oldMin); //ищем максимальный Z среди всех точек
                     }
                 }
 
@@ -216,10 +240,10 @@ namespace Fusee.Examples.Simple.Core
             minY = float.MaxValue;
             foreach (SceneNode node in model.Children)
             {
-                //С‚СЂРё РЅР°Р±РѕСЂР° СЌР»РµРјРµРЅС‚РѕРІ СЂР°Р·РЅРѕРіРѕ С†РІРµС‚Р° РґР»СЏ СЂР°РєРµС‚С‹ (СЃРµСЂС‹Р№, Р·РµР»РµРЅС‹Р№, Р±РµР»С‹Р№,....) - РїРѕ РєР°Р¶РґРѕРјСѓ РїСЂРѕС…РѕРґРёРјСЃСЏ Рё РёС‰РµРј РјР°РєСЃРёРјР°Р»СЊРЅСѓСЋ РєРѕРѕСЂРґРёРЅР°С‚Сѓ Z - РѕРЅР° РІ РјСЌС€Р°С…
+                //три набора элементов разного цвета для ракеты (серый, зеленый, белый,....) - по каждому проходимся и ищем максимальную координату Z - она в мэшах
                 foreach (SceneNode child in node.Children)
                 {
-                    //Сѓ РєР°Р¶РґРѕРіРѕ С‡РёР»РґР° РµСЃС‚СЊ Mesh Рё DefaultSurfaceEffect - РЅР°СЃ РёРЅС‚РµСЂРµСЃСѓСЋС‚ РјРµС€Рё - С‚Р°Рј С‚РѕС‡РєРё, СЃСЂРµРґРё РЅРёС… Рё РёС‰РµРј РјР°РєСЃРёРјР°Р»СЊРЅСѓСЋ РєРѕРѕСЂРґРёРЅР°С‚Сѓ z
+                    //у каждого чилда есть Mesh и DefaultSurfaceEffect - нас интересуют меши - там точки, среди них и ищем максимальную координату z
                     foreach (SceneComponent component in child.Components)
                     {
                         maxY = MaxY(component, maxY);
@@ -246,7 +270,7 @@ namespace Fusee.Examples.Simple.Core
                 {
                     foreach (var point in m.Vertices)
                     {
-                        oldMax = System.Math.Max(point.z, oldMax); //РёС‰РµРј РјР°РєСЃРёРјР°Р»СЊРЅС‹Р№ Z СЃСЂРµРґРё РІСЃРµС… С‚РѕС‡РµРє
+                        oldMax = System.Math.Max(point.z, oldMax); //ищем максимальный Z среди всех точек
                     }
                 }
 
@@ -261,7 +285,7 @@ namespace Fusee.Examples.Simple.Core
                 {
                     foreach (var point in m.Vertices)
                     {
-                        oldMin = System.Math.Min(point.z, oldMin); //РёС‰РµРј РјР°РєСЃРёРјР°Р»СЊРЅС‹Р№ Z СЃСЂРµРґРё РІСЃРµС… С‚РѕС‡РµРє
+                        oldMin = System.Math.Min(point.z, oldMin); //ищем максимальный Z среди всех точек
                     }
                 }
 
@@ -272,10 +296,10 @@ namespace Fusee.Examples.Simple.Core
             minZ = float.MaxValue;
             foreach (SceneNode node in model.Children)
             {
-                //С‚СЂРё РЅР°Р±РѕСЂР° СЌР»РµРјРµРЅС‚РѕРІ СЂР°Р·РЅРѕРіРѕ С†РІРµС‚Р° РґР»СЏ СЂР°РєРµС‚С‹ (СЃРµСЂС‹Р№, Р·РµР»РµРЅС‹Р№, Р±РµР»С‹Р№,....) - РїРѕ РєР°Р¶РґРѕРјСѓ РїСЂРѕС…РѕРґРёРјСЃСЏ Рё РёС‰РµРј РјР°РєСЃРёРјР°Р»СЊРЅСѓСЋ РєРѕРѕСЂРґРёРЅР°С‚Сѓ Z - РѕРЅР° РІ РјСЌС€Р°С…
+                //три набора элементов разного цвета для ракеты (серый, зеленый, белый,....) - по каждому проходимся и ищем максимальную координату Z - она в мэшах
                 foreach (SceneNode child in node.Children)
                 {
-                    //Сѓ РєР°Р¶РґРѕРіРѕ С‡РёР»РґР° РµСЃС‚СЊ Mesh Рё DefaultSurfaceEffect - РЅР°СЃ РёРЅС‚РµСЂРµСЃСѓСЋС‚ РјРµС€Рё - С‚Р°Рј С‚РѕС‡РєРё, СЃСЂРµРґРё РЅРёС… Рё РёС‰РµРј РјР°РєСЃРёРјР°Р»СЊРЅСѓСЋ РєРѕРѕСЂРґРёРЅР°С‚Сѓ z
+                    //у каждого чилда есть Mesh и DefaultSurfaceEffect - нас интересуют меши - там точки, среди них и ищем максимальную координату z
                     foreach (SceneComponent component in child.Components)
                     {
                         maxZ = MaxZ(component, maxZ);
@@ -303,8 +327,7 @@ namespace Fusee.Examples.Simple.Core
         // Init is called on startup.
         public override void Init()
         {
-            // Set the clear color for the backbuffer to white (100% intensity in all color channels R, G, B, A).
-            RC.ClearColor = new float4(1, 1, 1, 1);
+
         }
 
         public override void Update()
@@ -318,22 +341,22 @@ namespace Fusee.Examples.Simple.Core
             if (Mouse.LeftButton)
             {
                 _keys = false;
-                _angleVelHorz = -RotationSpeed * Mouse.XVel * DeltaTimeUpdate * 0.0005f;
-                _angleVelVert = -RotationSpeed * Mouse.YVel * DeltaTimeUpdate * 0.0005f;
+                _angleVelHorz = RotationSpeed * Mouse.XVel * DeltaTimeUpdate * 0.0005f;
+                _angleVelVert = RotationSpeed * Mouse.YVel * DeltaTimeUpdate * 0.0005f;
             }
             else if (Touch != null && Touch.GetTouchActive(TouchPoints.Touchpoint_0))
             {
                 _keys = false;
                 var touchVel = Touch.GetVelocity(TouchPoints.Touchpoint_0);
-                _angleVelHorz = -RotationSpeed * touchVel.x * DeltaTimeUpdate * 0.0005f;
-                _angleVelVert = -RotationSpeed * touchVel.y * DeltaTimeUpdate * 0.0005f;
+                _angleVelHorz = RotationSpeed * touchVel.x * DeltaTimeUpdate * 0.0005f;
+                _angleVelVert = RotationSpeed * touchVel.y * DeltaTimeUpdate * 0.0005f;
             }
             else
             {
                 if (_keys)
                 {
-                    _angleVelHorz = -RotationSpeed * Keyboard.LeftRightAxis * DeltaTimeUpdate;
-                    _angleVelVert = -RotationSpeed * Keyboard.UpDownAxis * DeltaTimeUpdate;
+                    _angleVelHorz = RotationSpeed * Keyboard.LeftRightAxis * DeltaTimeUpdate;
+                    _angleVelVert = RotationSpeed * Keyboard.UpDownAxis * DeltaTimeUpdate;
                 }
                 else
                 {
@@ -351,46 +374,28 @@ namespace Fusee.Examples.Simple.Core
         // RenderAFrame is called once a frame
         public override void RenderAFrame()
         {
-            // Clear the backbuffer
-            RC.Clear(ClearFlags.Color | ClearFlags.Depth);
-
-            RC.Viewport(0, 0, Width, Height);
-
-            // Create the camera matrix and set it as the current ModelView transformation
-            var mtxRot = float4x4.CreateRotationX(_angleVert) * float4x4.CreateRotationY(_angleHorz);
-            var mtxCam = float4x4.LookAt(0, 2, -10, 0, 2, 0, 0, 1, 0);
-
-            var view = mtxCam * mtxRot;
-            var perspective = float4x4.CreatePerspectiveFieldOfView(_fovy, (float)Width / Height, ZNear, ZFar);
-            var orthographic = float4x4.CreateOrthographic(Width, Height, ZNear, ZFar);
-
-            // Render the scene loaded in Init()
-            RC.View = view;
-            RC.Projection = perspective;
+            _camPivotTransform.RotationQuaternion = QuaternionF.FromEuler(_angleVert, _angleHorz, 0);
             _sceneRendererRocket.Render(RC);
 
-            //РїРµСЂРµРјРµСЃС‚РёРј Рё СЃРјР°СЃС€С‚Р°Р±РёСЂСѓРµРј РіРѕР»РѕРІРѕСѓ РѕР±РµР·СЊСЏРЅРєРё
+            //переместим и смасштабируем головоу обезьянки
             //_sceneRendererMonkey.RenderTransform(new Transform()
             //{
             //    Translation = new float3(20,20,20),
             //    Scale = new float3(1.2f,2,4),
             //});
 
-            //float4x4 mtxOffset = float4x4.CreateTranslation(0, 0, -0.3f); //С‚СЂР°РЅСЃРѕС„СЂРјР°С†РёСЏ - РїРµСЂРµРјРµС‰РµРЅРёРµ РїРѕ 20 С‚РѕС‡РµРє РїРѕ x,y,z
-            //RC.Projection = mtxOffset * RC.Projection; //СЃРјРµСЃС‚РёРј РїСЂРѕРµРєС†РёСЋ РїРµСЂРµРґ РѕС‚СЂРёСЃРѕРІРєРѕР№ РЅРѕРІРѕРіРѕ РѕР±СЉРµРєС‚Р°
+            //float4x4 mtxOffset = float4x4.CreateTranslation(0, 0, -0.3f); //трансофрмация - перемещение по 20 точек по x,y,z
+            //RC.Projection = mtxOffset * RC.Projection; //сместим проекцию перед отрисовкой нового объекта
             //_sceneRendererMonkey.Render(RC);
 
             //Constantly check for interactive objects.
-            RC.View = float4x4.LookAt(0, 0, 1, 0, 0, 0, 0, 1, 0);
-            RC.Projection = orthographic;
+            _guiRenderer.Render(RC);
             if (!Mouse.Desc.Contains("Android"))
                 _sih.CheckForInteractiveObjects(RC, Mouse.Position, Width, Height);
             if (Touch != null && Touch.GetTouchActive(TouchPoints.Touchpoint_0) && !Touch.TwoPoint)
             {
                 _sih.CheckForInteractiveObjects(RC, Touch.GetPosition(TouchPoints.Touchpoint_0), Width, Height);
             }
-
-            _guiRenderer.Render(RC);
 
             // Swap buffers: Show the contents of the backbuffer (containing the currently rendered frame) on the front buffer.
             Present();
