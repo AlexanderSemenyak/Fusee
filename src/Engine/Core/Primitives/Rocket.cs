@@ -1,7 +1,5 @@
 using Fusee.Engine.Core.Effects;
 using Fusee.Engine.Core.Scene;
-using Fusee.Engine.Core.ShaderShards.Fragment;
-using Fusee.Engine.Core.ShaderShards.Vertex;
 using Fusee.Math.Core;
 
 
