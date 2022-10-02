@@ -7,14 +7,31 @@ using System.Linq;
 
 namespace Fusee.Engine.Core
 {
-    internal class MeshManager : IDisposable
+    internal class MeshManager
     {
         private readonly IRenderContextImp _renderContextImp;
         private readonly Stack<IMeshImp> _toBeDeletedMeshImps = new();
-        private readonly Dictionary<Suid, IMeshImp> _identifierToMeshImpDictionary = new();
+        private readonly Stack<IInstanceDataImp> _toBeDeletedInstanceDataImps = new();
+        private readonly Dictionary<Suid, (IMeshImp IMeshImp, Mesh? Mesh)> _identifierToMeshImpDictionary = new();
+
+        private readonly Dictionary<Suid, IInstanceDataImp> _identifierToInstanceDataImpDictionary = new();
+
+        /// <summary>
+        /// Creates a new Instance of MeshManager. The instance is handling the memory allocation and deallocation on the GPU by observing Mesh objects.
+        /// </summary>
+        /// <param name="renderContextImp">The RenderContextImp is used for GPU memory allocation and deallocation. See RegisterMesh.</param>
+        public MeshManager(IRenderContextImp renderContextImp)
+        {
+            _renderContextImp = renderContextImp;
+        }
 
         private void Remove(IMeshImp meshImp)
         {
+            if (meshImp == null) return;
+
+            if (meshImp.TrianglesSet)
+                _renderContextImp.RemoveTriangles(meshImp);
+
             if (meshImp.VerticesSet)
                 _renderContextImp.RemoveVertices(meshImp);
 
@@ -33,9 +50,6 @@ namespace Fusee.Engine.Core
             if (meshImp.UVsSet)
                 _renderContextImp.RemoveUVs(meshImp);
 
-            if (meshImp.TrianglesSet)
-                _renderContextImp.RemoveTriangles(meshImp);
-
             if (meshImp.BoneWeightsSet)
                 _renderContextImp.RemoveBoneWeights(meshImp);
 
@@ -48,135 +62,332 @@ namespace Fusee.Engine.Core
             if (meshImp.BiTangentsSet)
                 _renderContextImp.RemoveBiTangents(meshImp);
 
-            // Force collection
-            GC.Collect();
+            if (meshImp.FlagsSet)
+                _renderContextImp.RemoveFlags(meshImp);
         }
 
-        private void MeshChanged(object sender, MeshDataEventArgs meshDataEventArgs)
+        private void Remove(IInstanceDataImp instanceData)
         {
-            if (!_identifierToMeshImpDictionary.TryGetValue(meshDataEventArgs.Mesh.SessionUniqueIdentifier, out IMeshImp toBeUpdatedMeshImp))
+            _renderContextImp.RemoveInstanceData(instanceData);
+        }
+
+        private void DisposeMesh(object sender, MeshChangedEventArgs meshDataEventArgs)
+        {
+            if (!_identifierToMeshImpDictionary.TryGetValue(meshDataEventArgs.Mesh.SessionUniqueIdentifier, out var toBeUpdatedMeshImp))
                 throw new KeyNotFoundException("Mesh is not registered.");
 
-            var mesh = meshDataEventArgs.Mesh;
+            // Add the meshImp to the toBeDeleted Stack...#
+            _toBeDeletedMeshImps.Push(toBeUpdatedMeshImp.IMeshImp);
 
-            switch (meshDataEventArgs.ChangedEnum)
+            // remove the meshImp from the dictionary, the meshImp data now only resides inside the gpu and will be cleaned up on bottom of Render(Mesh mesh)
+            _ = _identifierToMeshImpDictionary.Remove(meshDataEventArgs.Mesh.SessionUniqueIdentifier);
+        }
+
+        internal void UpdateAllMeshes()
+        {
+            foreach (var (kv, mesh) in from kv in _identifierToMeshImpDictionary
+                                       let mesh = kv.Value.Mesh
+                                       select (kv, mesh))
             {
-                case MeshChangedEnum.Disposed:
+                if (mesh == null) continue;
+                if (!mesh.UpdatePerFrame) continue;
 
-                    // Add the meshImp to the toBeDeleted Stack...#
-                    _toBeDeletedMeshImps.Push(toBeUpdatedMeshImp);
+                var meshImp = kv.Value.IMeshImp;
+                if (mesh.Vertices.DirtyIndex)
+                {
+                    // update all vertices
+                    // TODO: use BufferSubData() if possible, implement in interface in implement in imp
+                    _renderContextImp.SetVertices(meshImp, mesh.Vertices.AsReadOnlySpan);
+                    mesh.BoundingBox = new AABBf(mesh.Vertices.AsReadOnlySpan);
+                }
 
-                    // remove the meshImp from the dictionary, the meshImp data now only resides inside the gpu and will be cleaned up on bottom of Render(Mesh mesh)
-                    _identifierToMeshImpDictionary.Remove(mesh.SessionUniqueIdentifier);
+                if (mesh.Triangles.DirtyIndex)
+                {
+                    _renderContextImp.SetTriangles(meshImp, mesh.Triangles.AsReadOnlySpan);
+                }
 
+                if (mesh.Normals != null && mesh.Normals.DirtyIndex)
+                {
+                    _renderContextImp.SetNormals(meshImp, mesh.Normals.AsReadOnlySpan);
+                }
+
+                if (mesh.UVsSet && mesh.UVs.DirtyIndex)
+                {
+                    _renderContextImp.SetUVs(meshImp, mesh.UVs.AsReadOnlySpan);
+                }
+
+                if (mesh.TangentsSet && mesh.Tangents.DirtyIndex)
+                {
+                    _renderContextImp.SetTangents(meshImp, mesh.Tangents.AsReadOnlySpan);
+                }
+
+                if (mesh.BiTangentsSet && mesh.BiTangents.DirtyIndex)
+                {
+                    _renderContextImp.SetBiTangents(meshImp, mesh.BiTangents.AsReadOnlySpan);
+                }
+
+                if (mesh.BoneWeightsSet && mesh.BoneWeights.DirtyIndex)
+                {
+                    _renderContextImp.SetBoneWeights(meshImp, mesh.BoneWeights.AsReadOnlySpan);
+                }
+
+                if (mesh.BoneIndicesSet && mesh.BoneIndices.DirtyIndex)
+                {
+                    _renderContextImp.SetBoneIndices(meshImp, mesh.BoneIndices.AsReadOnlySpan);
+                }
+
+                if (mesh.Colors0Set && mesh.Colors0.DirtyIndex)
+                {
+                    _renderContextImp.SetColors(meshImp, mesh.Colors0.AsReadOnlySpan);
+                }
+
+                if (mesh.Colors1Set && mesh.Colors1.DirtyIndex)
+                {
+                    _renderContextImp.SetColors1(meshImp, mesh.Colors1.AsReadOnlySpan);
+                }
+
+                if (mesh.Colors2Set && mesh.Colors2.DirtyIndex)
+                {
+                    _renderContextImp.SetColors2(meshImp, mesh.Colors2.AsReadOnlySpan);
+                }
+
+                if (mesh.FlagsSet && mesh.Flags.DirtyIndex)
+                {
+                    _renderContextImp.SetFlags(meshImp, mesh.Flags.AsReadOnlySpan);
+                }
+
+                // TODO: Prepared for next change with index list
+                //if (!mesh.Vertices.DirtyIndices.Empty)
+                //{
+                //    // update all vertices
+                //    // TODO: use BufferSubData() if possible, implement in interface in implement in imp
+                //    _renderContextImp.SetVertices(meshImp, mesh.Vertices.AsReadOnlySpan);
+                //    mesh.BoundingBox = new AABBf(mesh.Vertices.AsReadOnlySpan);
+                //}
+                //if (mesh.Triangles.DirtyIndices.Empty)
+                //{
+                //    _renderContextImp.SetTriangles(meshImp, mesh.Triangles.AsReadOnlySpan);
+                //}
+                //if (mesh.NormalsSet && mesh.Normals.DirtyIndices.Empty)
+                //{
+                //    _renderContextImp.SetNormals(meshImp, mesh.Normals.AsReadOnlySpan);
+                //}
+                //if (mesh.UVsSet && mesh.UVs.DirtyIndices.Empty)
+                //{
+                //    _renderContextImp.SetUVs(meshImp, mesh.UVs.AsReadOnlySpan);
+                //}
+                //if (mesh.TangentsSet && mesh.Tangents.DirtyIndices.Empty)
+                //{
+                //    _renderContextImp.SetTangents(meshImp, mesh.Tangents.AsReadOnlySpan);
+                //}
+                //if (mesh.BiTangentsSet && mesh.BiTangents.DirtyIndices.Empty)
+                //{
+                //    _renderContextImp.SetBiTangents(meshImp, mesh.BiTangents.AsReadOnlySpan);
+                //}
+                //if (mesh.BoneWeightsSet && mesh.BoneWeights.DirtyIndices.Empty)
+                //{
+                //    _renderContextImp.SetBoneWeights(meshImp, mesh.BoneWeights.AsReadOnlySpan);
+                //}
+                //if (mesh.BoneIndicesSet && mesh.BoneIndices.DirtyIndices.Empty)
+                //{
+                //    _renderContextImp.SetBoneIndices(meshImp, mesh.BoneIndices.AsReadOnlySpan);
+                //}
+                //if (mesh.Colors0Set && mesh.Colors0.DirtyIndices.Empty)
+                //{
+                //    _renderContextImp.SetColors(meshImp, mesh.Colors0.AsReadOnlySpan);
+                //}
+                //if (mesh.Colors1Set && mesh.Colors1.DirtyIndices.Empty)
+                //{
+                //    _renderContextImp.SetColors1(meshImp, mesh.Colors1.AsReadOnlySpan);
+                //}
+                //if (mesh.Colors2Set && mesh.Colors2.DirtyIndices.Empty)
+                //{
+                //    _renderContextImp.SetColors2(meshImp, mesh.Colors2.AsReadOnlySpan);
+                //}
+                mesh.ResetIndexLists();
+            }
+        }
+
+        private void DisposeInstanceData(object sender, InstanceDataChangedEventArgs instanceDataEventArgs)
+        {
+            if (!_identifierToInstanceDataImpDictionary.TryGetValue(instanceDataEventArgs.InstanceData.SessionUniqueId, out IInstanceDataImp instanceDataImp))
+                throw new KeyNotFoundException("InstanceData is not registered.");
+
+            // Add the meshImp to the toBeDeleted Stack...
+            _toBeDeletedInstanceDataImps.Push(instanceDataImp);
+
+            // remove the meshImp from the dictionary, the meshImp data now only resides inside the gpu and will be cleaned up on bottom of Render(Mesh mesh)
+            _ = _identifierToInstanceDataImpDictionary.Remove(instanceDataEventArgs.InstanceData.SessionUniqueId);
+        }
+
+        private void InstanceDataChanged(object sender, InstanceDataChangedEventArgs instanceDataEventArgs)
+        {
+            if (!_identifierToInstanceDataImpDictionary.TryGetValue(instanceDataEventArgs.InstanceData.SessionUniqueId, out var instanceImp))
+            {
+                throw new ArgumentException("InstanceData is not registered yet. Use RegisterInstanceData first.");
+            }
+
+            var instanceData = (InstanceData)instanceDataEventArgs.InstanceData;
+
+            switch (instanceDataEventArgs.ChangedEnum)
+            {
+                case InstanceDataChangedEnum.Transform:
+                    _renderContextImp.SetInstanceTransform(instanceImp, instanceData.Positions, instanceData.Rotations, instanceData.Scales);
                     break;
-                case MeshChangedEnum.Vertices:
-                    _renderContextImp.SetVertices(toBeUpdatedMeshImp, mesh.Vertices);
-                    mesh.BoundingBox = new AABBf(mesh.Vertices);
-                    break;
-                case MeshChangedEnum.Triangles:
-                    _renderContextImp.SetTriangles(toBeUpdatedMeshImp, mesh.Triangles);
-                    break;
-                case MeshChangedEnum.Colors:
-                    _renderContextImp.SetColors(toBeUpdatedMeshImp, mesh.Colors);
-                    break;
-                case MeshChangedEnum.Colors1:
-                    _renderContextImp.SetColors(toBeUpdatedMeshImp, mesh.Colors1);
-                    break;
-                case MeshChangedEnum.Colors2:
-                    _renderContextImp.SetColors(toBeUpdatedMeshImp, mesh.Colors2);
-                    break;
-                case MeshChangedEnum.Normals:
-                    _renderContextImp.SetNormals(toBeUpdatedMeshImp, mesh.Normals);
-                    break;
-                case MeshChangedEnum.Uvs:
-                    _renderContextImp.SetUVs(toBeUpdatedMeshImp, mesh.UVs);
-                    break;
-                case MeshChangedEnum.BoneIndices:
-                    _renderContextImp.SetBoneIndices(toBeUpdatedMeshImp, mesh.BoneIndices);
-                    break;
-                case MeshChangedEnum.BoneWeights:
-                    _renderContextImp.SetBoneWeights(toBeUpdatedMeshImp, mesh.BoneWeights);
-                    break;
-                case MeshChangedEnum.Tangents:
-                    _renderContextImp.SetTangents(toBeUpdatedMeshImp, mesh.Tangents);
-                    break;
-                case MeshChangedEnum.BiTangents:
-                    _renderContextImp.SetBiTangents(toBeUpdatedMeshImp, mesh.BiTangents);
+                case InstanceDataChangedEnum.Colors:
+                    _renderContextImp.SetInstanceColor(instanceImp, instanceData.Colors);
                     break;
             }
         }
 
+        public void RegisterNewMesh(GpuMesh mesh, float3[] vertices, uint[] triangles, float2[]? uvs = null,
+            float3[]? normals = null, uint[]? colors = null, uint[]? colors1 = null, uint[]? colors2 = null,
+            float4[]? tangents = null, float3[]? bitangents = null, float4[]? boneIndices = null, float4[]? boneWeights = null, uint[]? flags = null)
+        {
+            var meshImp = _renderContextImp.CreateMeshImp();
+            _renderContextImp.SetVertexArrayObject(meshImp);
+
+            if (triangles != null)
+                _renderContextImp.SetTriangles(meshImp, triangles);
+
+            if (vertices != null)
+                _renderContextImp.SetVertices(meshImp, vertices);
+
+            if (uvs != null)
+                _renderContextImp.SetUVs(meshImp, uvs);
+
+            if (normals != null)
+                _renderContextImp.SetNormals(meshImp, normals);
+
+            if (colors != null)
+                _renderContextImp.SetColors(meshImp, colors);
+
+            if (colors1 != null)
+                _renderContextImp.SetColors1(meshImp, colors1);
+
+            if (colors2 != null)
+                _renderContextImp.SetColors2(meshImp, colors2);
+
+            if (boneIndices != null)
+                _renderContextImp.SetBoneIndices(meshImp, boneIndices);
+
+            if (boneWeights != null)
+                _renderContextImp.SetBoneWeights(meshImp, boneWeights);
+
+            if (tangents != null)
+                _renderContextImp.SetTangents(meshImp, tangents);
+
+            if (bitangents != null)
+                _renderContextImp.SetBiTangents(meshImp, bitangents);
+
+            if (flags != null)
+                _renderContextImp.SetFlags(meshImp, flags);
+
+            mesh.DisposeData += DisposeMesh;
+            meshImp.MeshType = mesh.MeshType;
+
+            _identifierToMeshImpDictionary.Add(mesh.SessionUniqueIdentifier, (meshImp, null));
+        }
+
+        // Configure newly created MeshImp to reflect Mesh's properties on GPU (allocate buffers)
         private IMeshImp RegisterNewMesh(Mesh mesh)
         {
-            // Configure newly created MeshImp to reflect Mesh's properties on GPU (allocate buffers)
             var meshImp = _renderContextImp.CreateMeshImp();
-
-            // Begin Setup GPU Buffers / allocate GPU memory
 
             _renderContextImp.SetVertexArrayObject(meshImp);
 
+            if (mesh.TrianglesSet)
+                _renderContextImp.SetTriangles(meshImp, mesh.Triangles.AsReadOnlySpan);
+
             if (mesh.VerticesSet)
-                _renderContextImp.SetVertices(meshImp, mesh.Vertices);
+                _renderContextImp.SetVertices(meshImp, mesh.Vertices.AsReadOnlySpan);
 
             if (mesh.UVsSet)
-                _renderContextImp.SetUVs(meshImp, mesh.UVs);
+                _renderContextImp.SetUVs(meshImp, mesh.UVs.AsReadOnlySpan);
 
             if (mesh.NormalsSet)
-                _renderContextImp.SetNormals(meshImp, mesh.Normals);
+                _renderContextImp.SetNormals(meshImp, mesh.Normals.AsReadOnlySpan);
 
-            if (mesh.ColorsSet)
-                _renderContextImp.SetColors(meshImp, mesh.Colors);
+            if (mesh.Colors0Set)
+                _renderContextImp.SetColors(meshImp, mesh.Colors0.AsReadOnlySpan);
 
-            if (mesh.ColorsSet1)
-                _renderContextImp.SetColors1(meshImp, mesh.Colors1);
+            if (mesh.Colors1Set)
+                _renderContextImp.SetColors1(meshImp, mesh.Colors1.AsReadOnlySpan);
 
-            if (mesh.ColorsSet2)
-                _renderContextImp.SetColors2(meshImp, mesh.Colors2);
+            if (mesh.Colors2Set)
+                _renderContextImp.SetColors2(meshImp, mesh.Colors2.AsReadOnlySpan);
 
             if (mesh.BoneIndicesSet)
-                _renderContextImp.SetBoneIndices(meshImp, mesh.BoneIndices);
+                _renderContextImp.SetBoneIndices(meshImp, mesh.BoneIndices.AsReadOnlySpan);
 
             if (mesh.BoneWeightsSet)
-                _renderContextImp.SetBoneWeights(meshImp, mesh.BoneWeights);
-
-            if (mesh.TrianglesSet)
-                _renderContextImp.SetTriangles(meshImp, mesh.Triangles);
+                _renderContextImp.SetBoneWeights(meshImp, mesh.BoneWeights.AsReadOnlySpan);
 
             if (mesh.TangentsSet)
-                _renderContextImp.SetTangents(meshImp, mesh.Tangents);
+                _renderContextImp.SetTangents(meshImp, mesh.Tangents.AsReadOnlySpan);
 
             if (mesh.BiTangentsSet)
-                _renderContextImp.SetBiTangents(meshImp, mesh.BiTangents);
+                _renderContextImp.SetBiTangents(meshImp, mesh.BiTangents.AsReadOnlySpan);
 
-            // End Setup GPU Buffers
+            if (mesh.FlagsSet)
+                _renderContextImp.SetFlags(meshImp, mesh.Flags.AsReadOnlySpan);
 
-            // Setup handler to observe changes of the mesh data and dispose event (deallocation)
-            mesh.MeshChanged += MeshChanged;
+            //mesh.MeshChanged += MeshChanged; // <- Replace with UpdateGPU method!
 
-            meshImp.MeshType = (OpenGLPrimitiveType)mesh.MeshType;
+            mesh.DisposeData += DisposeMesh;
 
-            _identifierToMeshImpDictionary.Add(mesh.SessionUniqueIdentifier, meshImp);
+            meshImp.MeshType = mesh.MeshType;
+
+            _identifierToMeshImpDictionary.Add(mesh.SessionUniqueIdentifier, (meshImp, mesh));
 
             return meshImp;
         }
 
-        /// <summary>
-        /// Creates a new Instance of MeshManager. Th instance is handling the memory allocation and deallocation on the GPU by observing Mesh.cs objects.
-        /// </summary>
-        /// <param name="renderContextImp">The RenderContextImp is used for GPU memory allocation and deallocation. See RegisterMesh.</param>
-        public MeshManager(IRenderContextImp renderContextImp)
+        private IInstanceDataImp RegisterNewInstanceData(Mesh mesh, InstanceData instanceData)
         {
-            _renderContextImp = renderContextImp;
+            if (!_identifierToMeshImpDictionary.TryGetValue(mesh.SessionUniqueIdentifier, out var meshImp))
+            {
+                throw new ArgumentException("Mesh is not registered yet. Use RegisterMesh first.");
+            }
+
+            instanceData.DataChanged += InstanceDataChanged;
+            instanceData.DisposeData += DisposeInstanceData;
+
+            var instanceDataImp = _renderContextImp.CreateInstanceDataImp(meshImp.IMeshImp);
+            instanceDataImp.Amount = instanceData.Amount;
+
+            _identifierToInstanceDataImpDictionary.Add(instanceData.SessionUniqueId, instanceDataImp);
+            _renderContextImp.SetInstanceTransform(instanceDataImp, instanceData.Positions, instanceData.Rotations, instanceData.Scales);
+            _renderContextImp.SetInstanceColor(instanceDataImp, instanceData.Colors);
+
+            return instanceDataImp;
         }
 
-        public IMeshImp GetMeshImpFromMesh(Mesh m)
+        public IMeshImp GetImpFromMesh(Mesh m)
         {
-            if (!_identifierToMeshImpDictionary.TryGetValue(m.SessionUniqueIdentifier, out IMeshImp foundMeshImp))
+            if (!_identifierToMeshImpDictionary.TryGetValue(m.SessionUniqueIdentifier, out var foundMeshImp))
             {
                 return RegisterNewMesh(m);
             }
-            return foundMeshImp;
+            return foundMeshImp.IMeshImp;
+        }
+
+        public IMeshImp GetImpFromMesh(GpuMesh m)
+        {
+            if (!_identifierToMeshImpDictionary.TryGetValue(m.SessionUniqueIdentifier, out var foundMeshImp))
+            {
+                throw new ArgumentException("GpuMesh not found, make sure you created it first.");
+            }
+            return foundMeshImp.IMeshImp;
+        }
+
+        public IInstanceDataImp GetImpFromInstanceData(Mesh m, InstanceData instanceData)
+        {
+            if (!_identifierToInstanceDataImpDictionary.TryGetValue(instanceData.SessionUniqueId, out IInstanceDataImp imp))
+            {
+                return RegisterNewInstanceData(m, instanceData);
+            }
+            return imp;
         }
 
         /// <summary>
@@ -184,46 +395,17 @@ namespace Fusee.Engine.Core
         /// </summary>
         public void Cleanup()
         {
-            if (_toBeDeletedMeshImps == null || _toBeDeletedMeshImps.Count == 0)
-            {
-                return;
-            }
             while (_toBeDeletedMeshImps.Count > 0)
             {
                 var tobeDeletedMeshImp = _toBeDeletedMeshImps.Pop();
                 Remove(tobeDeletedMeshImp);
             }
-        }
 
-        public void Dispose()
-        {
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
-        }
-
-        private bool disposed;
-        protected virtual void Dispose(bool disposing)
-        {
-            // Check to see if Dispose has already been called.
-            if (!disposed)
+            while (_toBeDeletedInstanceDataImps.Count > 0)
             {
-                Cleanup();
-
-                for (int i = 0; i < _identifierToMeshImpDictionary.Count; i++)
-                {
-                    var meshItem = _identifierToMeshImpDictionary.ElementAt(i);
-                    Remove(meshItem.Value);
-                    _identifierToMeshImpDictionary.Remove(meshItem.Key);
-                }
-
-                // Note disposing has been done.
-                disposed = true;
+                var tobeDeletedInstanceImp = _toBeDeletedInstanceDataImps.Pop();
+                Remove(tobeDeletedInstanceImp);
             }
-        }
-
-        ~MeshManager()
-        {
-            Dispose(disposing: false);
         }
     }
 }

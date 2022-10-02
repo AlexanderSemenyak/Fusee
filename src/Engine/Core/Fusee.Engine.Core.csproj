@@ -5,7 +5,12 @@
 		<DocumentationFile>$(OutputPath)\$(RootNamespace).xml</DocumentationFile>
 		<IsPackable>true</IsPackable>
 		<Description>Fusee Engine Core</Description>
+		<Nullable>enable</Nullable>
 	</PropertyGroup>
+
+	<ItemGroup>
+	  <PackageReference Include="CommunityToolkit.Diagnostics" Version="8.0.0" />
+	</ItemGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="$(FuseeEngineRoot)\src\Base\Common\Fusee.Base.Common.csproj">
@@ -32,9 +37,18 @@
 		<ProjectReference Include="$(FuseeEngineRoot)\src\Serialization\Fusee.Serialization.csproj">
 			<PrivateAssets>analyzers</PrivateAssets>
 		</ProjectReference>
-		<ProjectReference Include="$(FuseeEngineRoot)\src\Structures\Fusee.Structures.csproj">
-			<PrivateAssets>analyzers</PrivateAssets>
-		</ProjectReference>
 	</ItemGroup>
-	
+
+	<ItemGroup>
+	  <None Update="Assets\line.frag">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	  <None Update="Assets\line.geom">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	  <None Update="Assets\line.vert">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	</ItemGroup>
+
 </Project>

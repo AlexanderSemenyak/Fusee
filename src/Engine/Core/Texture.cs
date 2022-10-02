@@ -11,6 +11,8 @@ namespace Fusee.Engine.Core
     /// </summary>
     public class Texture : ITexture
     {
+        protected Texture() { }
+
         #region RenderContext Asset Management
 
         /// <summary>
@@ -21,15 +23,18 @@ namespace Fusee.Engine.Core
         /// <summary>
         /// SessionUniqueIdentifier is used to verify a Textures's uniqueness in the current session.
         /// </summary>
-        public Suid SessionUniqueIdentifier { get; private set; }
+        public Suid SessionUniqueIdentifier { get; protected set; }
         #endregion
 
-        private readonly ImageData _imageData;
+        /// <summary>
+        /// The <see cref="IImageData"/> of this texture.
+        /// </summary>
+        public IImageData ImageData { get; protected set; }
 
         #region Properties
 
         /// <summary>
-        /// Reference to the original image. Should save  path/file name. 
+        /// Reference to the original image. Should save path/file name.
         /// </summary>
         public string PathAndName;
 
@@ -38,7 +43,7 @@ namespace Fusee.Engine.Core
         /// </summary>
         public int Width
         {
-            get { return _imageData.Width; }
+            get { return ImageData.Width; }
         }
 
         /// <summary>
@@ -46,7 +51,7 @@ namespace Fusee.Engine.Core
         /// </summary>
         public int Height
         {
-            get { return _imageData.Height; }
+            get { return ImageData.Height; }
         }
 
         /// <summary>
@@ -54,7 +59,7 @@ namespace Fusee.Engine.Core
         /// </summary>
         public byte[] PixelData
         {
-            get { return _imageData.PixelData; }
+            get { return ImageData.PixelData; }
         }
 
         /// <summary>
@@ -62,7 +67,7 @@ namespace Fusee.Engine.Core
         /// </summary>
         public ImagePixelFormat PixelFormat
         {
-            get { return _imageData.PixelFormat; }
+            get { return ImageData.PixelFormat; }
         }
 
         /// <summary>
@@ -79,7 +84,7 @@ namespace Fusee.Engine.Core
         public bool DoGenerateMipMaps
         {
             get;
-            private set;
+            protected set;
         }
 
         /// <summary>
@@ -119,9 +124,9 @@ namespace Fusee.Engine.Core
         /// <summary>
         /// Type of the render texture, <see cref="RenderTargetTextureTypes"/>.
         /// </summary>
-        public RenderTargetTextureTypes TextureType { get; private set; }
+        public RenderTargetTextureTypes TextureType { get; protected set; }
 
-        #endregion        
+        #endregion
 
         /// <summary>
         /// Constructor initializes a Texture from a pixelData byte buffer, width and height in pixels and <see cref="ImagePixelFormat"/>.
@@ -136,7 +141,7 @@ namespace Fusee.Engine.Core
         public Texture(byte[] pixelData, int width, int height, ImagePixelFormat colorFormat, bool generateMipMaps = true, TextureFilterMode filterMode = TextureFilterMode.LinearMipmapLinear, TextureWrapMode wrapMode = TextureWrapMode.Repeat)
         {
             SessionUniqueIdentifier = Suid.GenerateSuid();
-            _imageData = new ImageData(pixelData, width, height, colorFormat);
+            ImageData = new ImageData(pixelData, width, height, colorFormat);
             DoGenerateMipMaps = generateMipMaps;
             FilterMode = filterMode;
             WrapMode = wrapMode;
@@ -152,10 +157,8 @@ namespace Fusee.Engine.Core
         public Texture(IImageData imageData, bool generateMipMaps = true, TextureFilterMode filterMode = TextureFilterMode.NearestMipmapLinear, TextureWrapMode wrapMode = TextureWrapMode.Repeat)
         {
             SessionUniqueIdentifier = Suid.GenerateSuid();
-            _imageData = new ImageData(
-                new byte[imageData.Width * imageData.Height * imageData.PixelFormat.BytesPerPixel],
-                imageData.Width, imageData.Height, imageData.PixelFormat);
-            _imageData.Blt(0, 0, imageData);
+            ImageData = imageData;
+
             DoGenerateMipMaps = generateMipMaps;
             FilterMode = filterMode;
             WrapMode = wrapMode;
@@ -178,7 +181,7 @@ namespace Fusee.Engine.Core
         public void Blt(int xDst, int yDst, IImageData src, int xSrc = 0, int ySrc = 0, int width = 0, int height = 0)
         {
             // Blit into private _imageData
-            _imageData.Blt(xDst, yDst, src, xSrc, ySrc, width, height);
+            ImageData.Blt(xDst, yDst, src, xSrc, ySrc, width, height);
             if (width == 0)
                 width = src.Width;
             if (height == 0)
@@ -205,7 +208,7 @@ namespace Fusee.Engine.Core
         /// <exception cref="ArgumentOutOfRangeException"></exception>
         public IEnumerator<ScanLine> ScanLines(int xSrc = 0, int ySrc = 0, int width = 0, int height = 0)
         {
-            return _imageData.ScanLines(xSrc, ySrc, width, height);
+            return ImageData.ScanLines(xSrc, ySrc, width, height);
         }
 
         private bool _disposed;
@@ -218,10 +221,7 @@ namespace Fusee.Engine.Core
         {
             if (!_disposed)
             {
-                if (disposing)
-                {
-                    TextureChanged?.Invoke(this, new TextureEventArgs(this, TextureChangedEnum.Disposed));
-                }
+                TextureChanged?.Invoke(this, new TextureEventArgs(this, TextureChangedEnum.Disposed));
 
                 _disposed = true;
             }
@@ -234,6 +234,8 @@ namespace Fusee.Engine.Core
         {
             // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
             Dispose(true);
+
+            GC.SuppressFinalize(this);
         }
 
         /// <summary>
@@ -241,7 +243,7 @@ namespace Fusee.Engine.Core
         /// </summary>
         ~Texture()
         {
-            Dispose(true);
+            Dispose(false);
         }
 
         /// <summary>

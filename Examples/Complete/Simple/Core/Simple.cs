@@ -332,6 +332,8 @@ namespace Fusee.Examples.Simple.Core
 
         public override void Update()
         {
+            _camPivotTransform.RotationQuaternion = QuaternionF.FromEuler(_angleVert, _angleHorz, 0);
+
             // Mouse and keyboard movement
             if (Keyboard.LeftRightAxis != 0 || Keyboard.UpDownAxis != 0)
             {
@@ -370,12 +372,11 @@ namespace Fusee.Examples.Simple.Core
             _angleVert += _angleVelVert;
         }
 
-
         // RenderAFrame is called once a frame
         public override void RenderAFrame()
         {
-            _camPivotTransform.RotationQuaternion = QuaternionF.FromEuler(_angleVert, _angleHorz, 0);
             _sceneRendererRocket.Render(RC);
+            _guiRenderer.Render(RC);
 
             //переместим и смасштабируем головоу обезьянки
             //_sceneRendererMonkey.RenderTransform(new Transform()
@@ -389,7 +390,6 @@ namespace Fusee.Examples.Simple.Core
             //_sceneRendererMonkey.Render(RC);
 
             //Constantly check for interactive objects.
-            _guiRenderer.Render(RC);
             if (!Mouse.Desc.Contains("Android"))
                 _sih.CheckForInteractiveObjects(RC, Mouse.Position, Width, Height);
             if (Touch != null && Touch.GetTouchActive(TouchPoints.Touchpoint_0) && !Touch.TwoPoint)
