@@ -57,19 +57,19 @@ namespace Fusee.Examples.PointCloudPotree2.Gui
             _fuControl.Init();
             await base.InitAsync();
 
-            _picker = new ImGuiFilePicker(Path.Combine(Environment.CurrentDirectory, ""), false, ".json");
+            _picker = new ImGuiFilePicker(new DirectoryInfo(Environment.CurrentDirectory), ".json");
             _picker.OnPicked += (s, file) =>
             {
-                if (string.IsNullOrEmpty(file)) return;
+                if (file == null || !file.Exists) return;
 
-                PointRenderingParams.Instance.PathToOocFile = new FileInfo(file).Directory.FullName;
+                PointRenderingParams.Instance.PathToOocFile = file.DirectoryName;
 
                 if (_fuControl != null)
                 {
                     _fuControl.RequestedNewFile = true;
                     _fuControl.UpdateOriginalGameWindowDimensions(Width, Height);
                     _fuControl.ResetCamera();
-                    _currentColorMode = 0;
+                    _currentColorMode = (int)PointRenderingParams.Instance.ColorMode;
                 }
             };
         }
