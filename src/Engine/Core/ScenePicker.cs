@@ -2,6 +2,7 @@ using CommunityToolkit.Diagnostics;
 using Fusee.Base.Core;
 using Fusee.Engine.Common;
 using Fusee.Engine.Core.Effects;
+using Fusee.Engine.Core.Primitives;
 using Fusee.Engine.Core.Scene;
 using Fusee.Math.Core;
 using Fusee.Xene;
@@ -180,7 +181,7 @@ namespace Fusee.Engine.Core
         /// <summary>
         /// The pick position on the screen.
         /// </summary>
-        public float2 PickPosClip { get; set; }
+        public float2 PickPosClip { get; private set; }
 
         private float4x4 _view;
         private float4x4 _invView;
@@ -249,7 +250,7 @@ namespace Fusee.Engine.Core
             _canvasHeight = canvasHeight;
 
             float2 pickPosClip;
-            if (_prePassResults.Count() == 0)
+            if (!_prePassResults.Any())
             {
                 Diagnostics.Error("No camera from a PrePassVisitor found. Picking not possible!");
                 return null;
@@ -271,12 +272,16 @@ namespace Fusee.Engine.Core
                 if (!float2.PointInRectangle(new float2(camRect.Left, camRect.Top), new float2(camRect.Right, camRect.Bottom), pickPos))
                     continue;
 
-                if (pickCam == default || camRes.Camera.Layer > pickCam.Camera.Layer)
+                if (pickCam == default(CameraResult) || camRes.Camera.Layer > pickCam.Camera.Layer)
                 {
                     pickCam = camRes;
                     pickCamRect = camRect;
                 }
             }
+
+            //Early out for the case that the scene is rendered with more than one canvas and the mouse isn't inside the correct one.
+            if (pickCam == null || pickCam == default(CameraResult))
+                return null;
 
             CurrentCameraResult = pickCam;
 
@@ -598,7 +603,6 @@ namespace Fusee.Engine.Core
 
         private void PickLineAdjacencyGeometry(Mesh mesh)
         {
-
             var mvp = _projection * _view * State.Model;
             var matOfNode = CurrentNode.GetComponent<ShaderEffect>();
             if (matOfNode == null)
@@ -610,13 +614,13 @@ namespace Fusee.Engine.Core
 
             if (mesh.Triangles == null) return;
             if (mesh.Vertices == null) return;
-            if (CurrentCameraResult == null)
+            if (CurrentCameraResult.Camera == null)
             {
                 Diagnostics.Warn("No camera found in SceneGraph, no picking possible!");
                 return;
             }
 
-            if (CurrentCameraResult.Camera == default)
+            if (CurrentCameraResult.Camera == default(Camera))
                 return;
 
             var size = CurrentCameraResult.Camera.GetViewportInPx(_canvasWidth, _canvasHeight);
@@ -698,7 +702,6 @@ namespace Fusee.Engine.Core
 
         private void PickLineGeometry(Mesh mesh)
         {
-
             var mvp = _projection * _view * State.Model;
 
             var matOfNode = CurrentNode.GetComponent<ShaderEffect>();
@@ -711,13 +714,13 @@ namespace Fusee.Engine.Core
 
             if (mesh.Triangles == null) return;
             if (mesh.Vertices == null) return;
-            if (CurrentCameraResult == null)
+            if (CurrentCameraResult.Camera == null)
             {
                 Diagnostics.Warn("No camera found in SceneGraph, no picking possible!");
                 return;
             }
 
-            if (CurrentCameraResult.Camera == default)
+            if (CurrentCameraResult.Camera == default(Camera))
                 return;
 
             var size = CurrentCameraResult.Camera.GetViewportInPx(_canvasWidth, _canvasHeight);
@@ -775,13 +778,14 @@ namespace Fusee.Engine.Core
                 mesh.BoundingBox = new(mesh.Vertices.AsReadOnlySpan);
             }
 
-            if (mesh is not Primitives.Plane && (mesh.BoundingBox.Size.x <= 0f || mesh.BoundingBox.Size.y <= 0f || mesh.BoundingBox.Size.z <= 0f))
+            if (mesh is not Plane && mesh is not NineSlicePlane && mesh is not Circle && mesh is not Line && (mesh.BoundingBox.Size.x <= 0f || mesh.BoundingBox.Size.y <= 0f || mesh.BoundingBox.Size.z <= 0f))
             {
-                Diagnostics.Warn($"Size of current bounding box is 0 for one or more dimensions. Picking not possible.");
+                Diagnostics.Debug($"Size of current bounding box is 0 for one or more dimensions. Picking not possible.");
                 return;
             }
 
-            var ray = new RayF(PickPosClip, _view, _projection);
+            if (_currentCameraResult.Camera == null) return;
+            var ray = new RayF(PickPosClip, _view, _projection, _currentCameraResult.Camera.ProjectionMethod == ProjectionMethod.Orthographic);
 
             var box = State.Model * mesh.BoundingBox;
             if (!box.IntersectRay(ray))

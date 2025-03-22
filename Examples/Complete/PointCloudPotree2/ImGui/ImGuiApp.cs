@@ -51,6 +51,9 @@ namespace Fusee.Examples.PointCloudPotree2.Gui
         {
             SetImGuiDesign();
 
+            // Enable Dockspace
+            ImGui.GetIO().ConfigFlags |= ImGuiConfigFlags.DockingEnable;
+
             _fuControl = new PointCloudRenderingControl(RC);
             ApplicationIsShuttingDown += OnShuttingDown;
             EndOfFrame += _fuControl.OnLoadNewFile;
@@ -86,12 +89,9 @@ namespace Fusee.Examples.PointCloudPotree2.Gui
 
         public override void RenderAFrame()
         {
-            // Enable Dockspace
-            ImGui.GetIO().ConfigFlags |= ImGuiConfigFlags.DockingEnable;
-
             // Set Window flags for Dockspace
-            var wndDockspaceFlags =
-                    ImGuiWindowFlags.NoDocking
+            var wndDockspaceFlags = 
+                      ImGuiWindowFlags.NoDocking 
                     | ImGuiWindowFlags.NoTitleBar
                     | ImGuiWindowFlags.NoCollapse
                     | ImGuiWindowFlags.NoResize
@@ -129,17 +129,13 @@ namespace Fusee.Examples.PointCloudPotree2.Gui
             ImGui.Begin("Viewport",
               ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoCollapse);
 
-            var parentMin = ImGui.GetWindowContentRegionMin();
-            var parentMax = ImGui.GetWindowContentRegionMax();
-            var size = parentMax - parentMin;
+            var size = ImGui.GetContentRegionAvail();
 
             // Using a Child allow to fill all the space of the window.
             // It also allows customization
-            ImGui.BeginChild("GameRender", size, true, ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoMove);
+            ImGui.BeginChild("GameRender", size, ImGuiChildFlags.None, ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoMove);
 
-            var fuseeViewportMin = ImGui.GetWindowContentRegionMin();
-            var fuseeViewportMax = ImGui.GetWindowContentRegionMax();
-            var fuseeViewportSize = fuseeViewportMax - fuseeViewportMin;
+            var fuseeViewportSize = ImGui.GetContentRegionAvail();
             var fuseeViewportPos = ImGui.GetWindowPos();
 
             var hndl = _fuControl.RenderToTexture((int)fuseeViewportSize.X, (int)fuseeViewportSize.Y);
@@ -152,8 +148,9 @@ namespace Fusee.Examples.PointCloudPotree2.Gui
             // check if mouse is inside window, if true, accept update() inputs
             _isMouseInsideFuControl = ImGui.IsItemHovered();
 
-            ImGui.EndChild();
-            ImGui.End();
+            ImGui.EndChild();   // GameRender
+            ImGui.End();        // Viewport
+            ImGui.End();        // DockSpace
 
             Draw();
             DrawFilePickerDialog();
@@ -372,7 +369,7 @@ namespace Fusee.Examples.PointCloudPotree2.Gui
             colors[(int)ImGuiCol.HeaderActive] = new Vector4(0.71f, 0.78f, 0.69f, 1.00f);
             colors[(int)ImGuiCol.Tab] = new Vector4(0.39f, 0.39f, 0.39f, 1.00f);
             colors[(int)ImGuiCol.TabHovered] = new Vector4(0.26f, 0.59f, 0.98f, 0.78f);
-            colors[(int)ImGuiCol.TabActive] = new Vector4(0.26f, 0.59f, 0.98f, 1.00f);
+            colors[(int)ImGuiCol.TabSelected] = new Vector4(0.26f, 0.59f, 0.98f, 1.00f);
             colors[(int)ImGuiCol.Separator] = new Vector4(0.39f, 0.39f, 0.39f, 1.00f);
             colors[(int)ImGuiCol.SeparatorHovered] = new Vector4(0.14f, 0.44f, 0.80f, 0.78f);
             colors[(int)ImGuiCol.SeparatorActive] = new Vector4(0.14f, 0.44f, 0.80f, 1.00f);
@@ -386,7 +383,7 @@ namespace Fusee.Examples.PointCloudPotree2.Gui
             colors[(int)ImGuiCol.TextSelectedBg] = new Vector4(0.26f, 0.59f, 0.98f, 0.35f);
             //colors[(int)ImGuiCol.ModalWindowDarkening] = new Vector4(0.20f, 0.20f, 0.20f, 0.35f);
             colors[(int)ImGuiCol.DragDropTarget] = new Vector4(0.26f, 0.59f, 0.98f, 0.95f);
-            colors[(int)ImGuiCol.NavHighlight] = colors[(int)ImGuiCol.HeaderHovered];
+            //colors[(int)ImGuiCol.NavHighlight] = colors[(int)ImGuiCol.HeaderHovered];
             colors[(int)ImGuiCol.NavWindowingHighlight] = new Vector4(0.70f, 0.70f, 0.70f, 0.70f);
         }
     }

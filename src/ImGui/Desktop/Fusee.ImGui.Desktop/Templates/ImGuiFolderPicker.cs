@@ -131,7 +131,7 @@ namespace Fusee.ImGuiImp.Desktop.Templates
         private Exception? _createFolderException;
 
         public DirectoryInfo? SelectedFolder { get; protected set; }
-        public DirectoryInfo RootFolder { get; protected set; }
+        public DirectoryInfo RootFolder;
 
         public int FontSize;
         public ImFontPtr SymbolsFontPtr = null;
@@ -189,7 +189,7 @@ namespace Fusee.ImGuiImp.Desktop.Templates
         }
         private Vector4 _windowBackground = new(200, 200, 200, 255);
 
-        public uint _windowBackgroundUint = new Vector4(200, 200, 200, 255).ToUintColor();
+        private uint _windowBackgroundUint;
 
         /// <summary>
         /// Background of file selection menu
@@ -229,6 +229,7 @@ namespace Fusee.ImGuiImp.Desktop.Templates
             CurrentOpenFolder = startingPath;
             StartingFolder = startingPath;
             SelectedFolder = startingPath;
+            WindowBackground = new Vector4(200, 200, 200, 255);
         }
 
 
@@ -392,7 +393,7 @@ namespace Fusee.ImGuiImp.Desktop.Templates
             var offsetFromBottom = ImGui.CalcTextSize(PickedFolderTxt) + ImGui.GetStyle().FramePadding * 2 + ImGui.GetStyle().WindowPadding * 2;
             var driveSelectionWidth = ImGui.GetWindowSize().X * 0.25f; // 25% of windowSize.x
 
-            ImGui.BeginChild($"DriveSelection##{_folderPickerCount}", new Vector2(driveSelectionWidth, -offsetFromBottom.Y), false, ImGuiWindowFlags.AlwaysUseWindowPadding | ImGuiWindowFlags.AlwaysAutoResize);
+            ImGui.BeginChild($"DriveSelection##{_folderPickerCount}", new Vector2(driveSelectionWidth, -offsetFromBottom.Y), ImGuiChildFlags.AlwaysUseWindowPadding, ImGuiWindowFlags.AlwaysAutoResize);
             // Drive Selection
             var driveCount = 0;
             foreach (var drive in DriveInfo.GetDrives())
@@ -417,7 +418,7 @@ namespace Fusee.ImGuiImp.Desktop.Templates
             ImGui.SameLine();
             // take all space in y, however shrink in y in item height + standard padding + WindowPadding
             var offsetFromBottom = ImGui.CalcTextSize(PickedFolderTxt) + ImGui.GetStyle().FramePadding * 2 + ImGui.GetStyle().WindowPadding * 2;
-            if (ImGui.BeginChild($"#FolderBrowser##{_folderPickerCount}", new Vector2(-1, -offsetFromBottom.Y), false, ImGuiWindowFlags.AlwaysUseWindowPadding | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.HorizontalScrollbar))
+            if (ImGui.BeginChild($"#FolderBrowser##{_folderPickerCount}", new Vector2(-1, -offsetFromBottom.Y), ImGuiChildFlags.AlwaysUseWindowPadding, ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.HorizontalScrollbar))
             {
                 var fileSystemEntries = GetFileSystemEntries(CurrentOpenFolder.FullName);
                 foreach (var fse in fileSystemEntries)
@@ -428,7 +429,7 @@ namespace Fusee.ImGuiImp.Desktop.Templates
                     {
                         ImGui.PushStyleColor(ImGuiCol.Text, FolderColor.ToUintColor());
                         ImGui.PushStyleColor(ImGuiCol.Header, SelectedColor.ToUintColor());
-                        if (ImGui.Selectable(name + "/", CurrentlySelectedFolder?.Name == name, ImGuiSelectableFlags.DontClosePopups | ImGuiSelectableFlags.AllowDoubleClick))
+                        if (ImGui.Selectable(name + "/", CurrentlySelectedFolder?.Name == name, ImGuiSelectableFlags.NoAutoClosePopups | ImGuiSelectableFlags.AllowDoubleClick))
                         {
                             if (ImGui.IsMouseDoubleClicked(0))
                             {
@@ -447,7 +448,7 @@ namespace Fusee.ImGuiImp.Desktop.Templates
                     {
                         // just print the files, but with lighter color
                         ImGui.PushStyleColor(ImGuiCol.Text, LightFileColor.ToUintColor());
-                        ImGui.Selectable(name, false, ImGuiSelectableFlags.DontClosePopups);
+                        ImGui.Selectable(name, false, ImGuiSelectableFlags.NoAutoClosePopups);
                         ImGui.PopStyleColor();
                     }
                 }
@@ -461,7 +462,7 @@ namespace Fusee.ImGuiImp.Desktop.Templates
             var pickedFileButtonSize = ImGui.CalcTextSize(PickedFolderTxt) + ImGui.GetStyle().FramePadding * 2;
             var cancelFileButtonSize = ImGui.CalcTextSize(CancelFolderOpenTxt) + ImGui.GetStyle().FramePadding * 2;
 
-            ImGui.BeginChild($"FolderSelector##{_folderPickerCount}", new Vector2(-1, -1), false, ImGuiWindowFlags.AlwaysAutoResize);
+            ImGui.BeginChild($"FolderSelector##{_folderPickerCount}", new Vector2(-1, -1), ImGuiChildFlags.None, ImGuiWindowFlags.AlwaysAutoResize);
 
             // take all available window space minus the minus both buttons
             // push buttons therefore to the right

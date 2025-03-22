@@ -8,7 +8,7 @@ using System;
 
 namespace Fusee.ImGuiImp.Desktop
 {
-    struct UniformFieldInfo
+    internal struct UniformFieldInfo
     {
         public int Location;
         public string Name;
@@ -31,7 +31,7 @@ namespace Fusee.ImGuiImp.Desktop
     {
         private static bool _initialized = false;
 
-        private ImGuiController _controller;
+        private readonly ImGuiController _controller;
         private bool _isShuttingDown;
 
         public ImGuiRenderCanvasImp(ImageData? icon = null, int width = 1280, int height = 720, int minWidth = 360, int minHeight = 640) : base(icon, true, width, height, minWidth, minHeight)
@@ -70,13 +70,13 @@ namespace Fusee.ImGuiImp.Desktop
             if (!_initialized) return;
             if (_isShuttingDown) return;
 
-            // HACK(mr): Fixme, don't know why
-            //Input.Instance.PreUpdate();
-
-            base.DoUpdate();
-            _controller.UpdateImGui(DeltaTimeUpdate);
-
-            //Input.Instance.PostUpdate();
+            // Check if window is minimized - else imgui will throw an assert:
+            // ((g.FrameCount == 0 || g.FrameCountEnded == g.FrameCount)  && "Forgot to call Render() or EndFrame() at the end of the previous frame?"
+            if (Width > 0 && Height > 0)
+            {
+                base.DoUpdate();
+                _controller.UpdateImGui(DeltaTimeUpdate);
+            }
         }
 
         public override void DoRender()
@@ -84,7 +84,6 @@ namespace Fusee.ImGuiImp.Desktop
             if (!_initialized) return;
             if (_controller.GameWindowWidth <= 0) return;
             if (_isShuttingDown) return;
-
             Input.Instance.PreUpdate();
 
             base.DoRender();
